@@ -1,0 +1,31 @@
+{
+  "name": "grudachain",
+  "version": "1.0.0",
+  "description": "Grudge Studio Launcher - The Next Generation Blockchain Core with AI Legion Integration",
+  "main": "index.js",
+  "scripts": {
+    "generate-favicons": "node generate-favicons.js",
+    "build": "npm run generate-favicons"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GrudgeDaDev/grudachain.git"
+  },
+  "keywords": [
+    "blockchain",
+    "ai",
+    "grudge",
+    "studio",
+    "launcher",
+    "grudachain"
+  ],
+  "author": "RacAlvin The Pirate King - GRUDGE STUDIO",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GrudgeDaDev/grudachain/issues"
+  },
+  "homepage": "https://github.com/GrudgeDaDev/grudachain#readme",
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  }
+}
