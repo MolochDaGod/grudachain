@@ -1,0 +1,11 @@
+node_modules/
+.env
+logs/
+temp/
+uploads/
+exports/
+*.log
+.vercel
+.DS_Store
+Thumbs.db
+Gruda Chain 1/
