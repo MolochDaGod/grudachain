@@ -46,6 +46,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
             background: rgba(0, 0, 0, 0.8);
             padding: 15px 20px;
             border-radius: 10px;
@@ -240,6 +241,116 @@
             margin-bottom: 10px;
         }
         
+        .auth-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #66aaff;
+        }
+        
+        .auth-bar .user-info { color: #66aaff; }
+        
+        .storage-browser {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 15px;
+            min-height: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .storage-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .storage-item:hover { background: rgba(0, 255, 136, 0.1); }
+        
+        .storage-item .item-icon { margin-right: 10px; }
+        .storage-item .item-name { flex: 1; }
+        .storage-item .item-size { color: #66aaff; font-size: 0.85em; margin-right: 15px; }
+        .storage-item .item-actions button { padding: 4px 10px; font-size: 0.8em; margin-left: 5px; }
+        
+        .breadcrumb {
+            padding: 8px 0;
+            margin-bottom: 10px;
+            color: #66aaff;
+            font-size: 0.9em;
+        }
+        
+        .breadcrumb span { cursor: pointer; }
+        .breadcrumb span:hover { color: #00ff88; text-decoration: underline; }
+        
+        .storage-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-card {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .stat-card .stat-value { font-size: 1.5em; color: #00ff88; }
+        .stat-card .stat-label { font-size: 0.8em; color: #66aaff; }
+        
+        .drop-zone {
+            border: 2px dashed #00ff88;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .drop-zone.drag-over {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: #66aaff;
+        }
+        
+        .full-width-panel {
+            grid-column: 1 / -1;
+        }
+        
+        .hosting-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .hosting-section input { flex: 1; min-width: 200px; }
+        
+        .hosted-link {
+            display: inline-block;
+            padding: 8px 15px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            color: #00ff88;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        
+        .hosted-link:hover { background: rgba(0, 255, 136, 0.2); }
+        
         .footer {
             text-align: center;
             padding: 20px;
@@ -278,8 +389,19 @@
                 <span id="ai-text">AI Services: Initializing...</span>
             </div>
             <div class="status-item">
+                <div class="status-dot" id="cloud-status"></div>
+                <span id="cloud-text">Puter Cloud: Connecting...</span>
+            </div>
+            <div class="status-item">
                 <div class="status-dot" id="network-status"></div>
                 <span id="network-text">Network: Connecting...</span>
+            </div>
+        </div>
+        
+        <div class="auth-bar" id="auth-bar">
+            <div class="user-info" id="user-info">Not signed in to Puter Cloud</div>
+            <div>
+                <button id="auth-btn" onclick="handlePuterAuth()">Sign In to Puter</button>
             </div>
         </div>
         
@@ -314,6 +436,7 @@
                         <div class="tab-button active" onclick="switchTab('code-gen')">💻 Code Gen</div>
                         <div class="tab-button" onclick="switchTab('file-analysis')">📋 Analysis</div>
                         <div class="tab-button" onclick="switchTab('network')">🌐 Network</div>
+                        <div class="tab-button" onclick="switchTab('hosting')">🚀 Hosting</div>
                     </div>
                     
                     <div class="tab-content active" id="code-gen">
@@ -354,13 +477,66 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="tab-content" id="hosting">
+                        <h4>🚀 Puter Hosting - Deploy to puter.site</h4>
+                        <div class="hosting-section">
+                            <input type="text" id="subdomain-input" placeholder="grudge-studio" style="flex: 1;">
+                            <button onclick="deployToPuter()">Deploy Grudge Studio</button>
+                        </div>
+                        <div id="hosting-status" style="margin-bottom: 15px;"></div>
+                        <div id="hosted-sites"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Puter Cloud Storage Panel -->
+        <div class="main-grid">
+            <div class="panel full-width-panel">
+                <h3>☁️ Puter Cloud Storage - Grudge Studio Object Storage</h3>
+                
+                <div class="storage-stats" id="storage-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-files">--</div>
+                        <div class="stat-label">Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-dirs">--</div>
+                        <div class="stat-label">Directories</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-kv">--</div>
+                        <div class="stat-label">KV Entries</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button onclick="createBucket()">📁 New Bucket</button>
+                    <button onclick="uploadFileToPuter()">⬆️ Upload File</button>
+                    <button onclick="refreshStorage()">🔄 Refresh</button>
+                    <button onclick="showKVManager()">🗃️ KV Store</button>
+                    <input type="file" id="puter-file-input" multiple style="display: none;" onchange="handlePuterUpload(event)">
+                </div>
+                
+                <div class="breadcrumb" id="breadcrumb">
+                    <span onclick="navigateTo('.')">/grudge-studio</span>
+                </div>
+                
+                <!-- Drag & Drop Zone -->
+                <div class="drop-zone" id="drop-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                    📦 Drag & drop files here to upload to Puter Cloud
+                </div>
+                
+                <div class="storage-browser" id="storage-browser">
+                    <p style="color: #66aaff;">Sign in to Puter to access cloud storage...</p>
                 </div>
             </div>
         </div>
         
         <div class="footer">
-            <p>🏴‍☠️ GRUDA Legion v3.0 | Free AI • Local Processing • Global Network</p>
-            <p>Claude 3.5 Sonnet • GPT-4o • O3-Mini • Gemini Pro • HuggingFace • OpenRouter</p>
+            <p>🏴‍☠️ GRUDA Legion v3.0 | Free AI • Puter Cloud Storage • Grudge Studio</p>
+            <p>Claude 3.5 Sonnet • GPT-4o • O3-Mini • Gemini Pro • Puter Cloud • Object Storage</p>
         </div>
     </div>
     
@@ -369,10 +545,19 @@
         let systemStatus = {
             server: 'starting',
             ai: 'initializing',
-            network: 'connecting'
+            network: 'connecting',
+            cloud: 'connecting'
         };
         let aiServices = {};
         let currentTab = 'code-gen';
+        let currentPath = 'grudge-studio';
+        let puterReady = false;
+        let puterUser = null;
+        let kvManagerVisible = false;
+        
+        // Grudge Studio storage config
+        const STUDIO_ROOT = 'grudge-studio';
+        const BUCKETS = ['assets', 'configs', 'game-data', 'player-data', 'exports', 'backups'];
         
         // Initialize the application
         document.addEventListener('DOMContentLoaded', async () => {
@@ -391,21 +576,488 @@
             console.log('✅ GRUDA Legion fully loaded');
         });
         
-        // Puter.js initialization
+        // =============================================
+        // PUTER.JS INITIALIZATION & AUTH
+        // =============================================
         async function initializePuterJS() {
             try {
                 if (typeof puter !== 'undefined') {
-                    await puter.init();
-                    console.log('✅ Puter.js initialized');
+                    console.log('✅ Puter.js SDK loaded');
                     updateStatus('ai', 'ready', 'AI Services: Ready');
+                    
+                    // Check if already signed in
+                    if (puter.auth.isSignedIn()) {
+                        puterReady = true;
+                        await onPuterAuthenticated();
+                    } else {
+                        updateStatus('cloud', 'loading', 'Puter Cloud: Sign in required');
+                    }
                 } else {
                     console.warn('⚠️ Puter.js not available');
                     updateStatus('ai', 'loading', 'AI Services: Loading...');
+                    updateStatus('cloud', 'error', 'Puter Cloud: Unavailable');
                 }
             } catch (error) {
                 console.error('Puter.js initialization failed:', error);
                 updateStatus('ai', 'error', 'AI Services: Local only');
+                updateStatus('cloud', 'error', 'Puter Cloud: Error');
             }
+        }
+        
+        async function handlePuterAuth() {
+            try {
+                if (typeof puter === 'undefined') {
+                    alert('Puter.js SDK not loaded. Please refresh the page.');
+                    return;
+                }
+                
+                if (puter.auth.isSignedIn()) {
+                    // Already signed in, sign out
+                    await puter.auth.signOut();
+                    puterReady = false;
+                    puterUser = null;
+                    document.getElementById('user-info').textContent = 'Not signed in to Puter Cloud';
+                    document.getElementById('auth-btn').textContent = 'Sign In to Puter';
+                    updateStatus('cloud', 'loading', 'Puter Cloud: Signed out');
+                    document.getElementById('storage-browser').innerHTML = '<p style="color: #66aaff;">Sign in to Puter to access cloud storage...</p>';
+                    return;
+                }
+                
+                const user = await puter.auth.signIn();
+                if (user) {
+                    puterReady = true;
+                    await onPuterAuthenticated();
+                }
+            } catch (error) {
+                console.error('Puter auth failed:', error);
+                alert('Authentication failed: ' + error.message);
+            }
+        }
+        
+        async function onPuterAuthenticated() {
+            try {
+                puterUser = await puter.auth.getUser();
+                document.getElementById('user-info').textContent = `Signed in as: ${puterUser.username} | Puter Cloud Connected`;
+                document.getElementById('auth-btn').textContent = 'Sign Out';
+                updateStatus('cloud', 'ready', 'Puter Cloud: Connected');
+                
+                // Initialize Grudge Studio storage structure
+                await initializeGrudgeStudioStorage();
+                
+                // Load storage view
+                await navigateTo(STUDIO_ROOT);
+                
+                // Update stats
+                await updateStorageStats();
+                
+                // Save session info to KV
+                await puter.kv.set('grudge-studio:lastLogin', new Date().toISOString());
+                await puter.kv.set('grudge-studio:version', '3.0.0');
+                
+                console.log('✅ Puter Cloud fully connected for Grudge Studio');
+            } catch (error) {
+                console.error('Post-auth setup failed:', error);
+            }
+        }
+        
+        // =============================================
+        // GRUDGE STUDIO CLOUD STORAGE
+        // =============================================
+        async function initializeGrudgeStudioStorage() {
+            try {
+                // Create root directory
+                try {
+                    await puter.fs.mkdir(STUDIO_ROOT);
+                    console.log('Created grudge-studio root');
+                } catch (e) { /* already exists */ }
+                
+                // Create default buckets
+                for (const bucket of BUCKETS) {
+                    try {
+                        await puter.fs.mkdir(`${STUDIO_ROOT}/${bucket}`);
+                        console.log(`Created bucket: ${bucket}`);
+                    } catch (e) { /* already exists */ }
+                }
+                
+                // Write a manifest file
+                const manifest = {
+                    name: 'Grudge Studio',
+                    version: '3.0.0',
+                    created: new Date().toISOString(),
+                    buckets: BUCKETS,
+                    description: 'GrudaChain Free AI Node System - Cloud Storage'
+                };
+                await puter.fs.write(
+                    `${STUDIO_ROOT}/manifest.json`,
+                    JSON.stringify(manifest, null, 2)
+                );
+                
+                console.log('✅ Grudge Studio storage initialized');
+            } catch (error) {
+                console.error('Storage init failed:', error);
+            }
+        }
+        
+        async function navigateTo(path) {
+            if (!puterReady) {
+                document.getElementById('storage-browser').innerHTML = '<p style="color: #ffaa00;">Sign in to Puter to browse cloud storage</p>';
+                return;
+            }
+            
+            currentPath = path;
+            updateBreadcrumb(path);
+            
+            const browser = document.getElementById('storage-browser');
+            browser.innerHTML = '<p style="color: #ffaa00;">Loading...</p>';
+            
+            try {
+                const items = await puter.fs.readdir(path);
+                browser.innerHTML = '';
+                
+                if (items.length === 0) {
+                    browser.innerHTML = '<p style="color: #66aaff;">Empty directory</p>';
+                    return;
+                }
+                
+                // Sort: directories first, then files
+                const sorted = items.sort((a, b) => {
+                    if (a.is_dir && !b.is_dir) return -1;
+                    if (!a.is_dir && b.is_dir) return 1;
+                    return a.name.localeCompare(b.name);
+                });
+                
+                sorted.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'storage-item';
+                    
+                    const icon = item.is_dir ? '📁' : getFileIcon(item.name);
+                    const size = item.is_dir ? '--' : formatSize(item.size || 0);
+                    
+                    div.innerHTML = `
+                        <span class="item-icon">${icon}</span>
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-size">${size}</span>
+                        <span class="item-actions">
+                            ${!item.is_dir ? '<button onclick="downloadFile(\'' + item.path + '\')">⬇️</button>' : ''}
+                            <button onclick="deleteItem(\'' + item.path + '\', ' + item.is_dir + ')'">❌</button>
+                        </span>
+                    `;
+                    
+                    if (item.is_dir) {
+                        div.querySelector('.item-name').onclick = () => navigateTo(item.path);
+                    }
+                    
+                    browser.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Failed to list directory:', error);
+                browser.innerHTML = `<p style="color: #ff6666;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        function updateBreadcrumb(path) {
+            const breadcrumb = document.getElementById('breadcrumb');
+            const parts = path.split('/');
+            let html = '';
+            let accumulated = '';
+            
+            parts.forEach((part, i) => {
+                accumulated += (i > 0 ? '/' : '') + part;
+                const p = accumulated;
+                html += `<span onclick="navigateTo('${p}')">${part}</span>`;
+                if (i < parts.length - 1) html += ' / ';
+            });
+            
+            breadcrumb.innerHTML = '/ ' + html;
+        }
+        
+        async function createBucket() {
+            if (!puterReady) { alert('Sign in to Puter first'); return; }
+            
+            const name = prompt('Bucket name (e.g. textures, sounds, maps):');
+            if (!name) return;
+            
+            const sanitized = name.replace(/[^a-zA-Z0-9_-]/g, '-').toLowerCase();
+            try {
+                await puter.fs.mkdir(`${currentPath}/${sanitized}`);
+                await navigateTo(currentPath);
+                await updateStorageStats();
+            } catch (error) {
+                alert('Failed to create bucket: ' + error.message);
+            }
+        }
+        
+        function uploadFileToPuter() {
+            if (!puterReady) { alert('Sign in to Puter first'); return; }
+            document.getElementById('puter-file-input').click();
+        }
+        
+        async function handlePuterUpload(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+            
+            for (const file of files) {
+                try {
+                    await puter.fs.write(`${currentPath}/${file.name}`, file, { dedupeName: true });
+                    console.log(`Uploaded: ${file.name}`);
+                } catch (error) {
+                    console.error(`Upload failed for ${file.name}:`, error);
+                }
+            }
+            
+            event.target.value = '';
+            await navigateTo(currentPath);
+            await updateStorageStats();
+        }
+        
+        // Drag and Drop handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('drop-zone').classList.add('drag-over');
+        }
+        
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('drop-zone').classList.remove('drag-over');
+        }
+        
+        async function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('drop-zone').classList.remove('drag-over');
+            
+            if (!puterReady) { alert('Sign in to Puter first'); return; }
+            
+            const files = e.dataTransfer.files;
+            if (!files.length) return;
+            
+            document.getElementById('drop-zone').textContent = `Uploading ${files.length} file(s)...`;
+            
+            for (const file of files) {
+                try {
+                    await puter.fs.write(`${currentPath}/${file.name}`, file, { dedupeName: true });
+                } catch (error) {
+                    console.error(`Drop upload failed for ${file.name}:`, error);
+                }
+            }
+            
+            document.getElementById('drop-zone').textContent = '📦 Drag & drop files here to upload to Puter Cloud';
+            await navigateTo(currentPath);
+            await updateStorageStats();
+        }
+        
+        async function downloadFile(path) {
+            try {
+                const blob = await puter.fs.read(path);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = path.split('/').pop();
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert('Download failed: ' + error.message);
+            }
+        }
+        
+        async function deleteItem(path, isDir) {
+            const name = path.split('/').pop();
+            if (!confirm(`Delete "${name}"?`)) return;
+            
+            try {
+                await puter.fs.delete(path, { recursive: isDir });
+                await navigateTo(currentPath);
+                await updateStorageStats();
+            } catch (error) {
+                alert('Delete failed: ' + error.message);
+            }
+        }
+        
+        async function refreshStorage() {
+            if (!puterReady) return;
+            await navigateTo(currentPath);
+            await updateStorageStats();
+        }
+        
+        async function updateStorageStats() {
+            if (!puterReady) return;
+            
+            try {
+                const items = await puter.fs.readdir(STUDIO_ROOT);
+                const files = items.filter(i => !i.is_dir).length;
+                const dirs = items.filter(i => i.is_dir).length;
+                
+                document.getElementById('stat-files').textContent = files;
+                document.getElementById('stat-dirs').textContent = dirs;
+                
+                // Count KV entries
+                try {
+                    const keys = await puter.kv.list(true);
+                    const grudgeKeys = keys.filter(k => k.key && k.key.startsWith('grudge-studio:'));
+                    document.getElementById('stat-kv').textContent = grudgeKeys.length;
+                } catch (e) {
+                    document.getElementById('stat-kv').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Stats update failed:', error);
+            }
+        }
+        
+        // =============================================
+        // PUTER KV STORE MANAGER
+        // =============================================
+        async function showKVManager() {
+            if (!puterReady) { alert('Sign in to Puter first'); return; }
+            
+            const browser = document.getElementById('storage-browser');
+            kvManagerVisible = !kvManagerVisible;
+            
+            if (!kvManagerVisible) {
+                await navigateTo(currentPath);
+                return;
+            }
+            
+            browser.innerHTML = '<p style="color: #ffaa00;">Loading KV Store...</p>';
+            
+            try {
+                const keys = await puter.kv.list(true);
+                
+                let html = `<div style="margin-bottom: 15px;">
+                    <strong style="color: #66aaff;">🗃️ Key-Value Store</strong>
+                    <button onclick="addKVEntry()" style="margin-left: 15px; padding: 4px 12px;">+ Add Entry</button>
+                    <button onclick="showKVManager()" style="margin-left: 5px; padding: 4px 12px;">Back to Files</button>
+                </div>`;
+                
+                if (keys.length === 0) {
+                    html += '<p style="color: #66aaff;">No key-value entries yet</p>';
+                } else {
+                    keys.forEach(entry => {
+                        const val = typeof entry.value === 'string' ? entry.value : JSON.stringify(entry.value);
+                        const truncated = val.length > 80 ? val.substring(0, 80) + '...' : val;
+                        html += `<div class="storage-item">
+                            <span class="item-icon">🔑</span>
+                            <span class="item-name"><strong>${entry.key}</strong></span>
+                            <span class="item-size">${truncated}</span>
+                            <span class="item-actions">
+                                <button onclick="deleteKVEntry('${entry.key}')">❌</button>
+                            </span>
+                        </div>`;
+                    });
+                }
+                
+                browser.innerHTML = html;
+            } catch (error) {
+                browser.innerHTML = `<p style="color: #ff6666;">Error loading KV store: ${error.message}</p>`;
+            }
+        }
+        
+        async function addKVEntry() {
+            const key = prompt('Key (prefix with grudge-studio: recommended):');
+            if (!key) return;
+            const value = prompt('Value:');
+            if (value === null) return;
+            
+            try {
+                await puter.kv.set(key, value);
+                await showKVManager();
+                await updateStorageStats();
+            } catch (error) {
+                alert('Failed to set KV entry: ' + error.message);
+            }
+        }
+        
+        async function deleteKVEntry(key) {
+            if (!confirm(`Delete key "${key}"?`)) return;
+            try {
+                await puter.kv.del(key);
+                await showKVManager();
+                await updateStorageStats();
+            } catch (error) {
+                alert('Failed to delete KV entry: ' + error.message);
+            }
+        }
+        
+        // =============================================
+        // PUTER HOSTING
+        // =============================================
+        async function deployToPuter() {
+            if (!puterReady) { alert('Sign in to Puter first'); return; }
+            
+            const subdomain = document.getElementById('subdomain-input').value.trim() || 'grudge-studio';
+            const statusDiv = document.getElementById('hosting-status');
+            statusDiv.innerHTML = '<p style="color: #ffaa00;">Deploying to puter.site...</p>';
+            
+            try {
+                // Create a hosting directory with an index page
+                const hostDir = `grudge-studio-hosting`;
+                try { await puter.fs.mkdir(hostDir); } catch(e) { /* exists */ }
+                
+                // Write a landing page for Grudge Studio
+                const landingPage = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grudge Studio - GrudaChain</title>
+    <script src="https://js.puter.com/v2/"><\/script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; background: linear-gradient(135deg, #000428, #004e92, #000428); color: #00ff88; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { text-align: center; padding: 40px; }
+        h1 { font-size: 3em; text-shadow: 0 0 20px #00ff88; margin-bottom: 20px; }
+        p { color: #66aaff; margin-bottom: 15px; font-size: 1.2em; }
+        .btn { display: inline-block; padding: 15px 30px; background: linear-gradient(45deg, #004e92, #000428); border: 1px solid #00ff88; border-radius: 5px; color: #00ff88; text-decoration: none; font-family: 'Courier New'; margin: 10px; transition: all 0.3s; }
+        .btn:hover { background: linear-gradient(45deg, #00ff88, #66aaff); color: #000428; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>\u{1F3F4}\u200D\u2620\uFE0F Grudge Studio</h1>
+        <p>GrudaChain Free AI Node System v3.0</p>
+        <p>Powered by Puter Cloud \u2022 Free Unlimited AI \u2022 Object Storage</p>
+        <a class="btn" href="https://grudachain.vercel.app">Launch GRUDA Legion</a>
+        <a class="btn" href="https://grudgewarlords.com">Grudge Warlords</a>
+    </div>
+</body>
+</html>`;
+                
+                await puter.fs.write(`${hostDir}/index.html`, landingPage);
+                
+                // Create the hosted site
+                const site = await puter.hosting.create(subdomain, hostDir);
+                const url = `https://${site.subdomain}.puter.site`;
+                
+                statusDiv.innerHTML = `<p style="color: #00ff88;">✅ Deployed successfully!</p>
+                    <a class="hosted-link" href="${url}" target="_blank">${url}</a>`;
+                
+                // Save to KV
+                await puter.kv.set('grudge-studio:hostedUrl', url);
+                await puter.kv.set('grudge-studio:subdomain', site.subdomain);
+                
+                // Show in hosted sites list
+                await loadHostedSites();
+                
+            } catch (error) {
+                console.error('Deploy failed:', error);
+                statusDiv.innerHTML = `<p style="color: #ff6666;">Deploy failed: ${error.message}</p>`;
+            }
+        }
+        
+        async function loadHostedSites() {
+            const container = document.getElementById('hosted-sites');
+            try {
+                const url = await puter.kv.get('grudge-studio:hostedUrl');
+                if (url) {
+                    container.innerHTML = `<div class="network-node">
+                        <div><strong>Grudge Studio</strong><br><small>${url}</small></div>
+                        <div><a class="hosted-link" href="${url}" target="_blank" style="padding: 4px 10px;">Visit</a></div>
+                    </div>`;
+                }
+            } catch (e) { /* no sites yet */ }
         }
         
         // Load system status
@@ -427,7 +1079,31 @@
             }
         }
         
-        // Update status indicators
+        // =============================================
+        // UTILITY FUNCTIONS
+        // =============================================
+        function getFileIcon(name) {
+            const ext = name.split('.').pop().toLowerCase();
+            const icons = {
+                json: '📄', js: '🟨', html: '🌐', css: '🎨', png: '🖼️',
+                jpg: '🖼️', jpeg: '🖼️', gif: '🖼️', svg: '🖼️', mp3: '🎥',
+                wav: '🎥', mp4: '🎬', txt: '📃', md: '📖', zip: '📦',
+                py: '🐍', ts: '🟦', java: '☕', yaml: '⚙️', yml: '⚙️'
+            };
+            return icons[ext] || '📄';
+        }
+        
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+        
+        // =============================================
+        // STATUS & UI
+        // =============================================
         function updateStatus(type, status, text) {
             const dot = document.getElementById(`${type}-status`);
             const textElement = document.getElementById(`${type}-text`);
@@ -452,7 +1128,6 @@
             }
         }
         
-        // Update status display
         function updateStatusDisplay() {
             updateStatus('server', systemStatus.server, `Server: ${systemStatus.server}`);
             updateStatus('ai', systemStatus.ai, `AI Services: ${systemStatus.ai}`);
@@ -617,23 +1292,14 @@
             });
         }
         
-        // Switch tabs
         function switchTab(tabName) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
-            
             currentTab = tabName;
+            
+            if (tabName === 'hosting') loadHostedSites();
         }
         
         // Discover network nodes
