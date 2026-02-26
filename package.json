@@ -14,7 +14,9 @@
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "helmet": "^7.1.0"
+    "grudge-studio": "^1.2.0",
+    "helmet": "^7.1.0",
+    "node-fetch": "^2.7.0"
   },
   "engines": {
     "node": ">=18"

@@ -375,8 +375,8 @@
     <div class="container">
         <div class="header">
             <div class="logo">🏴‍☠️ GRUDA LEGION</div>
-            <div class="tagline">Standalone AI System • Free Unlimited Access • Local Processing</div>
-            <div class="version">v3.0 - Production Ready</div>
+            <div class="tagline">Standalone AI System • Free Unlimited Access • Vibe 8.0 AI • Grudge Studio SDK</div>
+            <div class="version">v3.0 - Production Ready | Vibe 8.0.0 | grudge-studio@1.2.0 | @grudge/puter-sync@1.0.0</div>
         </div>
         
         <div class="status-bar">
@@ -387,6 +387,10 @@
             <div class="status-item">
                 <div class="status-dot" id="ai-status"></div>
                 <span id="ai-text">AI Services: Initializing...</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" id="vibe-status"></div>
+                <span id="vibe-text">Vibe AI: Connecting...</span>
             </div>
             <div class="status-item">
                 <div class="status-dot" id="cloud-status"></div>
@@ -419,12 +423,13 @@
                 </div>
                 <div class="input-group">
                     <input type="text" id="chat-input" placeholder="Ask me anything..." style="flex: 1;">
-                    <select id="model-select">
-                        <option value="auto">Auto-Select</option>
-                        <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
-                        <option value="gpt-4o">GPT-4o</option>
-                        <option value="o3-mini">O3-Mini</option>
-                        <option value="gemini-pro">Gemini Pro</option>
+                    <select id="provider-select">
+                        <option value="auto">Auto (Puter → Vibe)</option>
+                        <option value="puter">Puter.js (Claude/GPT-4o)</option>
+                        <option value="megallm">Vibe: MegaLLM</option>
+                        <option value="openrouter">Vibe: OpenRouter</option>
+                        <option value="agentrouter">Vibe: AgentRouter</option>
+                        <option value="routeway">Vibe: Routeway</option>
                     </select>
                     <button onclick="sendMessage()">Send</button>
                 </div>
@@ -491,6 +496,43 @@
             </div>
         </div>
         
+        <!-- Vibe AI Tools + Grudge Studio SDK -->
+        <div class="main-grid">
+            <div class="panel">
+                <h3>⚡ Vibe 8.0.0 - AI Development Tools</h3>
+                <p style="color: #66aaff; margin-bottom: 15px;">Free AI via 4 providers: MegaLLM, OpenRouter, AgentRouter, Routeway — no API keys needed</p>
+                <div id="vibe-providers" style="margin-bottom: 15px;"></div>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button onclick="loadVibeProviders()">🔄 Check Providers</button>
+                    <a href="/downloads/vibe-8.0.0.zip" download style="text-decoration: none;"><button>⬇️ Download Vibe 8.0.0</button></a>
+                    <a href="https://github.com/mk-knight23/vibe" target="_blank" style="text-decoration: none;"><button>💻 GitHub</button></a>
+                </div>
+                <div style="padding: 12px; background: rgba(0,0,0,0.9); border: 1px solid #00ff88; border-radius: 5px; font-size: 0.85em;">
+                    <strong>Vibe CLI Tools (36):</strong><br>
+                    Code Analyzer • Smart Refactor • Test Generator • Bundle Optimizer<br>
+                    Security Scanner • Performance Bench • Doc Generator • Code Migrator<br>
+                    Git Ops • Shell Exec • Web Fetch • Memory System • Multi-File Edit<br>
+                    <span style="color: #66aaff;">Install: <code>npm i -g vibe-ai-cli</code></span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>🎮 Grudge Studio SDK</h3>
+                <p style="color: #66aaff; margin-bottom: 15px;">3D Game Dev SDK — Three.js, Socket.io, AI Agent, Puter Cloud Sync</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button onclick="loadSDKInfo()">📦 SDK Modules</button>
+                    <a href="https://github.com/MolochDaGod/GrudgeStudioNPM" target="_blank" style="text-decoration: none;"><button>💻 GitHub</button></a>
+                    <a href="https://www.npmjs.com/package/grudge-studio" target="_blank" style="text-decoration: none;"><button>📦 NPM</button></a>
+                </div>
+                <div id="sdk-modules" style="padding: 12px; background: rgba(0,0,0,0.9); border: 1px solid #00ff88; border-radius: 5px; font-size: 0.85em;">
+                    <strong>grudge-studio@1.2.0</strong> — <code>npm install grudge-studio</code><br>
+                    core • render • controllers • terrain • net • ui • assets • ai-agent<br><br>
+                    <strong>@grudge/puter-sync@1.0.0</strong><br>
+                    Puter cloud sync • Auto-backup • Auth bridge • @heyputer/puter.js
+                </div>
+            </div>
+        </div>
+        
         <!-- Puter Cloud Storage Panel -->
         <div class="main-grid">
             <div class="panel full-width-panel">
@@ -535,8 +577,8 @@
         </div>
         
         <div class="footer">
-            <p>🏴‍☠️ GRUDA Legion v3.0 | Free AI • Puter Cloud Storage • Grudge Studio</p>
-            <p>Claude 3.5 Sonnet • GPT-4o • O3-Mini • Gemini Pro • Puter Cloud • Object Storage</p>
+            <p>🏴‍☠️ GRUDA Legion v3.0 | Vibe 8.0.0 AI | grudge-studio@1.2.0 | @grudge/puter-sync | Puter Cloud</p>
+            <p>MegaLLM • OpenRouter • AgentRouter • Routeway • Puter AI • Claude • GPT-4o • DeepSeek • Llama 3</p>
         </div>
     </div>
     
@@ -1171,39 +1213,60 @@
         // Send chat message
         async function sendMessage() {
             const input = document.getElementById('chat-input');
-            const model = document.getElementById('model-select').value;
+            const provider = document.getElementById('provider-select').value;
             const message = input.value.trim();
             
             if (!message) return;
             
-            // Display user message
             displayChatMessage(message, 'user');
             input.value = '';
             
-            // Try Puter.js AI first (client-side, free unlimited)
-            try {
-                if (typeof puter !== 'undefined' && puter.ai) {
-                    const puterResponse = await puter.ai.chat(message);
-                    displayChatMessage(puterResponse, 'ai', 'puter');
-                    return;
+            // Route: puter only, vibe provider, or auto (puter -> vibe -> local)
+            if (provider === 'puter' || provider === 'auto') {
+                try {
+                    if (typeof puter !== 'undefined' && puter.ai) {
+                        const puterResponse = await puter.ai.chat(message);
+                        displayChatMessage(puterResponse, 'ai', 'puter');
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('Puter AI failed:', err.message);
+                    if (provider === 'puter') {
+                        displayChatMessage('Puter AI unavailable. Try signing in or select a Vibe provider.', 'ai', 'error');
+                        return;
+                    }
                 }
-            } catch (err) {
-                console.warn('Puter.js AI failed, falling back to API:', err.message);
             }
             
-            // Fallback to HTTP API
+            // Use Vibe 8.0.0 multi-provider backend
             try {
-                const response = await fetch('/api/chat', {
+                const vibeProvider = (provider !== 'auto' && provider !== 'puter') ? provider : undefined;
+                const response = await fetch('/api/vibe/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message, model })
+                    body: JSON.stringify({ message, provider: vibeProvider })
                 });
                 
                 const data = await response.json();
-                displayChatMessage(data.response || data.fallback, 'ai', data.service);
+                if (data.success) {
+                    displayChatMessage(data.response, 'ai', `${data.provider} via Vibe`);
+                } else {
+                    displayChatMessage(data.error || 'AI service error', 'ai', 'error');
+                }
             } catch (error) {
-                console.error('Failed to send message:', error);
-                displayChatMessage('Sorry, I encountered an error. Please try again.', 'ai', 'error');
+                console.error('Vibe AI failed:', error);
+                // Final fallback to local
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message })
+                    });
+                    const data = await response.json();
+                    displayChatMessage(data.response || data.fallback, 'ai', 'local');
+                } catch (e) {
+                    displayChatMessage('All AI services unavailable. Please try again later.', 'ai', 'error');
+                }
             }
         }
         
@@ -1221,32 +1284,39 @@
             container.scrollTop = container.scrollHeight;
         }
         
-        // Generate code
+        // Generate code — uses Vibe multi-provider AI
         async function generateCode() {
             const prompt = document.getElementById('code-prompt').value.trim();
             const language = document.getElementById('language-select').value;
             const output = document.getElementById('generated-code');
             
             if (!prompt) return;
-            
-            output.value = 'Generating code...';
+            output.value = 'Generating code via Vibe AI...';
             
             try {
-                const response = await fetch('/api/generate-code', {
+                const response = await fetch('/api/vibe/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        description: prompt,
-                        language: language
+                        message: `Generate ${language} code for: ${prompt}\n\nReturn ONLY the code, no explanations. Include comments.`,
+                        systemPrompt: `You are an expert ${language} developer for Grudge Studio game development. Generate clean, production-ready code.`
                     })
                 });
-                
                 const data = await response.json();
-                output.value = data.code || data.fallback || 'Code generation failed';
-                
+                output.value = data.response || data.error || 'Code generation failed';
             } catch (error) {
-                console.error('Code generation failed:', error);
-                output.value = `// Error generating code\n// ${error.message}`;
+                // Fallback
+                try {
+                    const res = await fetch('/api/generate-code', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ description: prompt, language })
+                    });
+                    const data = await res.json();
+                    output.value = data.code || data.fallback || 'Code generation failed';
+                } catch (e) {
+                    output.value = `// Error generating code\n// ${error.message}`;
+                }
             }
         }
         
@@ -1301,6 +1371,56 @@
             
             if (tabName === 'hosting') loadHostedSites();
         }
+        
+        // =============================================
+        // VIBE AI + SDK LOADERS
+        // =============================================
+        async function loadVibeProviders() {
+            const container = document.getElementById('vibe-providers');
+            container.innerHTML = '<p style="color: #ffaa00;">Checking providers...</p>';
+            try {
+                const res = await fetch('/api/vibe/providers');
+                const data = await res.json();
+                let html = '';
+                Object.entries(data.providers).forEach(([key, p]) => {
+                    html += `<div class="network-node">
+                        <div><strong>${p.name}</strong><br><small>${p.models.join(', ')}</small></div>
+                        <div style="color: ${p.free ? '#00ff88' : '#ffaa00'};">● ${p.status} (free)</div>
+                    </div>`;
+                });
+                container.innerHTML = html;
+                updateStatus('vibe', 'ready', 'Vibe AI: 4 Providers Ready');
+            } catch (e) {
+                container.innerHTML = `<p style="color: #ff6666;">Failed: ${e.message}</p>`;
+            }
+        }
+        
+        async function loadSDKInfo() {
+            const container = document.getElementById('sdk-modules');
+            container.innerHTML = '<p style="color: #ffaa00;">Loading SDK info...</p>';
+            try {
+                const res = await fetch('/api/sdk/info');
+                const data = await res.json();
+                const gs = data.packages['grudge-studio'];
+                const ps = data.packages['@grudge/puter-sync'];
+                let html = `<strong>${gs.install}</strong> — v${gs.version}<br>`;
+                Object.entries(gs.modules).forEach(([mod, desc]) => {
+                    html += `<div class="storage-item" style="cursor: default; padding: 4px 8px;"><span class="item-icon">📦</span><span class="item-name"><strong>${mod}</strong>: ${desc}</span></div>`;
+                });
+                html += `<br><strong>@grudge/puter-sync</strong> v${ps.version}<br>`;
+                Object.entries(ps.modules).forEach(([mod, desc]) => {
+                    html += `<div class="storage-item" style="cursor: default; padding: 4px 8px;"><span class="item-icon">☁️</span><span class="item-name"><strong>${mod}</strong>: ${desc}</span></div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `<p style="color: #ff6666;">Failed: ${e.message}</p>`;
+            }
+        }
+        
+        // Init vibe status on load
+        setTimeout(() => {
+            loadVibeProviders();
+        }, 1500);
         
         // Discover network nodes
         async function discoverNodes() {
