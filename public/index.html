@@ -820,6 +820,30 @@
         const STUDIO_ROOT = 'grudge-studio';
         const BUCKETS = ['assets', 'configs', 'game-data', 'player-data', 'exports', 'backups'];
 
+        // Canonical KV keys (matches Warlord-Crafting-Suite ecosystem)
+        const KV_KEYS = {
+            profile: 'grudge_studio_profile',
+            lastLogin: 'grudge_studio_lastLogin',
+            version: 'grudge_studio_version',
+            hostedUrl: 'grudge_studio_hostedUrl',
+            subdomain: 'grudge_studio_subdomain',
+            accounts: 'grudge_accounts',
+            onlinePlayers: 'grudge_online_players',
+            activityLog: 'grudge_activity_log'
+        };
+
+        // Canonical role determination (matches AuthContext.tsx)
+        const ADMIN_USERNAMES = ['admin', 'grudgewarlord', 'outapps', 'grudachain', 'molochdadev'];
+        const DEVELOPER_USERNAMES = ['dev', 'developer'];
+
+        function determineRole(username, isPuterUser) {
+            const lower = (username || '').toLowerCase();
+            if (ADMIN_USERNAMES.includes(lower)) return 'admin';
+            if (DEVELOPER_USERNAMES.includes(lower)) return 'developer';
+            if (isPuterUser) return 'premium';
+            return 'user';
+        }
+
         // =============================================
         // INITIALIZATION
         // =============================================
@@ -983,6 +1007,8 @@
                     return;
                 }
                 if (puter.auth.isSignedIn()) {
+                    await updateOnlineStatus(false);
+                    await logGrudgeActivity('logout');
                     await puter.auth.signOut();
                     puterReady = false;
                     puterUser = null;
@@ -1017,6 +1043,9 @@
                 showToast(`Welcome, ${puterUser.username}!`, 'success');
                 await initializeGrudgeStudioStorage();
                 await loadGrudgeProfile();
+                await updateOnlineStatus(true);
+                await logGrudgeActivity('login');
+                await createGrudgeSession();
                 await navigateTo(STUDIO_ROOT);
                 await updateStorageStats();
                 console.log('\u2705 Puter Cloud fully connected for Grudge Studio');
@@ -1641,22 +1670,43 @@
 
         setTimeout(() => { loadVibeProviders(); }, 1500);
 
+        // Clean up online status on page unload
+        window.addEventListener('beforeunload', async () => {
+            await updateOnlineStatus(false);
+        });
+
         // =============================================
         // GRUDGE STUDIO PROFILE
         // =============================================
         async function loadGrudgeProfile() {
             if (!puterReady) return;
             try {
-                const json = await puter.kv.get('grudge-studio:profile');
+                // Try canonical key first, fall back to legacy key
+                let json = await puter.kv.get(KV_KEYS.profile);
+                if (!json) json = await puter.kv.get('grudge-studio:profile');
                 if (json) {
                     grudgeProfile = JSON.parse(json);
+                    // Migrate legacy fields
+                    if (grudgeProfile.memberSince && !grudgeProfile.createdAt) {
+                        grudgeProfile.createdAt = grudgeProfile.memberSince;
+                        delete grudgeProfile.memberSince;
+                    }
+                    if (!grudgeProfile.id) grudgeProfile.id = puterUser.uuid;
+                    if (!grudgeProfile.puterUuid) grudgeProfile.puterUuid = puterUser.uuid;
+                    if (grudgeProfile.isPuterUser === undefined) grudgeProfile.isPuterUser = true;
+                    // Re-determine role from canonical lists
+                    grudgeProfile.role = determineRole(puterUser.username, true);
                 } else {
                     grudgeProfile = {
+                        id: puterUser.uuid,
                         username: puterUser.username,
                         displayName: puterUser.username,
-                        role: 'Developer',
+                        email: puterUser.email || '',
+                        role: determineRole(puterUser.username, true),
+                        puterUuid: puterUser.uuid,
+                        isPuterUser: true,
                         studio: 'Grudge Studio',
-                        memberSince: new Date().toISOString(),
+                        createdAt: new Date().toISOString(),
                         lastLogin: new Date().toISOString(),
                         projects: 0,
                         deployments: 0,
@@ -1675,12 +1725,71 @@
         async function saveGrudgeProfile() {
             if (!puterReady || !grudgeProfile) return;
             try {
-                await puter.kv.set('grudge-studio:profile', JSON.stringify(grudgeProfile));
-                await puter.kv.set('grudge-studio:lastLogin', grudgeProfile.lastLogin);
-                await puter.kv.set('grudge-studio:version', '3.0.0');
+                await puter.kv.set(KV_KEYS.profile, JSON.stringify(grudgeProfile));
+                await puter.kv.set(KV_KEYS.lastLogin, grudgeProfile.lastLogin);
+                await puter.kv.set(KV_KEYS.version, '3.0.0');
+                // Clean up legacy keys
+                try { await puter.kv.del('grudge-studio:profile'); } catch (e) {}
+                try { await puter.kv.del('grudge-studio:lastLogin'); } catch (e) {}
+                try { await puter.kv.del('grudge-studio:version'); } catch (e) {}
             } catch (error) {
                 console.error('Failed to save profile:', error);
             }
+        }
+
+        // Canonical activity logging (matches grudge-launcher)
+        async function logGrudgeActivity(action) {
+            if (!puterReady || !puterUser) return;
+            try {
+                const logs = await puter.kv.get(KV_KEYS.activityLog) || [];
+                const parsed = typeof logs === 'string' ? JSON.parse(logs) : (Array.isArray(logs) ? logs : []);
+                parsed.unshift({
+                    timestamp: new Date().toISOString(),
+                    username: puterUser.username,
+                    action: action,
+                    app: 'grudachain'
+                });
+                if (parsed.length > 100) parsed.length = 100;
+                await puter.kv.set(KV_KEYS.activityLog, parsed);
+            } catch (e) { console.error('Activity log failed:', e); }
+        }
+
+        // Canonical online status (matches grudge-launcher)
+        async function updateOnlineStatus(isOnline) {
+            if (!puterReady || !puterUser) return;
+            try {
+                const onlinePlayers = await puter.kv.get(KV_KEYS.onlinePlayers) || {};
+                const parsed = typeof onlinePlayers === 'string' ? JSON.parse(onlinePlayers) : onlinePlayers;
+                if (isOnline) {
+                    parsed[puterUser.username] = {
+                        uuid: puterUser.uuid,
+                        app: 'grudachain',
+                        connectedAt: new Date().toISOString()
+                    };
+                } else {
+                    delete parsed[puterUser.username];
+                }
+                await puter.kv.set(KV_KEYS.onlinePlayers, parsed);
+            } catch (e) { console.error('Online status failed:', e); }
+        }
+
+        // Canonical session creation (matches grudge-auth)
+        async function createGrudgeSession() {
+            if (!puterReady || !puterUser) return;
+            try {
+                const sessionId = 'sess_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+                const session = {
+                    sessionId,
+                    userId: puterUser.uuid,
+                    username: puterUser.username,
+                    role: determineRole(puterUser.username, true),
+                    source: 'grudachain',
+                    isPuterUser: true,
+                    createdAt: Date.now(),
+                    expiresAt: Date.now() + (2 * 60 * 60 * 1000)
+                };
+                await puter.kv.set('grudge_session_' + sessionId, JSON.stringify(session));
+            } catch (e) { console.error('Session creation failed:', e); }
         }
 
         function renderAccountPanel() {
@@ -1691,7 +1800,8 @@
                 { label: 'Display Name', value: grudgeProfile.displayName },
                 { label: 'Role', value: grudgeProfile.role },
                 { label: 'Studio', value: grudgeProfile.studio },
-                { label: 'Member Since', value: new Date(grudgeProfile.memberSince).toLocaleDateString() },
+                { label: 'Puter UUID', value: (grudgeProfile.puterUuid || '').substring(0, 12) + '...' },
+                { label: 'Member Since', value: new Date(grudgeProfile.createdAt).toLocaleDateString() },
                 { label: 'Last Login', value: new Date(grudgeProfile.lastLogin).toLocaleString() },
                 { label: 'Projects', value: grudgeProfile.projects || 0 },
                 { label: 'Deployments', value: grudgeProfile.deployments || 0 },
@@ -1734,7 +1844,7 @@
                 }
                 grudgeProfile.storageFiles = totalFiles;
                 try {
-                    const url = await puter.kv.get('grudge-studio:hostedUrl');
+                    const url = await puter.kv.get(KV_KEYS.hostedUrl);
                     if (url) grudgeProfile.deployments = Math.max(grudgeProfile.deployments || 0, 1);
                 } catch (e) {}
                 await saveGrudgeProfile();
@@ -1813,13 +1923,20 @@ button:hover{background:linear-gradient(135deg,var(--p),var(--s));color:#000428;
 <script>
 var R=false,U=null,P=null,D='grudge-studio';
 var BK=['assets','configs','game-data','player-data','exports','backups'];
+var KK={profile:'grudge_studio_profile',activity:'grudge_activity_log',online:'grudge_online_players'};
+var AU=['admin','grudgewarlord','outapps','grudachain','molochdadev'];
+var DU=['dev','developer'];
+function dr(u){var l=(u||'').toLowerCase();if(AU.indexOf(l)>=0)return'admin';if(DU.indexOf(l)>=0)return'developer';return'premium';}
 document.addEventListener('DOMContentLoaded',async function(){if(typeof puter!=='undefined'&&puter.auth.isSignedIn()){R=true;await oa();}});
-async function da(){try{if(typeof puter==='undefined')return;if(puter.auth.isSignedIn()){await puter.auth.signOut();R=false;U=null;P=null;document.getElementById('ui').textContent='Not signed in';document.getElementById('pb').style.display='none';document.getElementById('pc').style.display='none';document.getElementById('fs').innerHTML='Sign in to browse...';return;}var u=await puter.auth.signIn();if(u){R=true;await oa();}}catch(e){alert('Auth failed: '+e.message);}}
-async function oa(){U=await puter.auth.getUser();document.getElementById('ui').textContent='Signed in: '+U.username+' | Puter Cloud';document.getElementById('pb').style.display='';try{await puter.fs.mkdir('grudge-studio');}catch(e){}for(var i=0;i<BK.length;i++){try{await puter.fs.mkdir('grudge-studio/'+BK[i]);}catch(e){}}await lp();await br(D);}
-async function lp(){try{var j=await puter.kv.get('grudge-studio:profile');if(j){P=JSON.parse(j);}else{P={username:U.username,displayName:U.username,role:'Developer',studio:'Grudge Studio',memberSince:new Date().toISOString(),lastLogin:new Date().toISOString(),aiQueries:0};}P.lastLogin=new Date().toISOString();await puter.kv.set('grudge-studio:profile',JSON.stringify(P));}catch(e){}}
+window.addEventListener('beforeunload',async function(){if(R&&U){try{var op=await puter.kv.get(KK.online)||{};var pp=typeof op==='string'?JSON.parse(op):op;delete pp[U.username];await puter.kv.set(KK.online,pp);}catch(e){}}});
+async function la(action){if(!R||!U)return;try{var lg=await puter.kv.get(KK.activity)||[];var pp=typeof lg==='string'?JSON.parse(lg):(Array.isArray(lg)?lg:[]);pp.unshift({timestamp:new Date().toISOString(),username:U.username,action:action,app:'grudge-studio-cloud'});if(pp.length>100)pp.length=100;await puter.kv.set(KK.activity,pp);}catch(e){}}
+async function uo(on){if(!R||!U)return;try{var op=await puter.kv.get(KK.online)||{};var pp=typeof op==='string'?JSON.parse(op):op;if(on){pp[U.username]={uuid:U.uuid,app:'grudge-studio-cloud',connectedAt:new Date().toISOString()};}else{delete pp[U.username];}await puter.kv.set(KK.online,pp);}catch(e){}}
+async function da(){try{if(typeof puter==='undefined')return;if(puter.auth.isSignedIn()){await uo(false);await la('logout');await puter.auth.signOut();R=false;U=null;P=null;document.getElementById('ui').textContent='Not signed in';document.getElementById('pb').style.display='none';document.getElementById('pc').style.display='none';document.getElementById('fs').innerHTML='Sign in to browse...';return;}var u=await puter.auth.signIn();if(u){R=true;await oa();}}catch(e){alert('Auth failed: '+e.message);}}
+async function oa(){U=await puter.auth.getUser();document.getElementById('ui').textContent='Signed in: '+U.username+' | Puter Cloud';document.getElementById('pb').style.display='';try{await puter.fs.mkdir('grudge-studio');}catch(e){}for(var i=0;i<BK.length;i++){try{await puter.fs.mkdir('grudge-studio/'+BK[i]);}catch(e){}}await lp();await uo(true);await la('login');await br(D);}
+async function lp(){try{var j=await puter.kv.get(KK.profile);if(!j)j=await puter.kv.get('grudge-studio:profile');if(j){P=JSON.parse(j);if(P.memberSince&&!P.createdAt){P.createdAt=P.memberSince;delete P.memberSince;}if(!P.id)P.id=U.uuid;if(!P.puterUuid)P.puterUuid=U.uuid;if(P.isPuterUser===undefined)P.isPuterUser=true;P.role=dr(U.username);}else{P={id:U.uuid,username:U.username,displayName:U.username,email:U.email||'',role:dr(U.username),puterUuid:U.uuid,isPuterUser:true,studio:'Grudge Studio',createdAt:new Date().toISOString(),lastLogin:new Date().toISOString(),aiQueries:0};}P.lastLogin=new Date().toISOString();await puter.kv.set(KK.profile,JSON.stringify(P));try{await puter.kv.del('grudge-studio:profile');}catch(e){}}catch(e){}}
 function tp(){var c=document.getElementById('pc');if(c.style.display==='none'){c.style.display='';rp();}else{c.style.display='none';}}
-function rp(){if(!P)return;var g=document.getElementById('pg');var f=[['Username',P.username],['Display Name',P.displayName],['Role',P.role],['Studio',P.studio],['Member Since',new Date(P.memberSince).toLocaleDateString()],['Last Login',new Date(P.lastLogin).toLocaleString()],['AI Queries',P.aiQueries||0]];g.innerHTML='';for(var i=0;i<f.length;i++){var d=document.createElement('div');d.className='pf';d.innerHTML='<div class="l">'+f[i][0]+'<\/div><div class="v">'+f[i][1]+'<\/div>';g.appendChild(d);}}
-async function sc(){var inp=document.getElementById('mi');var m=inp.value.trim();if(!m)return;am(m,'u');inp.value='';try{var r=await puter.ai.chat(m);am(r,'a');if(P){P.aiQueries=(P.aiQueries||0)+1;await puter.kv.set('grudge-studio:profile',JSON.stringify(P));}}catch(e){am('AI error: '+e.message,'a');}}
+function rp(){if(!P)return;var g=document.getElementById('pg');var f=[['Username',P.username],['Display Name',P.displayName],['Role',P.role],['Studio',P.studio||'Grudge Studio'],['Puter UUID',(P.puterUuid||'').substring(0,12)+'...'],['Member Since',new Date(P.createdAt||P.memberSince).toLocaleDateString()],['Last Login',new Date(P.lastLogin).toLocaleString()],['AI Queries',P.aiQueries||0]];g.innerHTML='';for(var i=0;i<f.length;i++){var d=document.createElement('div');d.className='pf';d.innerHTML='<div class="l">'+f[i][0]+'<\/div><div class="v">'+f[i][1]+'<\/div>';g.appendChild(d);}}
+async function sc(){var inp=document.getElementById('mi');var m=inp.value.trim();if(!m)return;am(m,'u');inp.value='';try{var r=await puter.ai.chat(m);am(r,'a');if(P){P.aiQueries=(P.aiQueries||0)+1;await puter.kv.set(KK.profile,JSON.stringify(P));}}catch(e){am('AI error: '+e.message,'a');}}
 function am(t,y){var c=document.getElementById('ch');var d=document.createElement('div');d.className='m m'+y;d.innerHTML=(y==='u'?'<b>You:<\/b> ':'<b>AI:<\/b> ')+t;c.appendChild(d);c.scrollTop=c.scrollHeight;}
 async function br(path){if(!R)return;D=path;var bc=document.getElementById('bc');bc.innerHTML='';var pts=path.split('/'),acc='';for(var i=0;i<pts.length;i++){acc+=(i>0?'/':'')+pts[i];if(i>0){bc.appendChild(document.createTextNode(' / '));}var sp=document.createElement('span');sp.textContent=pts[i];sp.style.cursor='pointer';sp.style.color='var(--s)';(function(p){sp.onclick=function(){br(p);};})(acc);bc.appendChild(sp);}var box=document.getElementById('fs');box.innerHTML='Loading...';try{var items=await puter.fs.readdir(path);if(!items.length){box.innerHTML='<p style="color:var(--s)">Empty</p>';return;}items.sort(function(a,b){if(a.is_dir&&!b.is_dir)return-1;if(!a.is_dir&&b.is_dir)return 1;return a.name.localeCompare(b.name);});box.innerHTML='';for(var i=0;i<items.length;i++){var it=items[i];var d=document.createElement('div');d.className='fi';d.textContent=(it.is_dir?'\ud83d\udcc1 ':'\ud83d\udcc4 ')+it.name;if(it.is_dir){(function(p){d.onclick=function(){br(p);};})(it.path);}box.appendChild(d);}}catch(e){box.innerHTML='Error: '+e.message;}}
 function rf(){if(R)br(D);}
@@ -1839,8 +1956,8 @@ async function du(e){var f=e.target.files;if(!f.length)return;for(var i=0;i<f.le
                     await saveGrudgeProfile();
                     renderAccountPanel();
                 }
-                await puter.kv.set('grudge-studio:hostedUrl', url);
-                await puter.kv.set('grudge-studio:subdomain', site.subdomain);
+                await puter.kv.set(KV_KEYS.hostedUrl, url);
+                await puter.kv.set(KV_KEYS.subdomain, site.subdomain);
                 window.open(url, '_blank');
             } catch (error) {
                 console.error('Deploy failed:', error);
