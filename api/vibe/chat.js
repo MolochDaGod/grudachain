@@ -1,4 +1,5 @@
-const fetch = require('node-fetch');
+// Vercel Node 18+ has native fetch; fallback to node-fetch for local dev
+const _fetch = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
 
 // Vibe 8.0.0 Free AI Providers — keys from vibe-cli open-source distribution
 const PROVIDERS = {
@@ -38,7 +39,7 @@ async function callProvider(providerKey, messages, model, temperature) {
   const timeout = setTimeout(() => controller.abort(), 15000);
 
   try {
-    const res = await fetch(`${provider.baseUrl}/chat/completions`, {
+    const res = await _fetch(`${provider.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
