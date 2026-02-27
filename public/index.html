@@ -187,6 +187,55 @@
         }
         .auth-bar .user-info { color: var(--secondary); font-size: 0.85em; }
 
+        /* Account Panel */
+        .account-panel {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+            animation: tabFade 0.3s ease;
+        }
+        .account-panel.active { display: block; }
+        .account-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+        }
+        .account-field {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            transition: border-color var(--transition);
+        }
+        .account-field:hover { border-color: var(--border-hover); }
+        .account-field .field-label {
+            font-size: 0.6em;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .account-field .field-value { font-size: 0.95em; color: var(--primary); }
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+        .account-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
         .service-status {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -565,7 +614,23 @@
         <div class="auth-bar" id="auth-bar">
             <div class="user-info" id="user-info">Not signed in to Puter Cloud</div>
             <div>
+                <button id="account-btn" onclick="toggleAccountPanel()" style="display: none; margin-right: 8px;">👤 Account</button>
                 <button id="auth-btn" onclick="handlePuterAuth()">Sign In to Puter</button>
+            </div>
+        </div>
+
+        <!-- Grudge Studio Account Panel -->
+        <div class="account-panel" id="account-panel">
+            <div class="account-header">
+                <h3 style="color: var(--secondary); font-size: 1.15em; border: none; margin: 0; padding: 0;">🎮 Grudge Studio Account</h3>
+                <button onclick="toggleAccountPanel()" style="padding: 6px 14px;">✕ Close</button>
+            </div>
+            <div class="account-grid" id="account-grid"></div>
+            <div class="account-actions">
+                <button onclick="editProfile()">✏️ Edit Profile</button>
+                <button onclick="syncGrudgeData()">🔄 Sync Data</button>
+                <button onclick="exportAccount()">📤 Export Account</button>
+                <button onclick="deployFullToPuter()">🚀 Deploy to Puter</button>
             </div>
         </div>
 
@@ -750,6 +815,7 @@
         let puterReady = false;
         let puterUser = null;
         let kvManagerVisible = false;
+        let grudgeProfile = null;
 
         const STUDIO_ROOT = 'grudge-studio';
         const BUCKETS = ['assets', 'configs', 'game-data', 'player-data', 'exports', 'backups'];
@@ -920,8 +986,11 @@
                     await puter.auth.signOut();
                     puterReady = false;
                     puterUser = null;
+                    grudgeProfile = null;
                     document.getElementById('user-info').textContent = 'Not signed in to Puter Cloud';
                     document.getElementById('auth-btn').textContent = 'Sign In to Puter';
+                    document.getElementById('account-btn').style.display = 'none';
+                    document.getElementById('account-panel').classList.remove('active');
                     updateStatus('cloud', 'loading', 'Puter Cloud: Signed out');
                     document.getElementById('storage-browser').innerHTML = '<p style="color: var(--secondary);">Sign in to Puter to access cloud storage...</p>';
                     showToast('Signed out of Puter Cloud', 'info');
@@ -943,14 +1012,14 @@
                 puterUser = await puter.auth.getUser();
                 document.getElementById('user-info').textContent = `Signed in as: ${puterUser.username} | Puter Cloud Connected`;
                 document.getElementById('auth-btn').textContent = 'Sign Out';
+                document.getElementById('account-btn').style.display = '';
                 updateStatus('cloud', 'ready', 'Puter Cloud: Connected');
                 showToast(`Welcome, ${puterUser.username}!`, 'success');
                 await initializeGrudgeStudioStorage();
+                await loadGrudgeProfile();
                 await navigateTo(STUDIO_ROOT);
                 await updateStorageStats();
-                await puter.kv.set('grudge-studio:lastLogin', new Date().toISOString());
-                await puter.kv.set('grudge-studio:version', '3.0.0');
-                console.log('✅ Puter Cloud fully connected for Grudge Studio');
+                console.log('\u2705 Puter Cloud fully connected for Grudge Studio');
             } catch (error) {
                 console.error('Post-auth setup failed:', error);
             }
@@ -1442,6 +1511,10 @@
             div.innerHTML = `<strong>${sender}:</strong> ${message}`;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
+            if (type === 'ai' && service !== 'error' && grudgeProfile) {
+                grudgeProfile.aiQueries = (grudgeProfile.aiQueries || 0) + 1;
+                saveGrudgeProfile();
+            }
         }
 
         // =============================================
@@ -1567,6 +1640,213 @@
         }
 
         setTimeout(() => { loadVibeProviders(); }, 1500);
+
+        // =============================================
+        // GRUDGE STUDIO PROFILE
+        // =============================================
+        async function loadGrudgeProfile() {
+            if (!puterReady) return;
+            try {
+                const json = await puter.kv.get('grudge-studio:profile');
+                if (json) {
+                    grudgeProfile = JSON.parse(json);
+                } else {
+                    grudgeProfile = {
+                        username: puterUser.username,
+                        displayName: puterUser.username,
+                        role: 'Developer',
+                        studio: 'Grudge Studio',
+                        memberSince: new Date().toISOString(),
+                        lastLogin: new Date().toISOString(),
+                        projects: 0,
+                        deployments: 0,
+                        aiQueries: 0,
+                        storageFiles: 0,
+                        preferences: { theme: 'terminal', aiProvider: 'auto' }
+                    };
+                }
+                grudgeProfile.lastLogin = new Date().toISOString();
+                await saveGrudgeProfile();
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+            }
+        }
+
+        async function saveGrudgeProfile() {
+            if (!puterReady || !grudgeProfile) return;
+            try {
+                await puter.kv.set('grudge-studio:profile', JSON.stringify(grudgeProfile));
+                await puter.kv.set('grudge-studio:lastLogin', grudgeProfile.lastLogin);
+                await puter.kv.set('grudge-studio:version', '3.0.0');
+            } catch (error) {
+                console.error('Failed to save profile:', error);
+            }
+        }
+
+        function renderAccountPanel() {
+            if (!grudgeProfile) return;
+            const grid = document.getElementById('account-grid');
+            const fields = [
+                { label: 'Username', value: grudgeProfile.username },
+                { label: 'Display Name', value: grudgeProfile.displayName },
+                { label: 'Role', value: grudgeProfile.role },
+                { label: 'Studio', value: grudgeProfile.studio },
+                { label: 'Member Since', value: new Date(grudgeProfile.memberSince).toLocaleDateString() },
+                { label: 'Last Login', value: new Date(grudgeProfile.lastLogin).toLocaleString() },
+                { label: 'Projects', value: grudgeProfile.projects || 0 },
+                { label: 'Deployments', value: grudgeProfile.deployments || 0 },
+                { label: 'AI Queries', value: grudgeProfile.aiQueries || 0 },
+                { label: 'Storage Files', value: grudgeProfile.storageFiles || 0 },
+                { label: 'AI Provider', value: grudgeProfile.preferences?.aiProvider || 'auto' },
+                { label: 'Theme', value: grudgeProfile.preferences?.theme || 'terminal' }
+            ];
+            grid.innerHTML = fields.map(f =>
+                `<div class="account-field"><div class="field-label">${f.label}</div><div class="field-value">${f.value}</div></div>`
+            ).join('');
+        }
+
+        function toggleAccountPanel() {
+            const panel = document.getElementById('account-panel');
+            panel.classList.toggle('active');
+            if (panel.classList.contains('active')) renderAccountPanel();
+        }
+
+        async function editProfile() {
+            if (!grudgeProfile) return;
+            const name = prompt('Display Name:', grudgeProfile.displayName);
+            if (name !== null && name.trim()) grudgeProfile.displayName = name.trim();
+            const role = prompt('Role:', grudgeProfile.role);
+            if (role !== null && role.trim()) grudgeProfile.role = role.trim();
+            await saveGrudgeProfile();
+            renderAccountPanel();
+            showToast('Profile updated', 'success');
+        }
+
+        async function syncGrudgeData() {
+            if (!puterReady) { showToast('Sign in first', 'warning'); return; }
+            showToast('Syncing Grudge Studio data...', 'info');
+            try {
+                const items = await puter.fs.readdir(STUDIO_ROOT);
+                grudgeProfile.projects = items.filter(i => i.is_dir).length;
+                let totalFiles = items.filter(i => !i.is_dir).length;
+                for (const dir of items.filter(i => i.is_dir)) {
+                    try { const sub = await puter.fs.readdir(dir.path); totalFiles += sub.filter(i => !i.is_dir).length; } catch (e) {}
+                }
+                grudgeProfile.storageFiles = totalFiles;
+                try {
+                    const url = await puter.kv.get('grudge-studio:hostedUrl');
+                    if (url) grudgeProfile.deployments = Math.max(grudgeProfile.deployments || 0, 1);
+                } catch (e) {}
+                await saveGrudgeProfile();
+                renderAccountPanel();
+                await updateStorageStats();
+                showToast('Data synced', 'success');
+            } catch (error) {
+                showToast('Sync failed: ' + error.message, 'error');
+            }
+        }
+
+        async function exportAccount() {
+            if (!grudgeProfile) return;
+            const data = { profile: grudgeProfile, exportDate: new Date().toISOString(), version: '3.0.0' };
+            try {
+                await puter.fs.write(`${STUDIO_ROOT}/exports/account-${Date.now()}.json`, JSON.stringify(data, null, 2));
+                showToast('Account exported to cloud storage', 'success');
+                await navigateTo(currentPath);
+            } catch (error) {
+                showToast('Export failed: ' + error.message, 'error');
+            }
+        }
+
+        async function deployFullToPuter() {
+            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            showToast('Deploying Grudge Studio Cloud Dashboard...', 'info');
+            try {
+                const hostDir = 'grudge-studio-app';
+                try { await puter.fs.mkdir(hostDir); } catch(e) {}
+                const dashboard = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Grudge Studio - Cloud Dashboard</title>
+<script src="https://js.puter.com/v2/"><\/script>
+<style>
+:root{--p:#00ff88;--s:#66aaff;--bg:rgba(0,4,40,0.65);--bd:rgba(0,255,136,0.25)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',monospace;background:linear-gradient(135deg,#000428,#001a4d,#000428);background-attachment:fixed;color:var(--p);min-height:100vh;line-height:1.5}
+.c{max-width:900px;margin:0 auto;padding:20px}
+h1{text-align:center;font-size:2.2em;text-shadow:0 0 30px rgba(0,255,136,0.6);margin-bottom:8px}
+.sub{text-align:center;color:var(--s);margin-bottom:24px;font-size:0.9em}
+.card{background:var(--bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--bd);border-radius:12px;padding:20px;margin-bottom:16px}
+.card h3{color:var(--s);margin-bottom:12px;border-bottom:1px solid var(--bd);padding-bottom:8px}
+.ab{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.cb{height:250px;overflow-y:auto;background:rgba(0,0,0,0.4);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:12px}
+.m{margin-bottom:10px;padding:8px 12px;border-radius:8px;font-size:0.85em}
+.mu{background:rgba(0,255,136,0.07);border-left:3px solid var(--p)}
+.ma{background:rgba(102,170,255,0.07);border-left:3px solid var(--s)}
+.ir{display:flex;gap:8px}
+input{background:rgba(0,0,0,0.5);border:1px solid var(--bd);border-radius:8px;padding:10px;color:var(--p);font-family:inherit;font-size:0.9em;flex:1}
+input:focus{outline:none;border-color:var(--s)}
+button{background:linear-gradient(135deg,rgba(0,78,146,0.7),rgba(0,4,40,0.7));border:1px solid var(--bd);border-radius:8px;padding:10px 18px;color:var(--p);cursor:pointer;font-family:inherit;transition:all 0.3s}
+button:hover{background:linear-gradient(135deg,var(--p),var(--s));color:#000428;transform:translateY(-2px)}
+.fi{display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid rgba(0,255,136,0.08);font-size:0.85em;cursor:pointer;border-radius:4px}
+.fi:hover{background:rgba(0,255,136,0.06)}
+.pg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pf{background:rgba(0,0,0,0.3);border:1px solid var(--bd);border-radius:8px;padding:10px}
+.pf .l{font-size:0.6em;color:var(--s);text-transform:uppercase;letter-spacing:1px}
+.pf .v{color:var(--p);font-size:0.95em}
+.ft{text-align:center;margin-top:24px;padding:16px;border-top:1px solid var(--bd);color:var(--s);font-size:0.8em}
+.ft a{color:var(--p)}
+@media(max-width:600px){.pg{grid-template-columns:1fr}.ir{flex-direction:column}h1{font-size:1.6em}}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>\u{1F3F4}\u200D\u2620\uFE0F Grudge Studio</h1>
+<p class="sub">GrudaChain Cloud Dashboard \u2022 Puter.js AI \u2022 Cloud Storage \u2022 Free</p>
+<div class="card"><div class="ab"><span id="ui">Not signed in</span><div><button id="pb" onclick="tp()" style="display:none;margin-right:8px">\u{1F464} Profile</button><button onclick="da()">Sign In</button></div></div></div>
+<div class="card" id="pc" style="display:none"><h3>\u{1F3AE} Account Profile</h3><div class="pg" id="pg"></div></div>
+<div class="card"><h3>\u{1F916} AI Chat (Puter AI - Free)</h3><div class="cb" id="ch"></div><div class="ir"><input id="mi" placeholder="Ask anything..." onkeypress="if(event.key==='Enter')sc()"><button onclick="sc()">Send</button></div></div>
+<div class="card"><h3>\u2601\uFE0F Cloud Storage</h3><div style="margin-bottom:8px;color:var(--s);font-size:0.85em" id="bc">/grudge-studio</div><div id="fs" style="min-height:100px;background:rgba(0,0,0,0.3);border:1px solid var(--bd);border-radius:8px;padding:10px">Sign in to browse...</div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button onclick="rf()">\u{1F504} Refresh</button><button onclick="nf()">\u{1F4C1} New Folder</button><button onclick="uf()">\u2B06\uFE0F Upload</button><input type="file" id="up" multiple style="display:none" onchange="du(event)"></div></div>
+<div class="ft"><p>\u{1F3F4}\u200D\u2620\uFE0F Grudge Studio v3.0 | Puter Cloud Edition</p><p><a href="https://grudachain.vercel.app" target="_blank">Full GRUDA Legion</a> \u2022 <a href="https://grudgewarlords.com" target="_blank">Grudge Warlords</a></p></div>
+</div>
+<script>
+var R=false,U=null,P=null,D='grudge-studio';
+var BK=['assets','configs','game-data','player-data','exports','backups'];
+document.addEventListener('DOMContentLoaded',async function(){if(typeof puter!=='undefined'&&puter.auth.isSignedIn()){R=true;await oa();}});
+async function da(){try{if(typeof puter==='undefined')return;if(puter.auth.isSignedIn()){await puter.auth.signOut();R=false;U=null;P=null;document.getElementById('ui').textContent='Not signed in';document.getElementById('pb').style.display='none';document.getElementById('pc').style.display='none';document.getElementById('fs').innerHTML='Sign in to browse...';return;}var u=await puter.auth.signIn();if(u){R=true;await oa();}}catch(e){alert('Auth failed: '+e.message);}}
+async function oa(){U=await puter.auth.getUser();document.getElementById('ui').textContent='Signed in: '+U.username+' | Puter Cloud';document.getElementById('pb').style.display='';try{await puter.fs.mkdir('grudge-studio');}catch(e){}for(var i=0;i<BK.length;i++){try{await puter.fs.mkdir('grudge-studio/'+BK[i]);}catch(e){}}await lp();await br(D);}
+async function lp(){try{var j=await puter.kv.get('grudge-studio:profile');if(j){P=JSON.parse(j);}else{P={username:U.username,displayName:U.username,role:'Developer',studio:'Grudge Studio',memberSince:new Date().toISOString(),lastLogin:new Date().toISOString(),aiQueries:0};}P.lastLogin=new Date().toISOString();await puter.kv.set('grudge-studio:profile',JSON.stringify(P));}catch(e){}}
+function tp(){var c=document.getElementById('pc');if(c.style.display==='none'){c.style.display='';rp();}else{c.style.display='none';}}
+function rp(){if(!P)return;var g=document.getElementById('pg');var f=[['Username',P.username],['Display Name',P.displayName],['Role',P.role],['Studio',P.studio],['Member Since',new Date(P.memberSince).toLocaleDateString()],['Last Login',new Date(P.lastLogin).toLocaleString()],['AI Queries',P.aiQueries||0]];g.innerHTML='';for(var i=0;i<f.length;i++){var d=document.createElement('div');d.className='pf';d.innerHTML='<div class="l">'+f[i][0]+'<\/div><div class="v">'+f[i][1]+'<\/div>';g.appendChild(d);}}
+async function sc(){var inp=document.getElementById('mi');var m=inp.value.trim();if(!m)return;am(m,'u');inp.value='';try{var r=await puter.ai.chat(m);am(r,'a');if(P){P.aiQueries=(P.aiQueries||0)+1;await puter.kv.set('grudge-studio:profile',JSON.stringify(P));}}catch(e){am('AI error: '+e.message,'a');}}
+function am(t,y){var c=document.getElementById('ch');var d=document.createElement('div');d.className='m m'+y;d.innerHTML=(y==='u'?'<b>You:<\/b> ':'<b>AI:<\/b> ')+t;c.appendChild(d);c.scrollTop=c.scrollHeight;}
+async function br(path){if(!R)return;D=path;var bc=document.getElementById('bc');bc.innerHTML='';var pts=path.split('/'),acc='';for(var i=0;i<pts.length;i++){acc+=(i>0?'/':'')+pts[i];if(i>0){bc.appendChild(document.createTextNode(' / '));}var sp=document.createElement('span');sp.textContent=pts[i];sp.style.cursor='pointer';sp.style.color='var(--s)';(function(p){sp.onclick=function(){br(p);};})(acc);bc.appendChild(sp);}var box=document.getElementById('fs');box.innerHTML='Loading...';try{var items=await puter.fs.readdir(path);if(!items.length){box.innerHTML='<p style="color:var(--s)">Empty</p>';return;}items.sort(function(a,b){if(a.is_dir&&!b.is_dir)return-1;if(!a.is_dir&&b.is_dir)return 1;return a.name.localeCompare(b.name);});box.innerHTML='';for(var i=0;i<items.length;i++){var it=items[i];var d=document.createElement('div');d.className='fi';d.textContent=(it.is_dir?'\ud83d\udcc1 ':'\ud83d\udcc4 ')+it.name;if(it.is_dir){(function(p){d.onclick=function(){br(p);};})(it.path);}box.appendChild(d);}}catch(e){box.innerHTML='Error: '+e.message;}}
+function rf(){if(R)br(D);}
+async function nf(){if(!R)return;var n=prompt('Folder name:');if(!n)return;try{await puter.fs.mkdir(D+'/'+n.replace(/[^a-zA-Z0-9_-]/g,'-').toLowerCase());br(D);}catch(e){alert(e.message);}}
+function uf(){if(!R)return;document.getElementById('up').click();}
+async function du(e){var f=e.target.files;if(!f.length)return;for(var i=0;i<f.length;i++){try{await puter.fs.write(D+'/'+f[i].name,f[i],{dedupeName:true});}catch(x){}}e.target.value='';br(D);}
+<\/script>
+</body>
+</html>`;
+                await puter.fs.write(hostDir + '/index.html', dashboard);
+                const subdomain = 'grudge-studio';
+                const site = await puter.hosting.create(subdomain, hostDir);
+                const url = 'https://' + site.subdomain + '.puter.site';
+                showToast('Deployed to ' + url, 'success');
+                if (grudgeProfile) {
+                    grudgeProfile.deployments = (grudgeProfile.deployments || 0) + 1;
+                    await saveGrudgeProfile();
+                    renderAccountPanel();
+                }
+                await puter.kv.set('grudge-studio:hostedUrl', url);
+                await puter.kv.set('grudge-studio:subdomain', site.subdomain);
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('Deploy failed:', error);
+                showToast('Deploy failed: ' + error.message, 'error');
+            }
+        }
 
         // =============================================
         // NETWORK DISCOVERY
