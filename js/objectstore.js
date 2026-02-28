@@ -4,17 +4,26 @@
  */
 
 const API_BASE = 'https://molochdagod.github.io/ObjectStore/api/v1';
+const ICON_BASE = 'https://molochdagod.github.io/ObjectStore/icons';
 
 export class ObjectStoreUI {
   constructor() {
     this.cache = new Map();
+    this.iconIndex = null;
     this.activeCategory = 'weapons';
     this.searchQuery = '';
     this.detailEl = null;
   }
 
   /** Initialize after panel is rendered */
-  init() {
+  async init() {
+    // Load icon index for sprite lookups
+    if (!this.iconIndex) {
+      try {
+        const res = await fetch(`${ICON_BASE}/icon-index.json`);
+        this.iconIndex = res.ok ? await res.json() : {};
+      } catch { this.iconIndex = {}; }
+    }
     this._bindTabs();
     this._bindSearch();
     this.loadCategory('weapons');
@@ -252,12 +261,95 @@ export class ObjectStoreUI {
     `;
   }
 
+  /** Build a flat weapon name → icon path map from icon-index */
+  _buildWeaponMap() {
+    if (this._weaponIconMap) return this._weaponIconMap;
+    this._weaponIconMap = new Map();
+    const idx = this.iconIndex || {};
+    if (idx.weapons) {
+      for (const catIcons of Object.values(idx.weapons)) {
+        if (typeof catIcons !== 'object') continue;
+        for (const [key, path] of Object.entries(catIcons)) {
+          this._weaponIconMap.set(key, path);
+        }
+      }
+    }
+    return this._weaponIconMap;
+  }
+
+  /** Resolve an icon URL for an item */
+  _getIconUrl(item) {
+    const idx = this.iconIndex || {};
+    const id = (item.id || '').toLowerCase();
+    const type = item._type || '';
+    const cat = item._cat || '';
+
+    // Weapons: match id segments against flat icon-index map
+    if (type === 'weapon') {
+      const wmap = this._buildWeaponMap();
+      // Try each segment of the kebab-case id (e.g. "bloodfeud-blade" → "bloodfeud", "blade")
+      const segments = id.split('-');
+      for (const seg of segments) {
+        if (wmap.has(seg)) return `${ICON_BASE}/${wmap.get(seg)}`;
+      }
+      // Try full id
+      if (wmap.has(id)) return `${ICON_BASE}/${wmap.get(id)}`;
+      // Try compound matches (e.g. "ironwrath" from "ironwrath-greatsword")
+      for (const [key, path] of wmap) {
+        if (id.includes(key) || key.includes(segments[0])) return `${ICON_BASE}/${path}`;
+      }
+      return null;
+    }
+
+    // Materials: match by material sub-category (ore, ingot, wood, cloth)
+    if (type === 'material' && idx.materials) {
+      const matCat = idx.materials[cat];
+      if (matCat && typeof matCat === 'object' && Object.keys(matCat).length > 0) {
+        // Try matching item id to a material key
+        for (const [key, path] of Object.entries(matCat)) {
+          const keyBase = key.split('-')[0];
+          if (id.includes(keyBase) || keyBase.includes(id.split('-')[0])) {
+            return `${ICON_BASE}/${path}`;
+          }
+        }
+        // Fallback: first icon in that material category
+        return `${ICON_BASE}/${Object.values(matCat)[0]}`;
+      }
+      return null;
+    }
+
+    // Consumables: use prefix-based icons
+    if (type === 'consumable' && idx.consumables) {
+      const consCat = idx.consumables[cat];
+      if (consCat && consCat.prefix) {
+        return `${ICON_BASE}/consumables/${consCat.prefix}01.png`;
+      }
+      return null;
+    }
+
+    // Skills: use skill icon sprites if available
+    if (type === 'skill' && idx.sprites && idx.sprites.skillIcons) {
+      for (const [key, path] of Object.entries(idx.sprites.skillIcons)) {
+        if (id.includes(key.split('-')[0])) return `${ICON_BASE}/${path}`;
+      }
+    }
+
+    // Armor: use generic armor prefix
+    if (type === 'armor' && idx.armor && idx.armor.generic) {
+      return `${ICON_BASE}/armor/${idx.armor.generic.prefix}01.png`;
+    }
+
+    return null;
+  }
+
   _itemCard(item) {
     const name = item.name || item.id || 'Unknown';
     const tier = item.tier || item.level || '';
     const type = item._type || '';
     const cat = item._cat || '';
     const tierClass = tier ? `tier-${Math.min(tier, 6)}` : '';
+    const iconUrl = this._getIconUrl(item);
+    const emoji = item.emoji || this._typeEmoji(type);
 
     let meta = type;
     if (cat) meta += ` · ${cat}`;
@@ -266,15 +358,30 @@ export class ObjectStoreUI {
     if (item.trait) meta += ` · ${item.trait}`;
     if (item.faction) meta += ` · ${item.faction}`;
 
+    const iconHtml = iconUrl
+      ? `<img class="item-icon" src="${iconUrl}" alt="${name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+         <div class="item-icon-fallback" style="display:none">${emoji}</div>`
+      : `<div class="item-icon-fallback">${emoji}</div>`;
+
     return `
       <div class="item-card" data-item='${JSON.stringify(item).replace(/'/g, '&#39;')}'>
-        <div class="item-name">${name}</div>
-        <div class="item-meta">
-          ${tier ? `<span class="item-tier ${tierClass}">T${tier}</span> ` : ''}
-          ${meta}
+        <div class="item-card-icon">
+          ${iconHtml}
+        </div>
+        <div class="item-card-info">
+          <div class="item-name">${name}</div>
+          <div class="item-meta">
+            ${tier ? `<span class="item-tier ${tierClass}">T${tier}</span> ` : ''}
+            ${meta}
+          </div>
         </div>
       </div>
     `;
+  }
+
+  _typeEmoji(type) {
+    const map = { weapon: '⚔️', armor: '🛡️', material: '🪨', consumable: '🧪', skill: '✨', race: '👤', class: '⚔️', faction: '🏴' };
+    return map[type] || '📦';
   }
 
   _matches(item, query) {
@@ -313,19 +420,34 @@ export class ObjectStoreUI {
     const body = this.detailEl.querySelector('#detail-body');
 
     title.textContent = item.name || item.id || 'Unknown';
+    const iconUrl = this._getIconUrl(item);
+    const emoji = item.emoji || this._typeEmoji(item._type || '');
 
-    const skip = new Set(['_type', '_cat', '_profession', 'name']);
+    const skip = new Set(['_type', '_cat', '_profession', 'name', 'emoji', 'spritePath']);
     const rows = Object.entries(item)
       .filter(([k]) => !skip.has(k) && !k.startsWith('_'))
       .map(([k, v]) => {
-        const val = typeof v === 'object' ? JSON.stringify(v) : String(v);
+        let val;
+        if (Array.isArray(v)) {
+          val = `<ul class="detail-list">${v.map(i => `<li>${i}</li>`).join('')}</ul>`;
+        } else if (typeof v === 'object') {
+          val = `<div class="detail-stats">${Object.entries(v).map(([sk, sv]) =>
+            `<span class="stat-chip">${sk}: ${sv}</span>`
+          ).join('')}</div>`;
+        } else {
+          val = String(v);
+        }
         return `<div class="detail-row">
           <span class="detail-row-label">${k}</span>
           <span class="detail-row-value">${val}</span>
         </div>`;
       });
 
-    body.innerHTML = rows.join('') || '<p style="color:var(--text-muted)">No additional data</p>';
+    const iconHtml = iconUrl
+      ? `<div class="detail-icon"><img src="${iconUrl}" alt="${item.name || ''}" onerror="this.parentElement.innerHTML='<span class=detail-icon-emoji>${emoji}</span>'"></div>`
+      : `<div class="detail-icon"><span class="detail-icon-emoji">${emoji}</span></div>`;
+
+    body.innerHTML = iconHtml + rows.join('') || '<p style="color:var(--text-muted)">No additional data</p>';
     this.detailEl.classList.add('open');
   }
 
