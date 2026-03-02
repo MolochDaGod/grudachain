@@ -6,25 +6,25 @@ const PROVIDERS = {
   megallm: {
     name: 'MegaLLM',
     baseUrl: 'https://ai.megallm.io/v1',
-    key: 'sk-mega-0eaa0b2c2bae3ced6afca8651cfbbce07927e231e4119068f7f7867c20cdc820',
+    key: process.env.MEGALLM_API_KEY || 'sk-mega-0eaa0b2c2bae3ced6afca8651cfbbce07927e231e4119068f7f7867c20cdc820',
     models: ['gpt-4o-mini', 'gpt-3.5-turbo', 'claude-3-haiku', 'deepseek-chat']
   },
   openrouter: {
     name: 'OpenRouter',
     baseUrl: 'https://openrouter.ai/api/v1',
-    key: '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',
+    key: process.env.OPENROUTER_API_KEY || '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',
     models: ['meta-llama/llama-3.1-8b-instruct:free', 'microsoft/phi-3-mini-128k-instruct:free']
   },
   agentrouter: {
     name: 'AgentRouter',
     baseUrl: 'https://agentrouter.org/v1',
-    key: 'sk-WXLlCAeAaDCeEjMWCBo7sqXGPOF1HrYEDm0JFBDXP3tEiERw',
+    key: process.env.AGENTROUTER_API_KEY || 'sk-WXLlCAeAaDCeEjMWCBo7sqXGPOF1HrYEDm0JFBDXP3tEiERw',
     models: ['gpt-4o-mini', 'claude-3-haiku']
   },
   routeway: {
     name: 'Routeway',
     baseUrl: 'https://api.routeway.ai/v1',
-    key: 'sk-LeRlb8aww5YXvdP57hnVw07xmIA2c3FvfeLvPhbmFU14osMn',
+    key: process.env.ROUTEWAY_API_KEY || 'sk-LeRlb8aww5YXvdP57hnVw07xmIA2c3FvfeLvPhbmFU14osMn',
     models: ['gpt-4o-mini', 'claude-3-haiku']
   }
 };

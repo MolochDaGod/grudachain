@@ -12,6 +12,8 @@ const _fetch = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
 const vibeProvidersHandler = require('./api/vibe/providers');
 const vibeChatHandler = require('./api/vibe/chat');
 const sdkInfoHandler = require('./api/sdk/info');
+const storageInfoHandler = require('./api/storage/info');
+const storageListHandler = require('./api/storage/list');
 
 // Initialize Express app
 const app = express();
@@ -274,6 +276,10 @@ app.options('/api/vibe/chat', vibeChatHandler); // CORS preflight
 // ─── SDK Info Route ───
 app.get('/api/sdk/info', sdkInfoHandler);
 
+// ─── Storage Routes ───
+app.get('/api/storage/info', storageInfoHandler);
+app.get('/api/storage/list', storageListHandler);
+
 // ─── Grudge Studio Integration Endpoints ───
 app.get('/api/grudge-studio/config', (req, res) => {
   res.json({
@@ -317,30 +323,132 @@ app.get('/api/grudge-studio/links', (req, res) => {
   });
 });
 
+// ─── Admin / Stats Endpoints ───
+app.get('/api/admin/stats', (req, res) => {
+  const connectedClients = io.engine.clientsCount || 0;
+  res.json({
+    success: true,
+    stats: {
+      uptime: Date.now() - systemStatus.uptime,
+      uptimeHuman: formatUptime(Date.now() - systemStatus.uptime),
+      connectedClients,
+      serverStatus: systemStatus.server,
+      aiStatus: systemStatus.ai,
+      networkStatus: systemStatus.network,
+      nodeEnv: NODE_ENV,
+      memoryUsage: process.memoryUsage(),
+      nodeVersion: process.version
+    },
+    services: aiServices,
+    vibeProviders: Object.entries(VIBE_PROVIDERS).map(([key, p]) => ({
+      id: key,
+      name: p.name,
+      models: p.models,
+      hasKey: !!p.key
+    })),
+    routes: [
+      'GET /health', 'GET /api/status',
+      'POST /api/chat', 'POST /api/generate-code', 'POST /api/analyze-file',
+      'GET /api/network/discover',
+      'GET /api/vibe/providers', 'POST /api/vibe/chat',
+      'GET /api/sdk/info',
+      'GET /api/storage/info', 'GET /api/storage/list',
+      'GET /api/grudge-studio/config', 'GET /api/grudge-studio/links',
+      'GET /api/admin/stats', 'GET /api/admin/ecosystem'
+    ],
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/admin/ecosystem', (req, res) => {
+  res.json({
+    success: true,
+    ecosystem: {
+      services: {
+        grudaLegion: {
+          url: 'https://gruda-legion-production.up.railway.app',
+          platform: 'Railway',
+          status: systemStatus.server,
+          uptime: Date.now() - systemStatus.uptime
+        },
+        grudachain: {
+          url: 'https://grudachain.vercel.app',
+          platform: 'Vercel',
+          type: 'Serverless functions + static'
+        },
+        authGateway: {
+          url: 'https://auth-gateway-flax.vercel.app',
+          platform: 'Vercel',
+          type: 'Authentication gateway'
+        },
+        wcs: {
+          url: 'https://warlord-crafting-suite.vercel.app',
+          platform: 'Vercel',
+          type: 'Game systems (crafting, battle, arsenal, dungeon)'
+        },
+        gge: {
+          url: 'https://grudgewarlords.com',
+          platform: 'Replit/Vercel',
+          type: 'Main game portal + GDevelop Assistant'
+        }
+      },
+      sdk: {
+        'grudge-studio': { version: '1.2.0', npm: 'https://www.npmjs.com/package/grudge-studio' },
+        '@grudge/puter-sync': { version: '1.0.0', description: 'Puter cloud sync bridge' }
+      },
+      ai: {
+        vibeVersion: '8.0.0',
+        providers: Object.keys(VIBE_PROVIDERS),
+        puterAI: 'Client-side via puter.ai.chat() — free unlimited'
+      },
+      storage: {
+        provider: 'Puter Cloud (puter.fs + puter.kv)',
+        hosting: 'Puter Hosting (*.puter.site)',
+        cost: 'Free unlimited'
+      },
+      repo: {
+        github: 'https://github.com/MolochDaGod/grudachain',
+        branch: 'master',
+        autoDeployTo: 'Railway'
+      }
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+function formatUptime(ms) {
+  const s = Math.floor(ms / 1000);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return `${d}d ${h}h ${m}m`;
+}
+
 // ─── Real AI Provider Chain (from Vibe 8.0.0) ───
+// Keys read from env vars first, falling back to bundled defaults
 const VIBE_PROVIDERS = {
   megallm: {
     name: 'MegaLLM',
     baseUrl: 'https://ai.megallm.io/v1',
-    key: 'sk-mega-0eaa0b2c2bae3ced6afca8651cfbbce07927e231e4119068f7f7867c20cdc820',
+    key: process.env.MEGALLM_API_KEY || 'sk-mega-0eaa0b2c2bae3ced6afca8651cfbbce07927e231e4119068f7f7867c20cdc820',
     models: ['gpt-4o-mini', 'gpt-3.5-turbo', 'claude-3-haiku', 'deepseek-chat']
   },
   openrouter: {
     name: 'OpenRouter',
     baseUrl: 'https://openrouter.ai/api/v1',
-    key: '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',
+    key: process.env.OPENROUTER_API_KEY || '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',
     models: ['meta-llama/llama-3.1-8b-instruct:free', 'microsoft/phi-3-mini-128k-instruct:free']
   },
   agentrouter: {
     name: 'AgentRouter',
     baseUrl: 'https://agentrouter.org/v1',
-    key: 'sk-WXLlCAeAaDCeEjMWCBo7sqXGPOF1HrYEDm0JFBDXP3tEiERw',
+    key: process.env.AGENTROUTER_API_KEY || 'sk-WXLlCAeAaDCeEjMWCBo7sqXGPOF1HrYEDm0JFBDXP3tEiERw',
     models: ['gpt-4o-mini', 'claude-3-haiku']
   },
   routeway: {
     name: 'Routeway',
     baseUrl: 'https://api.routeway.ai/v1',
-    key: 'sk-LeRlb8aww5YXvdP57hnVw07xmIA2c3FvfeLvPhbmFU14osMn',
+    key: process.env.ROUTEWAY_API_KEY || 'sk-LeRlb8aww5YXvdP57hnVw07xmIA2c3FvfeLvPhbmFU14osMn',
     models: ['gpt-4o-mini', 'claude-3-haiku']
   }
 };
@@ -565,6 +673,9 @@ server.listen(PORT, async () => {
 • Vibe Chat:      http://localhost:${PORT}/api/vibe/chat
 • SDK Info:       http://localhost:${PORT}/api/sdk/info
 • Grudge Config:  http://localhost:${PORT}/api/grudge-studio/config
+• Storage Info:   http://localhost:${PORT}/api/storage/info
+• Admin Stats:    http://localhost:${PORT}/api/admin/stats
+• Admin Ecosystem:http://localhost:${PORT}/api/admin/ecosystem
 • WebSocket:      ws://localhost:${PORT}
 
 🤖 Vibe 8.0.0 AI Providers (Real):
