@@ -6,6 +6,12 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const fs = require('fs');
+const _fetch = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
+
+// Import Vercel-compatible handlers (work as Express route handlers)
+const vibeProvidersHandler = require('./api/vibe/providers');
+const vibeChatHandler = require('./api/vibe/chat');
+const sdkInfoHandler = require('./api/sdk/info');
 
 // Initialize Express app
 const app = express();
@@ -26,7 +32,20 @@ app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false
 }));
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://grudgewarlords.com',
+    'https://www.grudgewarlords.com',
+    'https://warlord-crafting-suite.vercel.app',
+    'https://grudachain.vercel.app',
+    'https://auth-gateway-flax.vercel.app',
+    'https://gruda-legion-production.up.railway.app',
+    /\.vercel\.app$/,
+    /localhost/
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
 app.use(compression());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -247,58 +266,184 @@ app.get('/api/network/discover', (req, res) => {
   });
 });
 
-// AI service helper functions
-async function callPuterAI(message, model, temperature) {
-  // Simulated Puter.js call - in real implementation, this would use actual Puter.js SDK
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`AI Response: ${message} (via Puter.js ${model})`);
-    }, 500);
-  });
-}
+// ─── Vibe AI Routes (ported from Vercel serverless functions) ───
+app.get('/api/vibe/providers', vibeProvidersHandler);
+app.post('/api/vibe/chat', vibeChatHandler);
+app.options('/api/vibe/chat', vibeChatHandler); // CORS preflight
 
-async function callHuggingFaceAI(message, model) {
-  // Simulated HuggingFace call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`AI Response: ${message} (via HuggingFace ${model})`);
-    }, 800);
-  });
-}
+// ─── SDK Info Route ───
+app.get('/api/sdk/info', sdkInfoHandler);
 
-async function callOpenRouterAI(message, model) {
-  // Simulated OpenRouter call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`AI Response: ${message} (via OpenRouter ${model})`);
-    }, 600);
+// ─── Grudge Studio Integration Endpoints ───
+app.get('/api/grudge-studio/config', (req, res) => {
+  res.json({
+    success: true,
+    ecosystem: {
+      authGateway: 'https://auth-gateway-flax.vercel.app',
+      wcs: 'https://warlord-crafting-suite.vercel.app',
+      gge: 'https://grudgewarlords.com',
+      grudaLegion: 'https://gruda-legion-production.up.railway.app',
+      grudachain: 'https://grudachain.vercel.app'
+    },
+    sdk: {
+      name: 'grudge-studio',
+      version: '1.2.0',
+      npm: 'https://www.npmjs.com/package/grudge-studio',
+      github: 'https://github.com/MolochDaGod/GrudgeStudioNPM'
+    },
+    ai: {
+      vibeVersion: '8.0.0',
+      providers: ['megallm', 'openrouter', 'agentrouter', 'routeway'],
+      puterAI: true
+    },
+    timestamp: new Date().toISOString()
   });
+});
+
+app.get('/api/grudge-studio/links', (req, res) => {
+  res.json({
+    success: true,
+    links: {
+      main: 'https://grudgewarlords.com',
+      wcs: 'https://warlord-crafting-suite.vercel.app',
+      auth: 'https://auth-gateway-flax.vercel.app',
+      legion: 'https://gruda-legion-production.up.railway.app',
+      grudachain: 'https://grudachain.vercel.app',
+      npm: 'https://www.npmjs.com/package/grudge-studio',
+      github: 'https://github.com/MolochDaGod/GrudgeStudioNPM',
+      discord: 'https://discord.gg/grudgewarlords'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// ─── Real AI Provider Chain (from Vibe 8.0.0) ───
+const VIBE_PROVIDERS = {
+  megallm: {
+    name: 'MegaLLM',
+    baseUrl: 'https://ai.megallm.io/v1',
+    key: 'sk-mega-0eaa0b2c2bae3ced6afca8651cfbbce07927e231e4119068f7f7867c20cdc820',
+    models: ['gpt-4o-mini', 'gpt-3.5-turbo', 'claude-3-haiku', 'deepseek-chat']
+  },
+  openrouter: {
+    name: 'OpenRouter',
+    baseUrl: 'https://openrouter.ai/api/v1',
+    key: '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',
+    models: ['meta-llama/llama-3.1-8b-instruct:free', 'microsoft/phi-3-mini-128k-instruct:free']
+  },
+  agentrouter: {
+    name: 'AgentRouter',
+    baseUrl: 'https://agentrouter.org/v1',
+    key: 'sk-WXLlCAeAaDCeEjMWCBo7sqXGPOF1HrYEDm0JFBDXP3tEiERw',
+    models: ['gpt-4o-mini', 'claude-3-haiku']
+  },
+  routeway: {
+    name: 'Routeway',
+    baseUrl: 'https://api.routeway.ai/v1',
+    key: 'sk-LeRlb8aww5YXvdP57hnVw07xmIA2c3FvfeLvPhbmFU14osMn',
+    models: ['gpt-4o-mini', 'claude-3-haiku']
+  }
+};
+
+const VIBE_PROVIDER_ORDER = ['megallm', 'openrouter', 'agentrouter', 'routeway'];
+
+async function callVibeProvider(providerKey, messages, model, temperature) {
+  const provider = VIBE_PROVIDERS[providerKey];
+  if (!provider) throw new Error(`Unknown provider: ${providerKey}`);
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const res = await _fetch(`${provider.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${provider.key}`,
+        'HTTP-Referer': 'https://gruda-legion-production.up.railway.app',
+        'X-Title': 'GRUDA Legion Railway'
+      },
+      body: JSON.stringify({
+        model: model || provider.models[0],
+        messages,
+        temperature: temperature || 0.7,
+        max_tokens: 2048
+      }),
+      signal: controller.signal
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      throw new Error(`${provider.name} ${res.status}: ${errText.slice(0, 200)}`);
+    }
+
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) throw new Error(`${provider.name} returned empty response`);
+
+    return { content, provider: provider.name, model: data.model || model };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function callBestAvailableAI(prompt, preferredModel) {
-  // Try services in order of preference
-  for (const [service, config] of Object.entries(aiServices)) {
-    if (config.status === 'ready' && config.enabled) {
-      try {
-        switch (service) {
-          case 'puter':
-            return await callPuterAI(prompt, preferredModel, 0.7);
-          case 'huggingface':
-            return await callHuggingFaceAI(prompt, preferredModel);
-          case 'openrouter':
-            return await callOpenRouterAI(prompt, preferredModel);
-          default:
-            continue;
-        }
-      } catch (error) {
-        console.warn(`${service} failed:`, error.message);
-        continue;
-      }
+  const messages = [
+    { role: 'system', content: 'You are a helpful AI assistant for Grudge Studio game development. You help with code generation, game design, Three.js, Socket.io, combat systems, terrain generation, and all aspects of building multiplayer 3D games.' },
+    { role: 'user', content: prompt }
+  ];
+
+  for (const providerKey of VIBE_PROVIDER_ORDER) {
+    try {
+      const result = await callVibeProvider(providerKey, messages, preferredModel);
+      return result.content;
+    } catch (error) {
+      console.warn(`Vibe provider ${providerKey} failed:`, error.message);
     }
   }
-  
-  // Final fallback
+
+  // Final fallback to local
   return generateLocalResponse(prompt);
+}
+
+// Legacy /api/chat stub functions — now backed by real Vibe providers
+async function callPuterAI(message, model, temperature) {
+  const messages = [
+    { role: 'system', content: 'You are a helpful AI assistant powered by Puter.js.' },
+    { role: 'user', content: message }
+  ];
+  try {
+    const result = await callVibeProvider('megallm', messages, model, temperature);
+    return result.content;
+  } catch (error) {
+    throw new Error('MegaLLM (Puter fallback) failed: ' + error.message);
+  }
+}
+
+async function callHuggingFaceAI(message, model) {
+  const messages = [
+    { role: 'system', content: 'You are a helpful AI assistant.' },
+    { role: 'user', content: message }
+  ];
+  try {
+    const result = await callVibeProvider('openrouter', messages, model);
+    return result.content;
+  } catch (error) {
+    throw new Error('OpenRouter (HuggingFace fallback) failed: ' + error.message);
+  }
+}
+
+async function callOpenRouterAI(message, model) {
+  const messages = [
+    { role: 'system', content: 'You are a helpful AI assistant.' },
+    { role: 'user', content: message }
+  ];
+  try {
+    const result = await callVibeProvider('agentrouter', messages, model);
+    return result.content;
+  } catch (error) {
+    throw new Error('AgentRouter (OpenRouter fallback) failed: ' + error.message);
+  }
 }
 
 function generateLocalResponse(message) {
@@ -416,13 +561,24 @@ server.listen(PORT, async () => {
 • Main Interface: http://localhost:${PORT}
 • Health Check:   http://localhost:${PORT}/health
 • API Status:     http://localhost:${PORT}/api/status
+• Vibe Providers: http://localhost:${PORT}/api/vibe/providers
+• Vibe Chat:      http://localhost:${PORT}/api/vibe/chat
+• SDK Info:       http://localhost:${PORT}/api/sdk/info
+• Grudge Config:  http://localhost:${PORT}/api/grudge-studio/config
 • WebSocket:      ws://localhost:${PORT}
 
-🤖 AI Services Available:
-• Puter.js (Claude, GPT-4o, O3-mini) - Free unlimited
-• HuggingFace Inference API - Free tier
-• OpenRouter Free Models - Free tier
+🤖 Vibe 8.0.0 AI Providers (Real):
+• MegaLLM (gpt-4o-mini, claude-3-haiku) - Free
+• OpenRouter (llama-3.1, phi-3) - Free
+• AgentRouter (gpt-4o-mini, claude-3-haiku) - Free
+• Routeway (gpt-4o-mini, claude-3-haiku) - Free
+• Puter.js (Claude, GPT-4o) - Client-side
 • Local AI Fallback - Always available
+
+🎮 Grudge Studio Ecosystem:
+• Auth Gateway: https://auth-gateway-flax.vercel.app
+• WCS: https://warlord-crafting-suite.vercel.app
+• GGE: https://grudgewarlords.com
 
 ✅ GRUDA Legion is fully operational!
   `);
