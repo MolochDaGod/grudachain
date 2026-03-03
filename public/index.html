@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
   <meta name="theme-color" content="#0d1120" />
-  <meta name="description" content="Grudge Studio Nexus — a central hub for deployments, apps, GitHub Pages, tools, and ecosystem links." />
+  <meta name="description" content="Grudge Studio Nexus — central hub for all apps, games, AI systems, ObjectStore, WCS, GDevelop Assistant, and ecosystem links." />
 
   <!-- WCS Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -438,15 +438,17 @@
         </div>
         <div>
           <h1>Grudge Studio Nexus</h1>
-          <p>Deployments • Apps • GitHub Pages • Tools</p>
+          <p>Apps • Games • AI • ObjectStore • WCS • Tools</p>
         </div>
       </div>
 
       <div class="actions">
+        <a class="chip" href="https://grudge-platform.vercel.app" target="_blank" rel="noreferrer">⚔ Platform</a>
+        <a class="chip" href="https://gdevelop-assistant.vercel.app" target="_blank" rel="noreferrer">🎮 GDevelop</a>
+        <a class="chip" href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer">📦 ObjectStore</a>
+        <a class="chip" href="https://warlord-crafting-suite.vercel.app" target="_blank" rel="noreferrer">🔨 WCS</a>
         <a class="chip" href="https://github.com/MolochDaGod" target="_blank" rel="noreferrer">GitHub</a>
-        <a class="chip" href="https://github.com/MolochDaGod/grudachain" target="_blank" rel="noreferrer">Repo: grudachain</a>
         <a class="chip" href="https://discord.gg/grudgewarlords" target="_blank" rel="noreferrer">Discord</a>
-        <a class="chip" href="/legacy.html">Legacy Tools</a>
       </div>
     </div>
   </div>
@@ -490,7 +492,7 @@
           <div style="margin-top:6px">Tip: use <strong>+ Add link</strong> to store Render/Railway/Vercel URLs in your browser for quick access.</div>
         </div>
         <div>
-          <div><a href="/api/status" target="_blank" rel="noreferrer">/api/status</a> • <a href="/api/vibe/providers" target="_blank" rel="noreferrer">/api/vibe/providers</a> • <a href="/api/sdk/info" target="_blank" rel="noreferrer">/api/sdk/info</a></div>
+        <div><a href="https://grudge-platform.vercel.app" target="_blank" rel="noreferrer">Platform</a> • <a href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer">ObjectStore</a> • <a href="https://gdevelop-assistant.vercel.app" target="_blank" rel="noreferrer">GDevelop</a> • <a href="/api/status" target="_blank" rel="noreferrer">/api/status</a></div>
           <div style="margin-top:6px">© <span id="year"></span> Grudge Studio</div>
         </div>
       </div>
@@ -507,6 +509,42 @@
           tags: ['nexus', 'hub', 'grudge-studio']
         },
         {
+          name: 'Grudge Platform (App Launcher)',
+          platform: 'Vercel',
+          url: 'https://grudge-platform.vercel.app',
+          tags: ['platform', 'launcher', 'ops']
+        },
+        {
+          name: 'Warlord Crafting Suite (WCS)',
+          platform: 'Vercel',
+          url: 'https://warlord-crafting-suite.vercel.app',
+          tags: ['wcs', 'systems', 'crafting']
+        },
+        {
+          name: 'GDevelop Assistant',
+          platform: 'Vercel',
+          url: 'https://gdevelop-assistant.vercel.app',
+          tags: ['assistant', 'gdevelop', 'studio']
+        },
+        {
+          name: 'ObjectStore (Game Data API)',
+          platform: 'GitHub Pages',
+          url: 'https://molochdagod.github.io/ObjectStore',
+          tags: ['api', 'data', 'weapons', 'sprites']
+        },
+        {
+          name: 'Grudge Warlords',
+          platform: 'Web',
+          url: 'https://grudgewarlords.com',
+          tags: ['main', 'portal', 'game']
+        },
+        {
+          name: 'Puter Cloud Dashboard',
+          platform: 'Puter',
+          url: 'https://grudge-studio.puter.site',
+          tags: ['puter', 'ai', 'cloud', 'storage']
+        },
+        {
           name: 'GRUDA Legion Node',
           platform: 'Railway',
           url: 'https://gruda-legion-production.up.railway.app',
@@ -519,28 +557,448 @@
           tags: ['auth', 'jwt', 'gateway']
         },
         {
-          name: 'Warlord Crafting Suite (WCS)',
-          platform: 'Vercel',
-          url: 'https://warlord-crafting-suite.vercel.app',
-          tags: ['wcs', 'systems', 'crafting']
-        },
-        {
-          name: 'Grudge Warlords',
-          platform: 'Web',
-          url: 'https://grudgewarlords.com',
-          tags: ['main', 'portal', 'game']
-        },
-        {
-          name: 'GDevelop Assistant',
-          platform: 'Vercel',
-          url: 'https://gdevelop-assistant.vercel.app',
-          tags: ['assistant', 'gdevelop', 'studio']
-        },
-        {
           name: 'GrudaChain App Gallery',
           platform: 'Vercel',
           url: 'https://grudachain-app-gallery.vercel.app',
           tags: ['gallery', 'apps']
+        }
+      ],
+      objectstore: [
+        {
+          name: 'ObjectStore API Reference',
+          platform: 'GitHub Pages',
+          url: 'https://molochdagod.github.io/ObjectStore',
+          tags: ['api', '24 endpoints', 'weapons', 'armor', 'skills']
+        },
+        {
+          name: 'Item Database',
+          platform: 'Tool',
+          url: 'https://molochdagod.github.io/ObjectStore/GRUDGE_Item_Database.html',
+          tags: ['items', 'stats', 'tooltips', '500+ items']
+        },
+        {
+          name: 'Item Browser (AI Images)',
+          platform: 'Tool',
+          url: 'https://molochdagod.github.io/ObjectStore/ItemBrowser.html',
+          tags: ['ai-images', 'tier-filter', 'search']
+        },
+        {
+          name: 'Sprite Database',
+          platform: 'Tool',
+          url: 'https://molochdagod.github.io/ObjectStore/SPRITE_DATABASE.html',
+          tags: ['sprites', '500+ icons', 'weapons', 'armor', 'enemies']
+        },
+        {
+          name: 'API Documentation',
+          platform: 'Docs',
+          url: 'https://molochdagod.github.io/ObjectStore/docs/',
+          tags: ['sdk', 'schemas', 'integration']
+        },
+        {
+          name: 'Grudge SDK (JS)',
+          platform: 'SDK',
+          url: 'https://molochdagod.github.io/ObjectStore/sdk/grudge-sdk.js',
+          tags: ['sdk', 'javascript', 'download']
+        },
+        {
+          name: 'Weapons API',
+          platform: 'API',
+          url: 'https://molochdagod.github.io/ObjectStore/api/v1/weapons.json',
+          tags: ['119 weapons', 'json']
+        },
+        {
+          name: 'Equipment API',
+          platform: 'API',
+          url: 'https://molochdagod.github.io/ObjectStore/api/v1/equipment.json',
+          tags: ['150 items', 'armor', 'json']
+        },
+        {
+          name: 'Sprites API',
+          platform: 'API',
+          url: 'https://molochdagod.github.io/ObjectStore/api/v1/sprites.json',
+          tags: ['500+ sprites', 'json']
+        },
+        {
+          name: 'Skills API',
+          platform: 'API',
+          url: 'https://molochdagod.github.io/ObjectStore/api/v1/skills.json',
+          tags: ['47 skills', 'json']
+        }
+      ],
+      wcs: [
+        {
+          name: 'WCS Dashboard',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/dashboard',
+          tags: ['dashboard', 'overview']
+        },
+        {
+          name: 'Character Builder',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/character',
+          tags: ['race', 'class', 'attributes', 'gear']
+        },
+        {
+          name: 'Crafting System',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/crafting',
+          tags: ['crafting', 'recipes', 'workshop']
+        },
+        {
+          name: 'Arsenal',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/arsenal',
+          tags: ['weapons', 'equipment', 'manager']
+        },
+        {
+          name: 'Battle System',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/battle',
+          tags: ['combat', 'simulator', 'battle-log']
+        },
+        {
+          name: 'Dungeon Explorer',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/dungeon',
+          tags: ['dungeon', 'crawler', 'loot']
+        },
+        {
+          name: 'Arena PvP',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/arena',
+          tags: ['pvp', 'arena', 'combat']
+        },
+        {
+          name: 'Island Hub',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/island-hub',
+          tags: ['islands', 'factions', 'management']
+        },
+        {
+          name: 'Skill Trees',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/skill-tree',
+          tags: ['talent', 'trees', 'classes']
+        },
+        {
+          name: 'Recipes Browser',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/recipes',
+          tags: ['recipes', 'crafting', 'materials']
+        },
+        {
+          name: 'Shop & Exchange',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/shop',
+          tags: ['shop', 'exchange', 'trading']
+        },
+        {
+          name: 'Wallet',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/wallet',
+          tags: ['currency', 'web3', 'solana']
+        },
+        {
+          name: 'Miner Profession',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/miner',
+          tags: ['mining', 'profession', 'harvesting']
+        },
+        {
+          name: 'Forester Profession',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/forester',
+          tags: ['forestry', 'profession', 'harvesting']
+        },
+        {
+          name: 'Chef Profession',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/chef',
+          tags: ['cooking', 'profession', 'consumables']
+        },
+        {
+          name: 'Mystic Profession',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/mystic',
+          tags: ['enchanting', 'profession', 'magic']
+        },
+        {
+          name: 'Engineer Profession',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/engineer',
+          tags: ['engineering', 'profession', 'gadgets']
+        },
+        {
+          name: 'Sprite Viewer',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/sprites',
+          tags: ['sprites', 'viewer', 'art']
+        },
+        {
+          name: 'Gameplay Overview',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/gameplay',
+          tags: ['gameplay', 'tutorial']
+        }
+      ],
+      devtools: [
+        {
+          name: 'AI Battle Station (Chat)',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/',
+          tags: ['ai', 'chat', 'assistant']
+        },
+        {
+          name: 'RTS Builder',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/rts-builder',
+          tags: ['rts', 'level-designer', 'editor']
+        },
+        {
+          name: 'Map Editor',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/map-editor',
+          tags: ['maps', 'editor', 'terrain']
+        },
+        {
+          name: 'Character Editor',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/character-editor',
+          tags: ['character', 'design', 'editor']
+        },
+        {
+          name: 'Skill Tree Editor',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/skill-tree',
+          tags: ['skill-tree', 'designer', 'editor']
+        },
+        {
+          name: 'Effects Playground',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/effects',
+          tags: ['particles', 'vfx', 'effects']
+        },
+        {
+          name: 'Asset Gallery',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/asset-gallery',
+          tags: ['assets', 'art', 'sprites']
+        },
+        {
+          name: 'Projects / War Room',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/projects',
+          tags: ['projects', 'management', 'dashboard']
+        },
+        {
+          name: 'Grudge Drive (Storage)',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/grudge-drive',
+          tags: ['cloud', 'files', 'storage']
+        },
+        {
+          name: 'Admin Storage',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/admin-storage',
+          tags: ['admin', 'storage', 'panel']
+        },
+        {
+          name: 'Strategy Guide (Docs)',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/docs',
+          tags: ['docs', 'guide', 'documentation']
+        }
+      ],
+      games: [
+        {
+          name: 'Crown Clash',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/crown-clash',
+          tags: ['strategy', 'crown', 'battle']
+        },
+        {
+          name: 'Grudge Arena',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/arena',
+          tags: ['pvp', 'arena', 'combat']
+        },
+        {
+          name: 'Grudge Gangs (MOBA)',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/moba',
+          tags: ['moba', 'teams', 'brawler']
+        },
+        {
+          name: 'Realm Protector',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/realm',
+          tags: ['tower-defense', 'realm', 'guardian']
+        },
+        {
+          name: 'Swarm RTS',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/swarm-rts',
+          tags: ['rts', 'swarm', 'strategy']
+        },
+        {
+          name: 'Galactic Conquest',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/swarm-galactic',
+          tags: ['space', 'strategy', 'conquest']
+        },
+        {
+          name: 'Grudge Swarm',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/grudge-swarm',
+          tags: ['swarm', 'survival']
+        },
+        {
+          name: 'Gruda Wars',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/gruda-wars',
+          tags: ['factions', 'warfare', 'rts']
+        },
+        {
+          name: 'MMO World',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/mmo',
+          tags: ['mmo', 'world', 'multiplayer']
+        },
+        {
+          name: 'Grudge Warlords 3D',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/warlords',
+          tags: ['3d', 'warlords', 'prototype']
+        },
+        {
+          name: 'Pixel Warrior (Platformer)',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/platformer',
+          tags: ['platformer', '2d', 'action']
+        },
+        {
+          name: 'Gem Crusher (Puzzle)',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/puzzle',
+          tags: ['puzzle', 'gems', 'matching']
+        },
+        {
+          name: 'Sprint Master (Runner)',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/runner',
+          tags: ['runner', 'endless', 'speed']
+        },
+        {
+          name: 'Space Assault (Shooter)',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/shooter',
+          tags: ['shooter', 'space', 'action']
+        },
+        {
+          name: 'Sky Command (Flight)',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/flight',
+          tags: ['flight', 'simulator', 'aerial']
+        },
+        {
+          name: 'Grudge Drive (Racing)',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/grudge-drive',
+          tags: ['racing', 'overdrive', 'speed']
+        },
+        {
+          name: 'Decay (Horror)',
+          platform: 'Game',
+          url: 'https://gdevelop-assistant.vercel.app/decay',
+          tags: ['horror', 'survival', 'dark']
+        },
+        {
+          name: 'Featured Games Hub',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/games',
+          tags: ['featured', 'catalog', 'all-games']
+        }
+      ],
+      ai: [
+        {
+          name: 'GRUDA Legion AI Node',
+          platform: 'Railway',
+          url: 'https://gruda-legion-production.up.railway.app',
+          tags: ['ai-node', 'railway', 'socket.io', 'agents']
+        },
+        {
+          name: 'AI Battle Station (Chat)',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/',
+          tags: ['ai-chat', 'assistant', 'game-dev']
+        },
+        {
+          name: 'WCS AI Testing',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/ai-testing',
+          tags: ['ai-agent', 'testing', 'wcs']
+        },
+        {
+          name: 'Puter Cloud AI',
+          platform: 'Puter',
+          url: 'https://grudge-studio.puter.site',
+          tags: ['puter', 'ai-chat', 'cloud', 'storage']
+        },
+        {
+          name: 'Vibe AI Providers',
+          platform: 'API',
+          url: '/api/vibe/providers',
+          tags: ['vibe', 'ai', 'providers']
+        },
+        {
+          name: 'ObjectStore AI Behavior API',
+          platform: 'API',
+          url: 'https://molochdagod.github.io/ObjectStore/api/v1/ai.json',
+          tags: ['behavior-trees', 'ai', 'entities']
+        },
+        {
+          name: 'ObjectStore ECS API',
+          platform: 'API',
+          url: 'https://molochdagod.github.io/ObjectStore/api/v1/ecs.json',
+          tags: ['ecs', 'components', 'systems']
+        }
+      ],
+      platform: [
+        {
+          name: 'Grudge Platform (App Launcher)',
+          platform: 'Vercel',
+          url: 'https://grudge-platform.vercel.app',
+          tags: ['launcher', 'ops', '70+ apps']
+        },
+        {
+          name: 'Card Minter',
+          platform: 'Platform',
+          url: 'https://grudge-platform.vercel.app/card-minter',
+          tags: ['nft', 'cards', 'discord']
+        },
+        {
+          name: 'Multiplayer Lobby',
+          platform: 'Platform',
+          url: 'https://grudge-platform.vercel.app/multiplayer-lobby',
+          tags: ['multiplayer', 'lobby', 'realtime']
+        },
+        {
+          name: 'Multiplayer PvP',
+          platform: 'Platform',
+          url: 'https://grudge-platform.vercel.app/multiplayer-pvp',
+          tags: ['pvp', 'match', 'server']
+        },
+        {
+          name: 'Platform API Status',
+          platform: 'API',
+          url: 'https://grudge-platform.vercel.app/api/status',
+          tags: ['health', 'api', 'status']
+        },
+        {
+          name: 'WCS Dev Admin',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/dev-admin',
+          tags: ['admin', 'dev', 'console']
         }
       ],
       packages: [
@@ -555,6 +1013,12 @@
           platform: 'GitHub',
           url: 'https://github.com/MolochDaGod/GrudgeStudioNPM',
           tags: ['sdk', 'repo']
+        },
+        {
+          name: 'ObjectStore SDK (JS Module)',
+          platform: 'SDK',
+          url: 'https://molochdagod.github.io/ObjectStore/sdk/grudge-sdk.js',
+          tags: ['objectstore', 'sdk', 'javascript']
         },
         {
           name: '@grudge/puter-sync (docs)',
@@ -599,9 +1063,13 @@
 
     const TABS = [
       { id: 'deployments', label: 'Deployments' },
+      { id: 'objectstore', label: '📦 ObjectStore' },
+      { id: 'wcs', label: '🔨 WCS Systems' },
+      { id: 'devtools', label: '🛠 Dev Tools' },
+      { id: 'games', label: '🎮 Games' },
+      { id: 'ai', label: '🤖 AI Systems' },
+      { id: 'platform', label: '⚔ Platform' },
       { id: 'vercel', label: 'Vercel Apps' },
-      { id: 'railway', label: 'Railway' },
-      { id: 'render', label: 'Render' },
       { id: 'pages', label: 'GitHub Pages' },
       { id: 'repos', label: 'Repos' },
       { id: 'packages', label: 'SDK / Downloads' },
@@ -852,6 +1320,48 @@
         ], { emptyText: 'No deployments yet. Add one with + Add link.' }));
       }
 
+      if (state.tab === 'objectstore') {
+        host.appendChild(renderGrid([
+          ...CORE.objectstore,
+          ...state.custom.filter(c => c.category === 'objectstore')
+        ], { emptyText: 'No ObjectStore links yet.' }));
+      }
+
+      if (state.tab === 'wcs') {
+        host.appendChild(renderGrid([
+          ...CORE.wcs,
+          ...state.custom.filter(c => c.category === 'wcs')
+        ], { emptyText: 'No WCS links yet.' }));
+      }
+
+      if (state.tab === 'devtools') {
+        host.appendChild(renderGrid([
+          ...CORE.devtools,
+          ...state.custom.filter(c => c.category === 'devtools')
+        ], { emptyText: 'No dev tools yet.' }));
+      }
+
+      if (state.tab === 'games') {
+        host.appendChild(renderGrid([
+          ...CORE.games,
+          ...state.custom.filter(c => c.category === 'games')
+        ], { emptyText: 'No games yet.' }));
+      }
+
+      if (state.tab === 'ai') {
+        host.appendChild(renderGrid([
+          ...CORE.ai,
+          ...state.custom.filter(c => c.category === 'ai')
+        ], { emptyText: 'No AI systems yet.' }));
+      }
+
+      if (state.tab === 'platform') {
+        host.appendChild(renderGrid([
+          ...CORE.platform,
+          ...state.custom.filter(c => c.category === 'platform')
+        ], { emptyText: 'No platform links yet.' }));
+      }
+
       if (state.tab === 'packages') {
         host.appendChild(renderGrid([
           ...CORE.packages,
@@ -864,24 +1374,6 @@
           ...CORE.tools,
           ...state.custom.filter(c => c.category === 'tools')
         ], { emptyText: 'No tools yet.' }));
-      }
-
-      if (state.tab === 'railway') {
-        host.appendChild(renderGrid([
-          {
-            name: 'GRUDA Legion (Railway)',
-            platform: 'Railway',
-            url: 'https://gruda-legion-production.up.railway.app',
-            tags: ['ai-node', 'health: /health', 'status: /api/status']
-          },
-          ...state.custom.filter(c => c.category === 'railway')
-        ], { emptyText: 'No Railway links yet.' }));
-      }
-
-      if (state.tab === 'render') {
-        host.appendChild(renderGrid([
-          ...state.custom.filter(c => c.category === 'render')
-        ], { emptyText: 'No Render deployments saved yet. Click + Add link and choose category: render.' }));
       }
 
       if (state.tab === 'vercel') {
@@ -949,14 +1441,18 @@
 
       // Show counts in status line (low noise)
       if (!q) {
-        const counts = {
-          deployments: CORE.deployments.length,
-          packages: CORE.packages.length,
-          tools: CORE.tools.length,
-          custom: state.custom.length,
-          repos: state.repos ? state.repos.length : null
-        };
-        el('statusline').textContent = `Links: deployments ${counts.deployments} • packages ${counts.packages} • tools ${counts.tools} • custom ${counts.custom}` + (counts.repos ? ` • repos ${counts.repos}` : '');
+        const allCats = ['deployments','objectstore','wcs','devtools','games','ai','platform','packages','tools'];
+        const total = allCats.reduce((s,c) => s + (CORE[c]?.length || 0), 0);
+        el('statusline').textContent = `${total} links • ` +
+          `deploys ${CORE.deployments.length} • ` +
+          `objectstore ${CORE.objectstore.length} • ` +
+          `wcs ${CORE.wcs.length} • ` +
+          `devtools ${CORE.devtools.length} • ` +
+          `games ${CORE.games.length} • ` +
+          `ai ${CORE.ai.length} • ` +
+          `platform ${CORE.platform.length} • ` +
+          `custom ${state.custom.length}` +
+          (state.repos ? ` • repos ${state.repos.length}` : '');
       }
     }
 
@@ -988,6 +1484,12 @@
       const targets = [
         { name: 'This Hub', url: 'https://grudachain.grudgestudio.com/api/status' },
         { name: 'Railway Node', url: 'https://gruda-legion-production.up.railway.app/health' },
+        { name: 'Grudge Platform', url: 'https://grudge-platform.vercel.app' },
+        { name: 'WCS', url: 'https://warlord-crafting-suite.vercel.app' },
+        { name: 'GDevelop', url: 'https://gdevelop-assistant.vercel.app' },
+        { name: 'Auth Gateway', url: 'https://auth-gateway-flax.vercel.app' },
+        { name: 'ObjectStore', url: 'https://molochdagod.github.io/ObjectStore' },
+        { name: 'Puter Cloud', url: 'https://grudge-studio.puter.site' },
       ];
 
       const out = [];
