@@ -105,10 +105,11 @@ app.use(cors({
     'https://grudgewarlords.com',
     'https://www.grudgewarlords.com',
     'https://warlord-crafting-suite.vercel.app',
-    'https://grudachain.vercel.app',
+    'https://grudachain.grudgestudio.com',
     'https://auth-gateway-flax.vercel.app',
     'https://gruda-legion-production.up.railway.app',
     /\.vercel\.app$/,
+    /\.grudgestudio\.com$/,
     /localhost/
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -360,7 +361,7 @@ app.get('/api/grudge-studio/config', (req, res) => {
       wcs: 'https://warlord-crafting-suite.vercel.app',
       gge: 'https://grudgewarlords.com',
       grudaLegion: 'https://gruda-legion-production.up.railway.app',
-      grudachain: 'https://grudachain.vercel.app'
+      grudachain: 'https://grudachain.grudgestudio.com'
     },
     sdk: {
       name: 'grudge-studio',
@@ -385,7 +386,7 @@ app.get('/api/grudge-studio/links', (req, res) => {
       wcs: 'https://warlord-crafting-suite.vercel.app',
       auth: 'https://auth-gateway-flax.vercel.app',
       legion: 'https://gruda-legion-production.up.railway.app',
-      grudachain: 'https://grudachain.vercel.app',
+      grudachain: 'https://grudachain.grudgestudio.com',
       npm: 'https://www.npmjs.com/package/grudge-studio',
       github: 'https://github.com/MolochDaGod/GrudgeStudioNPM',
       discord: 'https://discord.gg/grudgewarlords'
@@ -443,7 +444,7 @@ app.get('/api/admin/ecosystem', verifyGrudgeToken, (req, res) => {
           uptime: Date.now() - systemStatus.uptime
         },
         grudachain: {
-          url: 'https://grudachain.vercel.app',
+          url: 'https://grudachain.grudgestudio.com',
           platform: 'Vercel',
           type: 'Serverless functions + static'
         },

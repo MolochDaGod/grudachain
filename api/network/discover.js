@@ -9,7 +9,7 @@ module.exports = function handler(req, res) {
         name: 'GrudaChain Node',
         status: 'active',
         services: ['ai', 'storage', 'compute'],
-        endpoint: req.headers.host ? `https://${req.headers.host}` : 'https://grudachain.vercel.app'
+        endpoint: req.headers.host ? `https://${req.headers.host}` : 'https://grudachain.grudgestudio.com'
       }
     ],
     timestamp: new Date().toISOString()

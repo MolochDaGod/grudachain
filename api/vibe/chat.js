@@ -44,7 +44,7 @@ async function callProvider(providerKey, messages, model, temperature) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${provider.key}`,
-        'HTTP-Referer': 'https://grudachain.vercel.app',
+        'HTTP-Referer': 'https://grudachain.grudgestudio.com',
         'X-Title': 'GrudaChain Grudge Studio'
       },
       body: JSON.stringify({
