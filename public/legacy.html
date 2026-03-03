@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏴‍☠️ GRUDA Legion - Standalone AI System</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <script src="https://js.puter.com/v2/"></script>
+    <style>
+        :root {
+            --primary: #00ff88;
+            --primary-dim: rgba(0, 255, 136, 0.5);
+            --secondary: #66aaff;
+            --secondary-dim: rgba(102, 170, 255, 0.5);
+            --bg-deep: #000428;
+            --bg-mid: #001a4d;
+            --bg-surface: rgba(0, 4, 40, 0.65);
+            --border: rgba(0, 255, 136, 0.25);
+            --border-hover: rgba(0, 255, 136, 0.5);
+            --error: #ff4757;
+            --warning: #ffa502;
+            --success: #00ff88;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --glow: 0 0 20px rgba(0, 255, 136, 0.15);
+            --glow-hover: 0 0 30px rgba(0, 255, 136, 0.25), 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-dim); }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #000428 0%, #001a4d 50%, #000428 100%);
+            background-attachment: fixed;
+            color: var(--primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            background: var(--bg-surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            transform: translateX(120%);
+            transition: transform var(--transition), opacity var(--transition);
+            opacity: 0;
+            max-width: 360px;
+        }
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast-success { border-color: var(--success); }
+        .toast-error { border-color: var(--error); color: var(--error); }
+        .toast-warning { border-color: var(--warning); color: var(--warning); }
+        .toast-info { border-color: var(--secondary); color: var(--secondary); }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .animate-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .animate-in.visible { opacity: 1; transform: translateY(0); }
+
+        .header {
+            text-align: center;
+            padding: 48px 0 28px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+            animation: fadeInUp 0.6s ease 0.1s both, logoGlow 4s ease-in-out 0.7s infinite;
+        }
+        .tagline {
+            font-size: 1.1em;
+            color: var(--secondary);
+            margin-bottom: 8px;
+            animation: fadeInUp 0.6s ease 0.2s both;
+        }
+        .version {
+            font-size: 0.8em;
+            color: var(--primary-dim);
+            animation: fadeInUp 0.6s ease 0.3s both;
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { text-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
+            50% { text-shadow: 0 0 40px rgba(0, 255, 136, 0.8), 0 0 80px rgba(0, 255, 136, 0.4), 0 0 120px rgba(102, 170, 255, 0.15); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--glow);
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 8px currentColor;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px currentColor; }
+            50% { opacity: 0.5; box-shadow: 0 0 14px currentColor, 0 0 20px currentColor; }
+        }
+
+        .auth-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            border: 1px solid rgba(102, 170, 255, 0.2);
+        }
+        .auth-bar .user-info { color: var(--secondary); font-size: 0.85em; }
+
+        /* Account Panel */
+        .account-panel {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+            animation: tabFade 0.3s ease;
+        }
+        .account-panel.active { display: block; }
+        .account-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+        }
+        .account-field {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            transition: border-color var(--transition);
+        }
+        .account-field:hover { border-color: var(--border-hover); }
+        .account-field .field-label {
+            font-size: 0.6em;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .account-field .field-value { font-size: 0.95em; color: var(--primary); }
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+        .account-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .service-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .service-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+            transition: all var(--transition);
+        }
+        .service-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--glow-hover);
+        }
+        .service-ready { border-color: var(--success); }
+        .service-error { border-color: var(--error); }
+        .service-loading { border-color: var(--warning); }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .panel {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            min-height: 400px;
+            box-shadow: var(--glow);
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+        .panel:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--glow-hover);
+        }
+        .panel h3 {
+            color: var(--secondary);
+            margin-bottom: 18px;
+            font-size: 1.25em;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .chat-container {
+            height: 300px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .chat-message {
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            animation: msgSlideIn 0.3s ease;
+            font-size: 0.9em;
+        }
+        @keyframes msgSlideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message {
+            background: rgba(0, 255, 136, 0.07);
+            border-left: 3px solid var(--primary);
+        }
+        .ai-message {
+            background: rgba(102, 170, 255, 0.07);
+            border-left: 3px solid var(--secondary);
+        }
+
+        .typing-dots {
+            display: inline-flex;
+            gap: 4px;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+        .typing-dots span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: var(--secondary);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input, textarea, select {
+            background: rgba(0, 0, 0, 0.55);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 12px rgba(102, 170, 255, 0.2);
+        }
+        input::placeholder, textarea::placeholder { color: rgba(0, 255, 136, 0.25); }
+
+        button {
+            background: linear-gradient(135deg, rgba(0, 78, 146, 0.7), rgba(0, 4, 40, 0.7));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 20px;
+            color: var(--primary);
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            transition: all var(--transition);
+            position: relative;
+        }
+        button:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--bg-deep);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+            border-color: var(--primary);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 255, 136, 0.2);
+        }
+
+        .code-editor {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.55);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .tab-container { margin-bottom: 20px; }
+        .tab-buttons {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 0;
+        }
+        .tab-button {
+            padding: 10px 18px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-size: 0.85em;
+        }
+        .tab-button:hover { background: rgba(0, 255, 136, 0.06); }
+        .tab-button.active {
+            background: rgba(0, 255, 136, 0.12);
+            border-color: var(--primary-dim);
+        }
+        .tab-content {
+            display: none;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) var(--radius-sm);
+            padding: 20px;
+            animation: tabFade 0.3s ease;
+        }
+        .tab-content.active { display: block; }
+        @keyframes tabFade {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .network-node {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+            transition: border-color var(--transition);
+        }
+        .network-node:hover { border-color: var(--border-hover); }
+
+        .storage-browser {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            min-height: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .storage-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.08);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+        }
+        .storage-item:hover { background: rgba(0, 255, 136, 0.06); }
+        .storage-item:last-child { border-bottom: none; }
+        .storage-item .item-icon { margin-right: 10px; }
+        .storage-item .item-name { flex: 1; font-size: 0.9em; }
+        .storage-item .item-size { color: var(--secondary); font-size: 0.8em; margin-right: 15px; }
+        .storage-item .item-actions button { padding: 4px 10px; font-size: 0.8em; margin-left: 5px; }
+
+        .breadcrumb {
+            padding: 8px 0;
+            margin-bottom: 10px;
+            color: var(--secondary);
+            font-size: 0.85em;
+        }
+        .breadcrumb span { cursor: pointer; transition: color 0.2s; }
+        .breadcrumb span:hover { color: var(--primary); }
+
+        .storage-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .stat-card {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            text-align: center;
+            transition: all var(--transition);
+        }
+        .stat-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 0 16px rgba(0, 255, 136, 0.1);
+        }
+        .stat-card .stat-value { font-size: 1.8em; color: var(--primary); font-weight: bold; }
+        .stat-card .stat-label { font-size: 0.7em; color: var(--secondary); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            text-align: center;
+            margin-bottom: 15px;
+            transition: all var(--transition);
+            cursor: pointer;
+            color: var(--primary-dim);
+        }
+        .drop-zone:hover { border-color: var(--primary-dim); background: rgba(0, 255, 136, 0.02); }
+        .drop-zone.drag-over {
+            background: rgba(0, 255, 136, 0.08);
+            border-color: var(--primary);
+            box-shadow: inset 0 0 30px rgba(0, 255, 136, 0.05);
+        }
+
+        .full-width-panel { grid-column: 1 / -1; }
+
+        .hosting-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .hosting-section input { flex: 1; min-width: 200px; }
+        .hosted-link {
+            display: inline-block;
+            padding: 8px 15px;
+            background: rgba(0, 255, 136, 0.06);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--primary);
+            text-decoration: none;
+            word-break: break-all;
+            transition: all 0.2s;
+        }
+        .hosted-link:hover { background: rgba(0, 255, 136, 0.12); border-color: var(--primary-dim); }
+
+        .footer {
+            text-align: center;
+            padding: 24px 20px;
+            border-top: 1px solid var(--border);
+            margin-top: 30px;
+            color: var(--secondary);
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+        .footer p + p { margin-top: 6px; opacity: 0.6; font-size: 0.9em; }
+
+        @media (max-width: 768px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .status-bar { flex-direction: column; gap: 8px; align-items: flex-start; }
+            .auth-bar { flex-direction: column; gap: 10px; text-align: center; }
+            .logo { font-size: 2em; }
+            .tagline { font-size: 0.9em; }
+            .tab-buttons { flex-wrap: wrap; }
+            .storage-stats { grid-template-columns: 1fr; }
+            .panel { padding: 16px; min-height: auto; }
+            #toast-container { right: 10px; left: 10px; }
+            .toast { max-width: none; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 10px; }
+            .logo { font-size: 1.5em; }
+            .header { padding: 20px 0 16px; }
+            .hosting-section { flex-direction: column; }
+            .hosting-section input { min-width: auto; width: 100%; }
+            .input-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particle-canvas"></canvas>
+    <div id="toast-container"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏴‍☠️ GRUDA LEGION</div>
+            <div class="tagline">Standalone AI System • Free Unlimited Access • Vibe 8.0 AI • Grudge Studio SDK</div>
+            <div class="version">v3.0 - Production Ready | Vibe 8.0.0 | grudge-studio@1.2.0 | @grudge/puter-sync@1.0.0</div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot" id="server-status"></div>
+                <span id="server-text">Server: Starting...</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" id="ai-status"></div>
+                <span id="ai-text">AI Services: Initializing...</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" id="vibe-status"></div>
+                <span id="vibe-text">Vibe AI: Connecting...</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" id="cloud-status"></div>
+                <span id="cloud-text">Puter Cloud: Connecting...</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" id="network-status"></div>
+                <span id="network-text">Network: Connecting...</span>
+            </div>
+        </div>
+
+        <div class="auth-bar" id="auth-bar">
+            <div class="user-info" id="user-info">Not signed in to Puter Cloud</div>
+            <div>
+                <button id="account-btn" onclick="toggleAccountPanel()" style="display: none; margin-right: 8px;">👤 Account</button>
+                <button id="auth-btn" onclick="handlePuterAuth()">Sign In to Puter</button>
+            </div>
+        </div>
+
+        <!-- Grudge Studio Account Panel -->
+        <div class="account-panel" id="account-panel">
+            <div class="account-header">
+                <h3 style="color: var(--secondary); font-size: 1.15em; border: none; margin: 0; padding: 0;">🎮 Grudge Studio Account</h3>
+                <button onclick="toggleAccountPanel()" style="padding: 6px 14px;">✕ Close</button>
+            </div>
+            <div class="account-grid" id="account-grid"></div>
+            <div class="account-actions">
+                <button onclick="editProfile()">✏️ Edit Profile</button>
+                <button onclick="syncGrudgeData()">🔄 Sync Data</button>
+                <button onclick="exportAccount()">📤 Export Account</button>
+                <button onclick="deployFullToPuter()">🚀 Deploy to Puter</button>
+            </div>
+        </div>
+
+        <div class="service-status" id="service-status"></div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <h3>🤖 AI Chat Interface</h3>
+                <div class="chat-container" id="chat-container">
+                    <div class="ai-message chat-message">
+                        <strong>GRUDA AI:</strong> Welcome to GRUDA Legion! I'm ready to assist you with any questions or tasks. All AI services are free and unlimited.
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="chat-input" placeholder="Ask me anything..." style="flex: 1;">
+                    <select id="provider-select">
+                        <option value="auto">Auto (Puter → Vibe)</option>
+                        <option value="puter">Puter.js (Claude/GPT-4o)</option>
+                        <option value="megallm">Vibe: MegaLLM</option>
+                        <option value="openrouter">Vibe: OpenRouter</option>
+                        <option value="agentrouter">Vibe: AgentRouter</option>
+                        <option value="routeway">Vibe: Routeway</option>
+                    </select>
+                    <button onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="tab-container">
+                    <div class="tab-buttons">
+                        <div class="tab-button active" onclick="switchTab('code-gen')">💻 Code Gen</div>
+                        <div class="tab-button" onclick="switchTab('file-analysis')">📋 Analysis</div>
+                        <div class="tab-button" onclick="switchTab('network')">🌐 Network</div>
+                        <div class="tab-button" onclick="switchTab('hosting')">🚀 Hosting</div>
+                    </div>
+
+                    <div class="tab-content active" id="code-gen">
+                        <h4>Code Generation</h4>
+                        <input type="text" id="code-prompt" placeholder="Describe what you want to build..." style="width: 100%; margin-bottom: 10px;">
+                        <div class="input-group">
+                            <select id="language-select">
+                                <option value="javascript">JavaScript</option>
+                                <option value="python">Python</option>
+                                <option value="html">HTML</option>
+                                <option value="css">CSS</option>
+                                <option value="react">React</option>
+                                <option value="node">Node.js</option>
+                            </select>
+                            <button onclick="generateCode()">Generate</button>
+                        </div>
+                        <textarea class="code-editor" id="generated-code" placeholder="Generated code will appear here..."></textarea>
+                    </div>
+
+                    <div class="tab-content" id="file-analysis">
+                        <h4>File Analysis</h4>
+                        <input type="file" id="file-input" accept="*/*" onchange="analyzeFile()">
+                        <div id="analysis-result" style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 8px; min-height: 200px;">
+                            Select a file to analyze...
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="network">
+                        <h4>Network Nodes</h4>
+                        <button onclick="discoverNodes()" style="margin-bottom: 15px;">🔍 Discover Nodes</button>
+                        <div id="network-nodes">
+                            <div class="network-node">
+                                <div>
+                                    <strong>Local Node</strong><br>
+                                    <small>localhost:3000</small>
+                                </div>
+                                <div style="color: var(--primary);">● Active</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="hosting">
+                        <h4>🚀 Puter Hosting - Deploy to puter.site</h4>
+                        <div class="hosting-section">
+                            <input type="text" id="subdomain-input" placeholder="grudge-studio" style="flex: 1;">
+                            <button onclick="deployToPuter()">Deploy Grudge Studio</button>
+                        </div>
+                        <div id="hosting-status" style="margin-bottom: 15px;"></div>
+                        <div id="hosted-sites"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vibe AI Tools + Grudge Studio SDK -->
+        <div class="main-grid">
+            <div class="panel">
+                <h3>⚡ Vibe 8.0.0 - AI Development Tools</h3>
+                <p style="color: var(--secondary); margin-bottom: 15px; font-size: 0.9em;">Free AI via 4 providers: MegaLLM, OpenRouter, AgentRouter, Routeway — no API keys needed</p>
+                <div id="vibe-providers" style="margin-bottom: 15px;"></div>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button onclick="loadVibeProviders()">🔄 Check Providers</button>
+                    <a href="/downloads/vibe-8.0.0.zip" download style="text-decoration: none;"><button>⬇️ Download Vibe 8.0.0</button></a>
+                    <a href="https://github.com/mk-knight23/vibe" target="_blank" style="text-decoration: none;"><button>💻 GitHub</button></a>
+                </div>
+                <div style="padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; font-size: 0.8em; line-height: 1.8;">
+                    <strong>Vibe CLI Tools (36):</strong><br>
+                    Code Analyzer • Smart Refactor • Test Generator • Bundle Optimizer<br>
+                    Security Scanner • Performance Bench • Doc Generator • Code Migrator<br>
+                    Git Ops • Shell Exec • Web Fetch • Memory System • Multi-File Edit<br>
+                    <span style="color: var(--secondary);">Install: <code>npm i -g vibe-ai-cli</code></span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>🎮 Grudge Studio SDK</h3>
+                <p style="color: var(--secondary); margin-bottom: 15px; font-size: 0.9em;">3D Game Dev SDK — Three.js, Socket.io, AI Agent, Puter Cloud Sync</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button onclick="loadSDKInfo()">📦 SDK Modules</button>
+                    <a href="https://github.com/MolochDaGod/GrudgeStudioNPM" target="_blank" style="text-decoration: none;"><button>💻 GitHub</button></a>
+                    <a href="https://www.npmjs.com/package/grudge-studio" target="_blank" style="text-decoration: none;"><button>📦 NPM</button></a>
+                </div>
+                <div id="sdk-modules" style="padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; font-size: 0.8em; line-height: 1.8;">
+                    <strong>grudge-studio@1.2.0</strong> — <code>npm install grudge-studio</code><br>
+                    core • render • controllers • terrain • net • ui • assets • ai-agent<br><br>
+                    <strong>@grudge/puter-sync@1.0.0</strong><br>
+                    Puter cloud sync • Auto-backup • Auth bridge • @heyputer/puter.js
+                </div>
+            </div>
+        </div>
+
+        <!-- Puter Cloud Storage Panel -->
+        <div class="main-grid">
+            <div class="panel full-width-panel">
+                <h3>☁️ Puter Cloud Storage - Grudge Studio Object Storage</h3>
+
+                <div class="storage-stats" id="storage-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-files">--</div>
+                        <div class="stat-label">Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-dirs">--</div>
+                        <div class="stat-label">Directories</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-kv">--</div>
+                        <div class="stat-label">KV Entries</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button onclick="createBucket()">📁 New Bucket</button>
+                    <button onclick="uploadFileToPuter()">⬆️ Upload File</button>
+                    <button onclick="refreshStorage()">🔄 Refresh</button>
+                    <button onclick="showKVManager()">🗃️ KV Store</button>
+                    <input type="file" id="puter-file-input" multiple style="display: none;" onchange="handlePuterUpload(event)">
+                </div>
+
+                <div class="breadcrumb" id="breadcrumb">
+                    <span onclick="navigateTo('.')">/grudge-studio</span>
+                </div>
+
+                <div class="drop-zone" id="drop-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                    📦 Drag & drop files here to upload to Puter Cloud
+                </div>
+
+                <div class="storage-browser" id="storage-browser">
+                    <p style="color: var(--secondary);">Sign in to Puter to access cloud storage...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🏴‍☠️ GRUDA Legion v3.0 | Vibe 8.0.0 AI | grudge-studio@1.2.0 | @grudge/puter-sync | Puter Cloud</p>
+            <p>MegaLLM • OpenRouter • AgentRouter • Routeway • Puter AI • Claude • GPT-4o • DeepSeek • Llama 3</p>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // GLOBAL STATE
+        // =============================================
+        let systemStatus = { server: 'starting', ai: 'initializing', network: 'connecting', cloud: 'connecting' };
+        let aiServices = {};
+        let currentTab = 'code-gen';
+        let currentPath = 'grudge-studio';
+        let puterReady = false;
+        let puterUser = null;
+        let kvManagerVisible = false;
+        let grudgeProfile = null;
+
+        const STUDIO_ROOT = 'grudge-studio';
+        const BUCKETS = ['assets', 'configs', 'game-data', 'player-data', 'exports', 'backups'];
+
+        // Canonical KV keys (matches Warlord-Crafting-Suite ecosystem)
+        const KV_KEYS = {
+            profile: 'grudge_studio_profile',
+            lastLogin: 'grudge_studio_lastLogin',
+            version: 'grudge_studio_version',
+            hostedUrl: 'grudge_studio_hostedUrl',
+            subdomain: 'grudge_studio_subdomain',
+            accounts: 'grudge_accounts',
+            onlinePlayers: 'grudge_online_players',
+            activityLog: 'grudge_activity_log'
+        };
+
+        // Canonical role determination (matches AuthContext.tsx)
+        const ADMIN_USERNAMES = ['admin', 'grudgewarlord', 'outapps', 'grudachain', 'molochdadev'];
+        const DEVELOPER_USERNAMES = ['dev', 'developer'];
+
+        function determineRole(username, isPuterUser) {
+            const lower = (username || '').toLowerCase();
+            if (ADMIN_USERNAMES.includes(lower)) return 'admin';
+            if (DEVELOPER_USERNAMES.includes(lower)) return 'developer';
+            if (isPuterUser) return 'premium';
+            return 'user';
+        }
+
+        // =============================================
+        // INITIALIZATION
+        // =============================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🏴‍☠️ GRUDA Legion initializing...');
+            initParticles();
+            await initializePuterJS();
+            await loadSystemStatus();
+            setupEventListeners();
+            initEntranceAnimations();
+            updateStatus('network', 'connected', 'Network: Connected');
+            console.log('✅ GRUDA Legion fully loaded');
+        });
+
+        // =============================================
+        // TOAST NOTIFICATION SYSTEM
+        // =============================================
+        function showToast(message, type = 'info', duration = 3500) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+            toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // =============================================
+        // TYPING INDICATOR
+        // =============================================
+        function showTypingIndicator() {
+            hideTypingIndicator();
+            const container = document.getElementById('chat-container');
+            const el = document.createElement('div');
+            el.className = 'chat-message ai-message';
+            el.id = 'typing-indicator';
+            el.innerHTML = '<strong>GRUDA AI:</strong> <span class="typing-dots"><span></span><span></span><span></span></span>';
+            container.appendChild(el);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const el = document.getElementById('typing-indicator');
+            if (el) el.remove();
+        }
+
+        // =============================================
+        // PARTICLE NETWORK BACKGROUND
+        // =============================================
+        function initParticles() {
+            const canvas = document.getElementById('particle-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const particles = [];
+            const COUNT = 35;
+            const MAX_DIST = 130;
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            for (let i = 0; i < COUNT; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.35,
+                    vy: (Math.random() - 0.5) * 0.35,
+                    r: Math.random() * 1.5 + 0.5,
+                    o: Math.random() * 0.4 + 0.15
+                });
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.x += p.vx; p.y += p.vy;
+                    if (p.x < 0) p.x = canvas.width;
+                    if (p.x > canvas.width) p.x = 0;
+                    if (p.y < 0) p.y = canvas.height;
+                    if (p.y > canvas.height) p.y = 0;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(0, 255, 136, ${p.o})`;
+                    ctx.fill();
+                });
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const d = Math.sqrt(dx * dx + dy * dy);
+                        if (d < MAX_DIST) {
+                            ctx.strokeStyle = `rgba(0, 255, 136, ${0.07 * (1 - d / MAX_DIST)})`;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        // =============================================
+        // ENTRANCE ANIMATIONS
+        // =============================================
+        function initEntranceAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, i) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => entry.target.classList.add('visible'), i * 60);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
+            document.querySelectorAll('.panel, .service-card, .stat-card').forEach(el => {
+                el.classList.add('animate-in');
+                observer.observe(el);
+            });
+        }
+
+        // =============================================
+        // PUTER.JS INITIALIZATION & AUTH
+        // =============================================
+        async function initializePuterJS() {
+            try {
+                if (typeof puter !== 'undefined') {
+                    console.log('✅ Puter.js SDK loaded');
+                    updateStatus('ai', 'ready', 'AI Services: Ready');
+                    if (puter.auth.isSignedIn()) {
+                        puterReady = true;
+                        await onPuterAuthenticated();
+                    } else {
+                        updateStatus('cloud', 'loading', 'Puter Cloud: Sign in required');
+                    }
+                } else {
+                    console.warn('⚠️ Puter.js not available');
+                    updateStatus('ai', 'loading', 'AI Services: Loading...');
+                    updateStatus('cloud', 'error', 'Puter Cloud: Unavailable');
+                }
+            } catch (error) {
+                console.error('Puter.js initialization failed:', error);
+                updateStatus('ai', 'error', 'AI Services: Local only');
+                updateStatus('cloud', 'error', 'Puter Cloud: Error');
+            }
+        }
+
+        async function handlePuterAuth() {
+            try {
+                if (typeof puter === 'undefined') {
+                    showToast('Puter.js SDK not loaded. Please refresh.', 'error');
+                    return;
+                }
+                if (puter.auth.isSignedIn()) {
+                    await updateOnlineStatus(false);
+                    await logGrudgeActivity('logout');
+                    await puter.auth.signOut();
+                    puterReady = false;
+                    puterUser = null;
+                    grudgeProfile = null;
+                    document.getElementById('user-info').textContent = 'Not signed in to Puter Cloud';
+                    document.getElementById('auth-btn').textContent = 'Sign In to Puter';
+                    document.getElementById('account-btn').style.display = 'none';
+                    document.getElementById('account-panel').classList.remove('active');
+                    updateStatus('cloud', 'loading', 'Puter Cloud: Signed out');
+                    document.getElementById('storage-browser').innerHTML = '<p style="color: var(--secondary);">Sign in to Puter to access cloud storage...</p>';
+                    showToast('Signed out of Puter Cloud', 'info');
+                    return;
+                }
+                const user = await puter.auth.signIn();
+                if (user) {
+                    puterReady = true;
+                    await onPuterAuthenticated();
+                }
+            } catch (error) {
+                console.error('Puter auth failed:', error);
+                showToast('Authentication failed: ' + error.message, 'error');
+            }
+        }
+
+        async function onPuterAuthenticated() {
+            try {
+                puterUser = await puter.auth.getUser();
+                document.getElementById('user-info').textContent = `Signed in as: ${puterUser.username} | Puter Cloud Connected`;
+                document.getElementById('auth-btn').textContent = 'Sign Out';
+                document.getElementById('account-btn').style.display = '';
+                updateStatus('cloud', 'ready', 'Puter Cloud: Connected');
+                showToast(`Welcome, ${puterUser.username}!`, 'success');
+                await initializeGrudgeStudioStorage();
+                await loadGrudgeProfile();
+                await updateOnlineStatus(true);
+                await logGrudgeActivity('login');
+                await createGrudgeSession();
+                await navigateTo(STUDIO_ROOT);
+                await updateStorageStats();
+                console.log('\u2705 Puter Cloud fully connected for Grudge Studio');
+            } catch (error) {
+                console.error('Post-auth setup failed:', error);
+            }
+        }
+
+        // =============================================
+        // GRUDGE STUDIO CLOUD STORAGE
+        // =============================================
+        async function initializeGrudgeStudioStorage() {
+            try {
+                try { await puter.fs.mkdir(STUDIO_ROOT); console.log('Created grudge-studio root'); } catch (e) {}
+                for (const bucket of BUCKETS) {
+                    try { await puter.fs.mkdir(`${STUDIO_ROOT}/${bucket}`); console.log(`Created bucket: ${bucket}`); } catch (e) {}
+                }
+                const manifest = {
+                    name: 'Grudge Studio', version: '3.0.0', created: new Date().toISOString(),
+                    buckets: BUCKETS, description: 'GrudaChain Free AI Node System - Cloud Storage'
+                };
+                await puter.fs.write(`${STUDIO_ROOT}/manifest.json`, JSON.stringify(manifest, null, 2));
+                console.log('✅ Grudge Studio storage initialized');
+            } catch (error) {
+                console.error('Storage init failed:', error);
+            }
+        }
+
+        async function navigateTo(path) {
+            if (!puterReady) {
+                document.getElementById('storage-browser').innerHTML = '<p style="color: var(--warning);">Sign in to Puter to browse cloud storage</p>';
+                return;
+            }
+            currentPath = path;
+            updateBreadcrumb(path);
+            const browser = document.getElementById('storage-browser');
+            browser.innerHTML = '<p style="color: var(--warning);">Loading...</p>';
+            try {
+                const items = await puter.fs.readdir(path);
+                browser.innerHTML = '';
+                if (items.length === 0) {
+                    browser.innerHTML = '<p style="color: var(--secondary);">Empty directory</p>';
+                    return;
+                }
+                const sorted = items.sort((a, b) => {
+                    if (a.is_dir && !b.is_dir) return -1;
+                    if (!a.is_dir && b.is_dir) return 1;
+                    return a.name.localeCompare(b.name);
+                });
+                sorted.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'storage-item';
+                    const icon = item.is_dir ? '📁' : getFileIcon(item.name);
+                    const size = item.is_dir ? '--' : formatSize(item.size || 0);
+                    div.innerHTML = `
+                        <span class="item-icon">${icon}</span>
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-size">${size}</span>
+                        <span class="item-actions">
+                            ${!item.is_dir ? '<button onclick="downloadFile(\'' + item.path + '\')">⬇️</button>' : ''}
+                            <button onclick="deleteItem(\'' + item.path + '\', ' + item.is_dir + ')">❌</button>
+                        </span>
+                    `;
+                    if (item.is_dir) {
+                        div.querySelector('.item-name').onclick = () => navigateTo(item.path);
+                    }
+                    browser.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Failed to list directory:', error);
+                browser.innerHTML = `<p style="color: var(--error);">Error: ${error.message}</p>`;
+            }
+        }
+
+        function updateBreadcrumb(path) {
+            const breadcrumb = document.getElementById('breadcrumb');
+            const parts = path.split('/');
+            let html = '', accumulated = '';
+            parts.forEach((part, i) => {
+                accumulated += (i > 0 ? '/' : '') + part;
+                const p = accumulated;
+                html += `<span onclick="navigateTo('${p}')">${part}</span>`;
+                if (i < parts.length - 1) html += ' / ';
+            });
+            breadcrumb.innerHTML = '/ ' + html;
+        }
+
+        async function createBucket() {
+            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            const name = prompt('Bucket name (e.g. textures, sounds, maps):');
+            if (!name) return;
+            const sanitized = name.replace(/[^a-zA-Z0-9_-]/g, '-').toLowerCase();
+            try {
+                await puter.fs.mkdir(`${currentPath}/${sanitized}`);
+                showToast(`Bucket "${sanitized}" created`, 'success');
+                await navigateTo(currentPath);
+                await updateStorageStats();
+            } catch (error) {
+                showToast('Failed to create bucket: ' + error.message, 'error');
+            }
+        }
+
+        function uploadFileToPuter() {
+            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            document.getElementById('puter-file-input').click();
+        }
+
+        async function handlePuterUpload(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+            for (const file of files) {
+                try {
+                    await puter.fs.write(`${currentPath}/${file.name}`, file, { dedupeName: true });
+                    console.log(`Uploaded: ${file.name}`);
+                } catch (error) {
+                    console.error(`Upload failed for ${file.name}:`, error);
+                }
+            }
+            showToast(`${files.length} file(s) uploaded`, 'success');
+            event.target.value = '';
+            await navigateTo(currentPath);
+            await updateStorageStats();
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault(); e.stopPropagation();
+            document.getElementById('drop-zone').classList.add('drag-over');
+        }
+        function handleDragLeave(e) {
+            e.preventDefault(); e.stopPropagation();
+            document.getElementById('drop-zone').classList.remove('drag-over');
+        }
+        async function handleDrop(e) {
+            e.preventDefault(); e.stopPropagation();
+            document.getElementById('drop-zone').classList.remove('drag-over');
+            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            const files = e.dataTransfer.files;
+            if (!files.length) return;
+            document.getElementById('drop-zone').textContent = `⏳ Uploading ${files.length} file(s)...`;
+            for (const file of files) {
+                try {
+                    await puter.fs.write(`${currentPath}/${file.name}`, file, { dedupeName: true });
+                } catch (error) {
+                    console.error(`Drop upload failed for ${file.name}:`, error);
+                }
+            }
+            document.getElementById('drop-zone').textContent = '📦 Drag & drop files here to upload to Puter Cloud';
+            showToast(`${files.length} file(s) uploaded`, 'success');
+            await navigateTo(currentPath);
+            await updateStorageStats();
+        }
+
+        async function downloadFile(path) {
+            try {
+                const blob = await puter.fs.read(path);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = path.split('/').pop();
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('Download started', 'info');
+            } catch (error) {
+                showToast('Download failed: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteItem(path, isDir) {
+            const name = path.split('/').pop();
+            if (!confirm(`Delete "${name}"?`)) return;
+            try {
+                await puter.fs.delete(path, { recursive: isDir });
+                showToast(`"${name}" deleted`, 'info');
+                await navigateTo(currentPath);
+                await updateStorageStats();
+            } catch (error) {
+                showToast('Delete failed: ' + error.message, 'error');
+            }
+        }
+
+        async function refreshStorage() {
+            if (!puterReady) return;
+            await navigateTo(currentPath);
+            await updateStorageStats();
+            showToast('Storage refreshed', 'info');
+        }
+
+        async function updateStorageStats() {
+            if (!puterReady) return;
+            try {
+                const items = await puter.fs.readdir(STUDIO_ROOT);
+                document.getElementById('stat-files').textContent = items.filter(i => !i.is_dir).length;
+                document.getElementById('stat-dirs').textContent = items.filter(i => i.is_dir).length;
+                try {
+                    const keys = await puter.kv.list(true);
+                    document.getElementById('stat-kv').textContent = keys.filter(k => k.key && k.key.startsWith('grudge-studio:')).length;
+                } catch (e) {
+                    document.getElementById('stat-kv').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Stats update failed:', error);
+            }
+        }
+
+        // =============================================
+        // KV STORE MANAGER
+        // =============================================
+        async function showKVManager() {
+            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            const browser = document.getElementById('storage-browser');
+            kvManagerVisible = !kvManagerVisible;
+            if (!kvManagerVisible) { await navigateTo(currentPath); return; }
+            browser.innerHTML = '<p style="color: var(--warning);">Loading KV Store...</p>';
+            try {
+                const keys = await puter.kv.list(true);
+                let html = `<div style="margin-bottom: 15px;">
+                    <strong style="color: var(--secondary);">🗃️ Key-Value Store</strong>
+                    <button onclick="addKVEntry()" style="margin-left: 15px; padding: 4px 12px;">+ Add Entry</button>
+                    <button onclick="showKVManager()" style="margin-left: 5px; padding: 4px 12px;">Back to Files</button>
+                </div>`;
+                if (keys.length === 0) {
+                    html += '<p style="color: var(--secondary);">No key-value entries yet</p>';
+                } else {
+                    keys.forEach(entry => {
+                        const val = typeof entry.value === 'string' ? entry.value : JSON.stringify(entry.value);
+                        const truncated = val.length > 80 ? val.substring(0, 80) + '...' : val;
+                        html += `<div class="storage-item">
+                            <span class="item-icon">🔑</span>
+                            <span class="item-name"><strong>${entry.key}</strong></span>
+                            <span class="item-size">${truncated}</span>
+                            <span class="item-actions">
+                                <button onclick="deleteKVEntry('${entry.key}')">❌</button>
+                            </span>
+                        </div>`;
+                    });
+                }
+                browser.innerHTML = html;
+            } catch (error) {
+                browser.innerHTML = `<p style="color: var(--error);">Error loading KV store: ${error.message}</p>`;
+            }
+        }
+
+        async function addKVEntry() {
+            const key = prompt('Key (prefix with grudge-studio: recommended):');
+            if (!key) return;
+            const value = prompt('Value:');
+            if (value === null) return;
+            try {
+                await puter.kv.set(key, value);
+                showToast(`KV entry "${key}" set`, 'success');
+                await showKVManager();
+                await updateStorageStats();
+            } catch (error) {
+                showToast('Failed to set KV entry: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteKVEntry(key) {
+            if (!confirm(`Delete key "${key}"?`)) return;
+            try {
+                await puter.kv.del(key);
+                showToast(`KV entry "${key}" deleted`, 'info');
+                await showKVManager();
+                await updateStorageStats();
+            } catch (error) {
+                showToast('Failed to delete: ' + error.message, 'error');
+            }
+        }
+
+        // =============================================
+        // PUTER HOSTING
+        // =============================================
+        async function deployToPuter() {
+            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            const subdomain = document.getElementById('subdomain-input').value.trim() || 'grudge-studio';
+            const statusDiv = document.getElementById('hosting-status');
+            statusDiv.innerHTML = '<p style="color: var(--warning);">⏳ Deploying to puter.site...</p>';
+            try {
+                const hostDir = `grudge-studio-hosting`;
+                try { await puter.fs.mkdir(hostDir); } catch(e) {}
+                const landingPage = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grudge Studio - GrudaChain</title>
+    <script src="https://js.puter.com/v2/"><\/script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; background: linear-gradient(135deg, #000428, #004e92, #000428); color: #00ff88; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { text-align: center; padding: 40px; }
+        h1 { font-size: 3em; text-shadow: 0 0 20px #00ff88; margin-bottom: 20px; }
+        p { color: #66aaff; margin-bottom: 15px; font-size: 1.2em; }
+        .btn { display: inline-block; padding: 15px 30px; background: linear-gradient(45deg, #004e92, #000428); border: 1px solid #00ff88; border-radius: 5px; color: #00ff88; text-decoration: none; font-family: 'Courier New'; margin: 10px; transition: all 0.3s; }
+        .btn:hover { background: linear-gradient(45deg, #00ff88, #66aaff); color: #000428; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>\u{1F3F4}\u200D\u2620\uFE0F Grudge Studio</h1>
+        <p>GrudaChain Free AI Node System v3.0</p>
+        <p>Powered by Puter Cloud \u2022 Free Unlimited AI \u2022 Object Storage</p>
+<a class="btn" href="https://grudachain.grudgestudio.com">Launch GRUDA Legion</a>
+        <a class="btn" href="https://grudgewarlords.com">Grudge Warlords</a>
+    </div>
+</body>
+</html>`;
+                await puter.fs.write(`${hostDir}/index.html`, landingPage);
+                const site = await puter.hosting.create(subdomain, hostDir);
+                const url = `https://${site.subdomain}.puter.site`;
+                statusDiv.innerHTML = `<p style="color: var(--primary);">✅ Deployed successfully!</p>
+                    <a class="hosted-link" href="${url}" target="_blank">${url}</a>`;
+                showToast('Deployed to ' + url, 'success');
+                await puter.kv.set(KV_KEYS.hostedUrl, url);
+                await puter.kv.set(KV_KEYS.subdomain, site.subdomain);
+                await loadHostedSites();
+            } catch (error) {
+                console.error('Deploy failed:', error);
+                statusDiv.innerHTML = `<p style="color: var(--error);">Deploy failed: ${error.message}</p>`;
+                showToast('Deploy failed', 'error');
+            }
+        }
+
+        async function loadHostedSites() {
+            const container = document.getElementById('hosted-sites');
+            try {
+                const url = await puter.kv.get(KV_KEYS.hostedUrl);
+                if (url) {
+                    container.innerHTML = `<div class="network-node">
+                        <div><strong>Grudge Studio</strong><br><small>${url}</small></div>
+                        <div><a class="hosted-link" href="${url}" target="_blank" style="padding: 4px 10px;">Visit</a></div>
+                    </div>`;
+                }
+            } catch (e) {}
+        }
+
+        // =============================================
+        // SYSTEM STATUS
+        // =============================================
+        async function loadSystemStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                systemStatus = data.system;
+                aiServices = data.ai;
+                updateStatusDisplay();
+                updateServiceStatus();
+                updateStatus('server', 'ready', 'Server: Running');
+            } catch (error) {
+                console.error('Failed to load system status:', error);
+                updateStatus('server', 'error', 'Server: Error');
+            }
+        }
+
+        // =============================================
+        // UTILITY FUNCTIONS
+        // =============================================
+        function getFileIcon(name) {
+            const ext = name.split('.').pop().toLowerCase();
+            const icons = {
+                json: '📄', js: '🟨', html: '🌐', css: '🎨', png: '🖼️',
+                jpg: '🖼️', jpeg: '🖼️', gif: '🖼️', svg: '🖼️', mp3: '🎵',
+                wav: '🎵', mp4: '🎬', txt: '📃', md: '📖', zip: '📦',
+                py: '🐍', ts: '🟦', java: '☕', yaml: '⚙️', yml: '⚙️'
+            };
+            return icons[ext] || '📄';
+        }
+
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        // =============================================
+        // STATUS & UI
+        // =============================================
+        function updateStatus(type, status, text) {
+            const dot = document.getElementById(`${type}-status`);
+            const textEl = document.getElementById(`${type}-text`);
+            if (dot && textEl) {
+                dot.className = 'status-dot';
+                textEl.textContent = text;
+                const colors = { ready: '#00ff88', connected: '#00ff88', loading: '#ffa502', connecting: '#ffa502', error: '#ff4757' };
+                dot.style.background = colors[status] || '#ffa502';
+            }
+        }
+
+        function updateStatusDisplay() {
+            updateStatus('server', systemStatus.server, `Server: ${systemStatus.server}`);
+            updateStatus('ai', systemStatus.ai, `AI Services: ${systemStatus.ai}`);
+            updateStatus('network', systemStatus.network, `Network: ${systemStatus.network}`);
+        }
+
+        function updateServiceStatus() {
+            const container = document.getElementById('service-status');
+            container.innerHTML = '';
+            Object.entries(aiServices).forEach(([name, service]) => {
+                const card = document.createElement('div');
+                card.className = `service-card service-${service.status}`;
+                card.innerHTML = `
+                    <h4>${name.toUpperCase()}</h4>
+                    <p>Status: ${service.status}</p>
+                    <p>Models: ${service.models ? service.models.length : 0}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function setupEventListeners() {
+            document.getElementById('chat-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+            document.getElementById('code-prompt').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') generateCode();
+            });
+        }
+
+        // =============================================
+        // CHAT WITH TYPING INDICATOR
+        // =============================================
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const provider = document.getElementById('provider-select').value;
+            const message = input.value.trim();
+            if (!message) return;
+
+            displayChatMessage(message, 'user');
+            input.value = '';
+            showTypingIndicator();
+
+            if (provider === 'puter' || provider === 'auto') {
+                try {
+                    if (typeof puter !== 'undefined' && puter.ai) {
+                        const puterResponse = await puter.ai.chat(message);
+                        hideTypingIndicator();
+                        displayChatMessage(puterResponse, 'ai', 'puter');
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('Puter AI failed:', err.message);
+                    if (provider === 'puter') {
+                        hideTypingIndicator();
+                        displayChatMessage('Puter AI unavailable. Try signing in or select a Vibe provider.', 'ai', 'error');
+                        return;
+                    }
+                }
+            }
+
+            try {
+                const vibeProvider = (provider !== 'auto' && provider !== 'puter') ? provider : undefined;
+                const response = await fetch('/api/vibe/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, provider: vibeProvider })
+                });
+                const data = await response.json();
+                hideTypingIndicator();
+                if (data.success) {
+                    displayChatMessage(data.response, 'ai', `${data.provider} via Vibe`);
+                } else {
+                    displayChatMessage(data.error || 'AI service error', 'ai', 'error');
+                }
+            } catch (error) {
+                console.error('Vibe AI failed:', error);
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message })
+                    });
+                    const data = await response.json();
+                    hideTypingIndicator();
+                    displayChatMessage(data.response || data.fallback, 'ai', 'local');
+                } catch (e) {
+                    hideTypingIndicator();
+                    displayChatMessage('All AI services unavailable. Please try again later.', 'ai', 'error');
+                }
+            }
+        }
+
+        function displayChatMessage(message, type, service = '') {
+            const container = document.getElementById('chat-container');
+            const div = document.createElement('div');
+            div.className = `chat-message ${type}-message`;
+            const serviceText = service ? ` (${service})` : '';
+            const sender = type === 'user' ? 'You' : `GRUDA AI${serviceText}`;
+            div.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            if (type === 'ai' && service !== 'error' && grudgeProfile) {
+                grudgeProfile.aiQueries = (grudgeProfile.aiQueries || 0) + 1;
+                saveGrudgeProfile();
+            }
+        }
+
+        // =============================================
+        // CODE GENERATION
+        // =============================================
+        async function generateCode() {
+            const prompt = document.getElementById('code-prompt').value.trim();
+            const language = document.getElementById('language-select').value;
+            const output = document.getElementById('generated-code');
+            if (!prompt) return;
+            output.value = '⏳ Generating code via Vibe AI...';
+            try {
+                const response = await fetch('/api/vibe/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `Generate ${language} code for: ${prompt}\n\nReturn ONLY the code, no explanations. Include comments.`,
+                        systemPrompt: `You are an expert ${language} developer for Grudge Studio game development. Generate clean, production-ready code.`
+                    })
+                });
+                const data = await response.json();
+                output.value = data.response || data.error || 'Code generation failed';
+            } catch (error) {
+                try {
+                    const res = await fetch('/api/generate-code', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ description: prompt, language })
+                    });
+                    const data = await res.json();
+                    output.value = data.code || data.fallback || 'Code generation failed';
+                } catch (e) {
+                    output.value = `// Error generating code\n// ${error.message}`;
+                }
+            }
+        }
+
+        // =============================================
+        // FILE ANALYSIS
+        // =============================================
+        async function analyzeFile() {
+            const fileInput = document.getElementById('file-input');
+            const resultDiv = document.getElementById('analysis-result');
+            if (!fileInput.files.length) return;
+            const file = fileInput.files[0];
+            resultDiv.innerHTML = '⏳ Analyzing file...';
+            try {
+                const content = await readFileContent(file);
+                const response = await fetch('/api/analyze-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content, filename: file.name, type: file.type })
+                });
+                const data = await response.json();
+                resultDiv.innerHTML = `<pre>${data.analysis || data.fallback || 'Analysis failed'}</pre>`;
+            } catch (error) {
+                console.error('File analysis failed:', error);
+                resultDiv.innerHTML = `Error analyzing file: ${error.message}`;
+            }
+        }
+
+        function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            currentTab = tabName;
+            if (tabName === 'hosting') loadHostedSites();
+        }
+
+        // =============================================
+        // VIBE AI + SDK LOADERS
+        // =============================================
+        async function loadVibeProviders() {
+            const container = document.getElementById('vibe-providers');
+            container.innerHTML = '<p style="color: var(--warning);">Checking providers...</p>';
+            try {
+                const res = await fetch('/api/vibe/providers');
+                const data = await res.json();
+                let html = '';
+                Object.entries(data.providers).forEach(([key, p]) => {
+                    html += `<div class="network-node">
+                        <div><strong>${p.name}</strong><br><small>${p.models.join(', ')}</small></div>
+                        <div style="color: ${p.free ? 'var(--primary)' : 'var(--warning)'};">● ${p.status} (free)</div>
+                    </div>`;
+                });
+                container.innerHTML = html;
+                updateStatus('vibe', 'ready', 'Vibe AI: 4 Providers Ready');
+            } catch (e) {
+                container.innerHTML = `<p style="color: var(--error);">Failed: ${e.message}</p>`;
+            }
+        }
+
+        async function loadSDKInfo() {
+            const container = document.getElementById('sdk-modules');
+            container.innerHTML = '<p style="color: var(--warning);">Loading SDK info...</p>';
+            try {
+                const res = await fetch('/api/sdk/info');
+                const data = await res.json();
+                const gs = data.packages['grudge-studio'];
+                const ps = data.packages['@grudge/puter-sync'];
+                let html = `<strong>${gs.install}</strong> — v${gs.version}<br>`;
+                Object.entries(gs.modules).forEach(([mod, desc]) => {
+                    html += `<div class="storage-item" style="cursor: default; padding: 4px 8px;"><span class="item-icon">📦</span><span class="item-name"><strong>${mod}</strong>: ${desc}</span></div>`;
+                });
+                html += `<br><strong>@grudge/puter-sync</strong> v${ps.version}<br>`;
+                Object.entries(ps.modules).forEach(([mod, desc]) => {
+                    html += `<div class="storage-item" style="cursor: default; padding: 4px 8px;"><span class="item-icon">☁️</span><span class="item-name"><strong>${mod}</strong>: ${desc}</span></div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `<p style="color: var(--error);">Failed: ${e.message}</p>`;
+            }
+        }
+
+        setTimeout(() => { loadVibeProviders(); }, 1500);
+
+        // Clean up online status on page unload
+        window.addEventListener('beforeunload', async () => {
+            await updateOnlineStatus(false);
+        });
+
+        // =============================================
+        // GRUDGE STUDIO PROFILE
+        // =============================================
+        async function loadGrudgeProfile() {
+            if (!puterReady) return;
+            try {
+                // Try canonical key first, fall back to legacy key
+                let json = await puter.kv.get(KV_KEYS.profile);
+                if (!json) json = await puter.kv.get('grudge-studio:profile');
+                if (json) {
+                    grudgeProfile = JSON.parse(json);
+                    // Migrate legacy fields
+                    if (grudgeProfile.memberSince && !grudgeProfile.createdAt) {
+                        grudgeProfile.createdAt = grudgeProfile.memberSince;
+                        delete grudgeProfile.memberSince;
+                    }
+                    if (!grudgeProfile.id) grudgeProfile.id = puterUser.uuid;
+                    if (!grudgeProfile.puterUuid) grudgeProfile.puterUuid = puterUser.uuid;
+                    if (grudgeProfile.isPuterUser === undefined) grudgeProfile.isPuterUser = true;
+                    // Re-determine role from canonical lists
+                    grudgeProfile.role = determineRole(puterUser.username, true);
+                } else {
+                    grudgeProfile = {
+                        id: puterUser.uuid,
+                        username: puterUser.username,
+                        displayName: puterUser.username,
+                        email: puterUser.email || '',
+                        role: determineRole(puterUser.username, true),
+                        puterUuid: puterUser.uuid,
+                        isPuterUser: true,
+                        studio: 'Grudge Studio',
+                        createdAt: new Date().toISOString(),
+                        lastLogin: new Date().toISOString(),
+                        projects: 0,
+                        deployments: 0,
+                        aiQueries: 0,
+                        storageFiles: 0,
+                        preferences: { theme: 'terminal', aiProvider: 'auto' }
+                    };
+                }
+                grudgeProfile.lastLogin = new Date().toISOString();
+                await saveGrudgeProfile();
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+            }
+        }
+
+        async function saveGrudgeProfile() {
+            if (!puterReady || !grudgeProfile) return;
+            try {
+                await puter.kv.set(KV_KEYS.profile, JSON.stringify(grudgeProfile));
+                await puter.kv.set(KV_KEYS.lastLogin, grudgeProfile.lastLogin);
+                await puter.kv.set(KV_KEYS.version, '3.0.0');
+                // Clean up legacy keys
+                try { await puter.kv.del('grudge-studio:profile'); } catch (e) {}
+                try { await puter.kv.del('grudge-studio:lastLogin'); } catch (e) {}
+                try { await puter.kv.del('grudge-studio:version'); } catch (e) {}
+            } catch (error) {
+                console.error('Failed to save profile:', error);
+            }
+        }
+
+        // Canonical activity logging (matches grudge-launcher)
+        async function logGrudgeActivity(action) {
+            if (!puterReady || !puterUser) return;
+            try {
+                const logs = await puter.kv.get(KV_KEYS.activityLog) || [];
+                const parsed = typeof logs === 'string' ? JSON.parse(logs) : (Array.isArray(logs) ? logs : []);
+                parsed.unshift({
+                    timestamp: new Date().toISOString(),
+                    username: puterUser.username,
+                    action: action,
+                    app: 'grudachain'
+                });
+                if (parsed.length > 100) parsed.length = 100;
+                await puter.kv.set(KV_KEYS.activityLog, parsed);
+            } catch (e) { console.error('Activity log failed:', e); }
+        }
+
+        // Canonical online status (matches grudge-launcher)
+        async function updateOnlineStatus(isOnline) {
+            if (!puterReady || !puterUser) return;
+            try {
+                const onlinePlayers = await puter.kv.get(KV_KEYS.onlinePlayers) || {};
+                const parsed = typeof onlinePlayers === 'string' ? JSON.parse(onlinePlayers) : onlinePlayers;
+                if (isOnline) {
+                    parsed[puterUser.username] = {
+                        uuid: puterUser.uuid,
+                        app: 'grudachain',
+                        connectedAt: new Date().toISOString()
+                    };
+                } else {
+                    delete parsed[puterUser.username];
+                }
+                await puter.kv.set(KV_KEYS.onlinePlayers, parsed);
+            } catch (e) { console.error('Online status failed:', e); }
+        }
+
+        // Canonical session creation (matches grudge-auth)
+        async function createGrudgeSession() {
+            if (!puterReady || !puterUser) return;
+            try {
+                const sessionId = 'sess_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+                const session = {
+                    sessionId,
+                    userId: puterUser.uuid,
+                    username: puterUser.username,
+                    role: determineRole(puterUser.username, true),
+                    source: 'grudachain',
+                    isPuterUser: true,
+                    createdAt: Date.now(),
+                    expiresAt: Date.now() + (2 * 60 * 60 * 1000)
+                };
+                await puter.kv.set('grudge_session_' + sessionId, JSON.stringify(session));
+            } catch (e) { console.error('Session creation failed:', e); }
+        }
+
+        function renderAccountPanel() {
+            if (!grudgeProfile) return;
+            const grid = document.getElementById('account-grid');
+            const fields = [
+                { label: 'Username', value: grudgeProfile.username },
+                { label: 'Display Name', value: grudgeProfile.displayName },
+                { label: 'Role', value: grudgeProfile.role },
+                { label: 'Studio', value: grudgeProfile.studio },
+                { label: 'Puter UUID', value: (grudgeProfile.puterUuid || '').substring(0, 12) + '...' },
+                { label: 'Member Since', value: new Date(grudgeProfile.createdAt).toLocaleDateString() },
+                { label: 'Last Login', value: new Date(grudgeProfile.lastLogin).toLocaleString() },
+                { label: 'Projects', value: grudgeProfile.projects || 0 },
+                { label: 'Deployments', value: grudgeProfile.deployments || 0 },
+                { label: 'AI Queries', value: grudgeProfile.aiQueries || 0 },
+                { label: 'Storage Files', value: grudgeProfile.storageFiles || 0 },
+                { label: 'AI Provider', value: grudgeProfile.preferences?.aiProvider || 'auto' },
+                { label: 'Theme', value: grudgeProfile.preferences?.theme || 'terminal' }
+            ];
+            grid.innerHTML = fields.map(f =>
+                `<div class="account-field"><div class="field-label">${f.label}</div><div class="field-value">${f.value}</div></div>`
+            ).join('');
+        }
+
+        function toggleAccountPanel() {
+            const panel = document.getElementById('account-panel');
+            panel.classList.toggle('active');
+            if (panel.classList.contains('active')) renderAccountPanel();
+        }
+
+        async function editProfile() {
+            if (!grudgeProfile) return;
+            const name = prompt('Display Name:', grudgeProfile.displayName);
+            if (name !== null && name.trim()) grudgeProfile.displayName = name.trim();
+            const role = prompt('Role:', grudgeProfile.role);
+            if (role !== null && role.trim()) grudgeProfile.role = role.trim();
+            await saveGrudgeProfile();
+            renderAccountPanel();
+            showToast('Profile updated', 'success');
+        }
+
+        async function syncGrudgeData() {
+            if (!puterReady) { showToast('Sign in first', 'warning'); return; }
+            showToast('Syncing Grudge Studio data...', 'info');
+            try {
+                const items = await puter.fs.readdir(STUDIO_ROOT);
+                grudgeProfile.projects = items.filter(i => i.is_dir).length;
+                let totalFiles = items.filter(i => !i.is_dir).length;
+                for (const dir of items.filter(i => i.is_dir)) {
+                    try { const sub = await puter.fs.readdir(dir.path); totalFiles += sub.filter(i => !i.is_dir).length; } catch (e) {}
+                }
+                grudgeProfile.storageFiles = totalFiles;
+                try {
+                    const url = await puter.kv.get(KV_KEYS.hostedUrl);
+                    if (url) grudgeProfile.deployments = Math.max(grudgeProfile.deployments || 0, 1);
+                } catch (e) {}
+                await saveGrudgeProfile();
+                renderAccountPanel();
+                await updateStorageStats();
+                showToast('Data synced', 'success');
+            } catch (error) {
+                showToast('Sync failed: ' + error.message, 'error');
+            }
+        }
+
+        async function exportAccount() {
+            if (!grudgeProfile) return;
+            const data = { profile: grudgeProfile, exportDate: new Date().toISOString(), version: '3.0.0' };
+            try {
+                await puter.fs.write(`${STUDIO_ROOT}/exports/account-${Date.now()}.json`, JSON.stringify(data, null, 2));
+                showToast('Account exported to cloud storage', 'success');
+                await navigateTo(currentPath);
+            } catch (error) {
+                showToast('Export failed: ' + error.message, 'error');
+            }
+        }
+
+        async function deployFullToPuter() {
+            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            showToast('Deploying Grudge Studio Cloud Dashboard...', 'info');
+            try {
+                const hostDir = 'grudge-studio-app';
+                try { await puter.fs.mkdir(hostDir); } catch(e) {}
+                const dashboard = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Grudge Studio - Cloud Dashboard</title>
+<script src="https://js.puter.com/v2/"><\/script>
+<style>
+:root{--p:#00ff88;--s:#66aaff;--bg:rgba(0,4,40,0.65);--bd:rgba(0,255,136,0.25)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',monospace;background:linear-gradient(135deg,#000428,#001a4d,#000428);background-attachment:fixed;color:var(--p);min-height:100vh;line-height:1.5}
+.c{max-width:900px;margin:0 auto;padding:20px}
+h1{text-align:center;font-size:2.2em;text-shadow:0 0 30px rgba(0,255,136,0.6);margin-bottom:8px}
+.sub{text-align:center;color:var(--s);margin-bottom:24px;font-size:0.9em}
+.card{background:var(--bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--bd);border-radius:12px;padding:20px;margin-bottom:16px}
+.card h3{color:var(--s);margin-bottom:12px;border-bottom:1px solid var(--bd);padding-bottom:8px}
+.ab{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.cb{height:250px;overflow-y:auto;background:rgba(0,0,0,0.4);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:12px}
+.m{margin-bottom:10px;padding:8px 12px;border-radius:8px;font-size:0.85em}
+.mu{background:rgba(0,255,136,0.07);border-left:3px solid var(--p)}
+.ma{background:rgba(102,170,255,0.07);border-left:3px solid var(--s)}
+.ir{display:flex;gap:8px}
+input{background:rgba(0,0,0,0.5);border:1px solid var(--bd);border-radius:8px;padding:10px;color:var(--p);font-family:inherit;font-size:0.9em;flex:1}
+input:focus{outline:none;border-color:var(--s)}
+button{background:linear-gradient(135deg,rgba(0,78,146,0.7),rgba(0,4,40,0.7));border:1px solid var(--bd);border-radius:8px;padding:10px 18px;color:var(--p);cursor:pointer;font-family:inherit;transition:all 0.3s}
+button:hover{background:linear-gradient(135deg,var(--p),var(--s));color:#000428;transform:translateY(-2px)}
+.fi{display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid rgba(0,255,136,0.08);font-size:0.85em;cursor:pointer;border-radius:4px}
+.fi:hover{background:rgba(0,255,136,0.06)}
+.pg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pf{background:rgba(0,0,0,0.3);border:1px solid var(--bd);border-radius:8px;padding:10px}
+.pf .l{font-size:0.6em;color:var(--s);text-transform:uppercase;letter-spacing:1px}
+.pf .v{color:var(--p);font-size:0.95em}
+.ft{text-align:center;margin-top:24px;padding:16px;border-top:1px solid var(--bd);color:var(--s);font-size:0.8em}
+.ft a{color:var(--p)}
+@media(max-width:600px){.pg{grid-template-columns:1fr}.ir{flex-direction:column}h1{font-size:1.6em}}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>\u{1F3F4}\u200D\u2620\uFE0F Grudge Studio</h1>
+<p class="sub">GrudaChain Cloud Dashboard \u2022 Puter.js AI \u2022 Cloud Storage \u2022 Free</p>
+<div class="card"><div class="ab"><span id="ui">Not signed in</span><div><button id="pb" onclick="tp()" style="display:none;margin-right:8px">\u{1F464} Profile</button><button onclick="da()">Sign In</button></div></div></div>
+<div class="card" id="pc" style="display:none"><h3>\u{1F3AE} Account Profile</h3><div class="pg" id="pg"></div></div>
+<div class="card"><h3>\u{1F916} AI Chat (Puter AI - Free)</h3><div class="cb" id="ch"></div><div class="ir"><input id="mi" placeholder="Ask anything..." onkeypress="if(event.key==='Enter')sc()"><button onclick="sc()">Send</button></div></div>
+<div class="card"><h3>\u2601\uFE0F Cloud Storage</h3><div style="margin-bottom:8px;color:var(--s);font-size:0.85em" id="bc">/grudge-studio</div><div id="fs" style="min-height:100px;background:rgba(0,0,0,0.3);border:1px solid var(--bd);border-radius:8px;padding:10px">Sign in to browse...</div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button onclick="rf()">\u{1F504} Refresh</button><button onclick="nf()">\u{1F4C1} New Folder</button><button onclick="uf()">\u2B06\uFE0F Upload</button><input type="file" id="up" multiple style="display:none" onchange="du(event)"></div></div>
+<div class="ft"><p>\u{1F3F4}\u200D\u2620\uFE0F Grudge Studio v3.0 | Puter Cloud Edition</p><p><a href="https://grudachain.grudgestudio.com" target="_blank">Full GRUDA Legion</a> \u2022 <a href="https://grudgewarlords.com" target="_blank">Grudge Warlords</a></p></div>
+</div>
+<script>
+var R=false,U=null,P=null,D='grudge-studio';
+var BK=['assets','configs','game-data','player-data','exports','backups'];
+var KK={profile:'grudge_studio_profile',activity:'grudge_activity_log',online:'grudge_online_players'};
+var AU=['admin','grudgewarlord','outapps','grudachain','molochdadev'];
+var DU=['dev','developer'];
+function dr(u){var l=(u||'').toLowerCase();if(AU.indexOf(l)>=0)return'admin';if(DU.indexOf(l)>=0)return'developer';return'premium';}
+document.addEventListener('DOMContentLoaded',async function(){if(typeof puter!=='undefined'&&puter.auth.isSignedIn()){R=true;await oa();}});
+window.addEventListener('beforeunload',async function(){if(R&&U){try{var op=await puter.kv.get(KK.online)||{};var pp=typeof op==='string'?JSON.parse(op):op;delete pp[U.username];await puter.kv.set(KK.online,pp);}catch(e){}}});
+async function la(action){if(!R||!U)return;try{var lg=await puter.kv.get(KK.activity)||[];var pp=typeof lg==='string'?JSON.parse(lg):(Array.isArray(lg)?lg:[]);pp.unshift({timestamp:new Date().toISOString(),username:U.username,action:action,app:'grudge-studio-cloud'});if(pp.length>100)pp.length=100;await puter.kv.set(KK.activity,pp);}catch(e){}}
+async function uo(on){if(!R||!U)return;try{var op=await puter.kv.get(KK.online)||{};var pp=typeof op==='string'?JSON.parse(op):op;if(on){pp[U.username]={uuid:U.uuid,app:'grudge-studio-cloud',connectedAt:new Date().toISOString()};}else{delete pp[U.username];}await puter.kv.set(KK.online,pp);}catch(e){}}
+async function da(){try{if(typeof puter==='undefined')return;if(puter.auth.isSignedIn()){await uo(false);await la('logout');await puter.auth.signOut();R=false;U=null;P=null;document.getElementById('ui').textContent='Not signed in';document.getElementById('pb').style.display='none';document.getElementById('pc').style.display='none';document.getElementById('fs').innerHTML='Sign in to browse...';return;}var u=await puter.auth.signIn();if(u){R=true;await oa();}}catch(e){alert('Auth failed: '+e.message);}}
+async function oa(){U=await puter.auth.getUser();document.getElementById('ui').textContent='Signed in: '+U.username+' | Puter Cloud';document.getElementById('pb').style.display='';try{await puter.fs.mkdir('grudge-studio');}catch(e){}for(var i=0;i<BK.length;i++){try{await puter.fs.mkdir('grudge-studio/'+BK[i]);}catch(e){}}await lp();await uo(true);await la('login');await br(D);}
+async function lp(){try{var j=await puter.kv.get(KK.profile);if(!j)j=await puter.kv.get('grudge-studio:profile');if(j){P=JSON.parse(j);if(P.memberSince&&!P.createdAt){P.createdAt=P.memberSince;delete P.memberSince;}if(!P.id)P.id=U.uuid;if(!P.puterUuid)P.puterUuid=U.uuid;if(P.isPuterUser===undefined)P.isPuterUser=true;P.role=dr(U.username);}else{P={id:U.uuid,username:U.username,displayName:U.username,email:U.email||'',role:dr(U.username),puterUuid:U.uuid,isPuterUser:true,studio:'Grudge Studio',createdAt:new Date().toISOString(),lastLogin:new Date().toISOString(),aiQueries:0};}P.lastLogin=new Date().toISOString();await puter.kv.set(KK.profile,JSON.stringify(P));try{await puter.kv.del('grudge-studio:profile');}catch(e){}}catch(e){}}
+function tp(){var c=document.getElementById('pc');if(c.style.display==='none'){c.style.display='';rp();}else{c.style.display='none';}}
+function rp(){if(!P)return;var g=document.getElementById('pg');var f=[['Username',P.username],['Display Name',P.displayName],['Role',P.role],['Studio',P.studio||'Grudge Studio'],['Puter UUID',(P.puterUuid||'').substring(0,12)+'...'],['Member Since',new Date(P.createdAt||P.memberSince).toLocaleDateString()],['Last Login',new Date(P.lastLogin).toLocaleString()],['AI Queries',P.aiQueries||0]];g.innerHTML='';for(var i=0;i<f.length;i++){var d=document.createElement('div');d.className='pf';d.innerHTML='<div class="l">'+f[i][0]+'<\/div><div class="v">'+f[i][1]+'<\/div>';g.appendChild(d);}}
+async function sc(){var inp=document.getElementById('mi');var m=inp.value.trim();if(!m)return;am(m,'u');inp.value='';try{var r=await puter.ai.chat(m);am(r,'a');if(P){P.aiQueries=(P.aiQueries||0)+1;await puter.kv.set(KK.profile,JSON.stringify(P));}}catch(e){am('AI error: '+e.message,'a');}}
+function am(t,y){var c=document.getElementById('ch');var d=document.createElement('div');d.className='m m'+y;d.innerHTML=(y==='u'?'<b>You:<\/b> ':'<b>AI:<\/b> ')+t;c.appendChild(d);c.scrollTop=c.scrollHeight;}
+async function br(path){if(!R)return;D=path;var bc=document.getElementById('bc');bc.innerHTML='';var pts=path.split('/'),acc='';for(var i=0;i<pts.length;i++){acc+=(i>0?'/':'')+pts[i];if(i>0){bc.appendChild(document.createTextNode(' / '));}var sp=document.createElement('span');sp.textContent=pts[i];sp.style.cursor='pointer';sp.style.color='var(--s)';(function(p){sp.onclick=function(){br(p);};})(acc);bc.appendChild(sp);}var box=document.getElementById('fs');box.innerHTML='Loading...';try{var items=await puter.fs.readdir(path);if(!items.length){box.innerHTML='<p style="color:var(--s)">Empty</p>';return;}items.sort(function(a,b){if(a.is_dir&&!b.is_dir)return-1;if(!a.is_dir&&b.is_dir)return 1;return a.name.localeCompare(b.name);});box.innerHTML='';for(var i=0;i<items.length;i++){var it=items[i];var d=document.createElement('div');d.className='fi';d.textContent=(it.is_dir?'\ud83d\udcc1 ':'\ud83d\udcc4 ')+it.name;if(it.is_dir){(function(p){d.onclick=function(){br(p);};})(it.path);}box.appendChild(d);}}catch(e){box.innerHTML='Error: '+e.message;}}
+function rf(){if(R)br(D);}
+async function nf(){if(!R)return;var n=prompt('Folder name:');if(!n)return;try{await puter.fs.mkdir(D+'/'+n.replace(/[^a-zA-Z0-9_-]/g,'-').toLowerCase());br(D);}catch(e){alert(e.message);}}
+function uf(){if(!R)return;document.getElementById('up').click();}
+async function du(e){var f=e.target.files;if(!f.length)return;for(var i=0;i<f.length;i++){try{await puter.fs.write(D+'/'+f[i].name,f[i],{dedupeName:true});}catch(x){}}e.target.value='';br(D);}
+<\/script>
+</body>
+</html>`;
+                await puter.fs.write(hostDir + '/index.html', dashboard);
+                const subdomain = 'grudge-studio';
+                const site = await puter.hosting.create(subdomain, hostDir);
+                const url = 'https://' + site.subdomain + '.puter.site';
+                showToast('Deployed to ' + url, 'success');
+                if (grudgeProfile) {
+                    grudgeProfile.deployments = (grudgeProfile.deployments || 0) + 1;
+                    await saveGrudgeProfile();
+                    renderAccountPanel();
+                }
+                await puter.kv.set(KV_KEYS.hostedUrl, url);
+                await puter.kv.set(KV_KEYS.subdomain, site.subdomain);
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('Deploy failed:', error);
+                showToast('Deploy failed: ' + error.message, 'error');
+            }
+        }
+
+        // =============================================
+        // NETWORK DISCOVERY
+        // =============================================
+        async function discoverNodes() {
+            const container = document.getElementById('network-nodes');
+            container.innerHTML = '<p>Discovering nodes...</p>';
+            try {
+                const response = await fetch('/api/network/discover');
+                const data = await response.json();
+                container.innerHTML = '';
+                data.nodes.forEach(node => {
+                    const nodeDiv = document.createElement('div');
+                    nodeDiv.className = 'network-node';
+                    nodeDiv.innerHTML = `
+                        <div>
+                            <strong>${node.name}</strong><br>
+                            <small>${node.endpoint}</small>
+                        </div>
+                        <div style="color: var(--primary);">● ${node.status}</div>
+                    `;
+                    container.appendChild(nodeDiv);
+                });
+            } catch (error) {
+                console.error('Node discovery failed:', error);
+                container.innerHTML = '<p>Node discovery failed</p>';
+            }
+        }
+    </script>
+</body>
+</html>
