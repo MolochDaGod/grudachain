@@ -28,6 +28,72 @@ const io = new Server(server, {
 // Configuration
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
+const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || 'https://auth-gateway-flax.vercel.app';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'grudge-warlords-secret-key';
+
+// ── JWT Auth Middleware (hub-and-spoke: verify against auth-gateway) ──
+
+let jwt;
+try { jwt = require('jsonwebtoken'); } catch { jwt = null; }
+
+/** Verify JWT locally, then fall back to remote auth-gateway /api/verify. */
+async function verifyGrudgeToken(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const token = authHeader.slice(7);
+
+  // Fast path: local JWT decode
+  if (jwt) {
+    try {
+      const decoded = jwt.verify(token, SESSION_SECRET);
+      if (decoded.grudgeId) {
+        req.grudgeUser = { grudgeId: decoded.grudgeId, username: decoded.username, userId: decoded.userId };
+        return next();
+      }
+    } catch { /* fall through to remote */ }
+  }
+
+  // Slow path: call auth-gateway /api/verify
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const resp = await _fetch(`${AUTH_GATEWAY}/api/verify`, {
+      headers: { Authorization: authHeader },
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.success && data.grudgeId) {
+        req.grudgeUser = {
+          grudgeId: data.grudgeId,
+          username: data.username || data.user?.username,
+          userId: data.user?.id || data.grudgeId,
+          role: data.user?.role
+        };
+        return next();
+      }
+    }
+  } catch { /* auth-gateway unreachable */ }
+
+  return res.status(401).json({ error: 'Invalid or expired token' });
+}
+
+/** Optional auth — continues even if no valid token. */
+async function optionalGrudgeAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      // Reuse the same logic but don't block
+      await new Promise((resolve) => {
+        verifyGrudgeToken(req, { status: () => ({ json: () => {} }) }, resolve);
+      });
+    } catch { /* continue unauthenticated */ }
+  }
+  next();
+}
 
 // Middleware
 app.use(helmet({
@@ -323,8 +389,8 @@ app.get('/api/grudge-studio/links', (req, res) => {
   });
 });
 
-// ─── Admin / Stats Endpoints ───
-app.get('/api/admin/stats', (req, res) => {
+// ─── Admin / Stats Endpoints (auth-protected) ───
+app.get('/api/admin/stats', verifyGrudgeToken, (req, res) => {
   const connectedClients = io.engine.clientsCount || 0;
   res.json({
     success: true,
@@ -360,7 +426,7 @@ app.get('/api/admin/stats', (req, res) => {
   });
 });
 
-app.get('/api/admin/ecosystem', (req, res) => {
+app.get('/api/admin/ecosystem', verifyGrudgeToken, (req, res) => {
   res.json({
     success: true,
     ecosystem: {
