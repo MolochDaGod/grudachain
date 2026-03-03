@@ -1,6 +1,7 @@
 {
   "version": 2,
   "rewrites": [
+    { "source": "/favicon.ico", "destination": "/favicon.png" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ],
   "headers": [

@@ -122,6 +122,11 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
+// Redirect /favicon.ico → /favicon.png (browsers request .ico by default)
+app.get('/favicon.ico', (req, res) => {
+  res.redirect(301, '/favicon.png');
+});
+
 // AI Services Configuration
 const aiServices = {
   puter: {
