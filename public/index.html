@@ -7,10 +7,12 @@
 
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+      <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
 
   <meta name="theme-color" content="#0d1120" />
+  <script src="/grudge-auth.js"></script>
   <meta name="description" content="Grudge Studio Nexus — central hub for all apps, games, AI systems, ObjectStore, WCS, GDevelop Assistant, and ecosystem links." />
 
   <!-- WCS Fonts -->
@@ -443,10 +445,11 @@
       </div>
 
       <div class="actions">
+        <div id="auth-bar" style="display:flex;align-items:center;gap:8px;"></div>
         <a class="chip" href="https://grudge-platform.vercel.app" target="_blank" rel="noreferrer">⚔ Platform</a>
+        <a class="chip" href="https://warlord-crafting-suite.vercel.app" target="_blank" rel="noreferrer">🔨 WCS</a>
         <a class="chip" href="https://gdevelop-assistant.vercel.app" target="_blank" rel="noreferrer">🎮 GDevelop</a>
         <a class="chip" href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer">📦 ObjectStore</a>
-        <a class="chip" href="https://warlord-crafting-suite.vercel.app" target="_blank" rel="noreferrer">🔨 WCS</a>
         <a class="chip" href="https://github.com/MolochDaGod" target="_blank" rel="noreferrer">GitHub</a>
         <a class="chip" href="https://discord.gg/grudgewarlords" target="_blank" rel="noreferrer">Discord</a>
       </div>
@@ -457,10 +460,10 @@
     <div class="hero">
       <div class="hero-grid">
         <div class="card">
-          <h2>✅ Canonical URL</h2>
+          <h2>✅ Grudge Studio Nexus</h2>
           <p>
-            This hub is meant to be the single place you can bookmark for every Grudge Studio deployment.
-            The old <code>grudachain.vercel.app</code> subdomain is not in use — this custom domain is the source of truth.
+            This hub is the single place you can bookmark for every Grudge Studio deployment.
+            Access all apps, games, AI systems, and tools from one place.
           </p>
 
           <div class="search">
@@ -504,8 +507,8 @@
       deployments: [
         {
           name: 'GrudaChain Nexus (this hub)',
-          platform: 'Vercel • Custom Domain',
-          url: 'https://grudachain.grudgestudio.com',
+          platform: 'Vercel',
+          url: 'https://grudachain-rho.vercel.app',
           tags: ['nexus', 'hub', 'grudge-studio']
         },
         {
@@ -1482,7 +1485,7 @@
 
     async function runChecks() {
       const targets = [
-        { name: 'This Hub', url: 'https://grudachain.grudgestudio.com/api/status' },
+        { name: 'This Hub', url: '/api/status' },
         { name: 'Railway Node', url: 'https://gruda-legion-production.up.railway.app/health' },
         { name: 'Grudge Platform', url: 'https://grudge-platform.vercel.app' },
         { name: 'WCS', url: 'https://warlord-crafting-suite.vercel.app' },
@@ -1514,6 +1517,91 @@
     renderTabs();
     render();
     runChecks();
+
+    // ── Auth UI ──
+    function renderAuthBar() {
+      const bar = document.getElementById('auth-bar');
+      if (!bar) return;
+      if (GrudgeAuth.isLoggedIn()) {
+        const user = GrudgeAuth.getUserData();
+        const name = user?.username || 'Player';
+        const role = user?.role || 'player';
+        const roleBadge = role === 'admin' ? ' <span class="badge" style="border-color:hsl(0 65% 50%);color:hsl(0 65% 60%);">ADMIN</span>' : (role === 'guest' ? ' <span class="badge">GUEST</span>' : '');
+        bar.innerHTML = `<span style="font-family:var(--font-heading);font-size:12px;color:hsl(43 90% 70%);">${name}${roleBadge}</span><button onclick="GrudgeAuth.logout();renderAuthBar();render();" style="font-size:10px;padding:6px 10px;">Logout</button>`;
+        if (role === 'admin') {
+          bar.innerHTML += `<a class="chip" href="/api/admin/stats" target="_blank" style="font-size:10px;padding:6px 10px;">Admin</a>`;
+        }
+      } else {
+        bar.innerHTML = `<button onclick="showAuthModal('login')" style="font-size:10px;padding:6px 10px;">Login</button><button onclick="showAuthModal('register')" style="font-size:10px;padding:6px 10px;">Register</button><button onclick="doGuestLogin()" style="font-size:10px;padding:6px 10px;border-color:hsl(220 15% 30%);">Guest</button>`;
+      }
+    }
+
+    async function doGuestLogin() {
+      try {
+        await GrudgeAuth.guestLogin();
+        toast('Logged in as guest');
+        renderAuthBar();
+        render();
+      } catch (e) { toast('Guest login failed: ' + e.message); }
+    }
+
+    function showAuthModal(mode) {
+      let existing = document.getElementById('auth-modal');
+      if (existing) existing.remove();
+      const isLogin = mode === 'login';
+      const modal = document.createElement('div');
+      modal.id = 'auth-modal';
+      modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);';
+      modal.innerHTML = `
+        <div class="card" style="width:360px;max-width:90vw;">
+          <h2>${isLogin ? 'Login' : 'Register'}</h2>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+            <input id="auth-user" type="text" placeholder="Username" style="width:100%;min-width:0;" />
+            ${!isLogin ? '<input id="auth-email" type="email" placeholder="Email (optional)" style="width:100%;min-width:0;" />' : ''}
+            <input id="auth-pass" type="password" placeholder="Password" style="width:100%;min-width:0;" />
+            <div id="auth-error" style="color:hsl(0 65% 60%);font-size:11px;min-height:16px;"></div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="submitAuth('${mode}')" style="flex:1;">${isLogin ? 'Login' : 'Create Account'}</button>
+              <button onclick="document.getElementById('auth-modal').remove()" style="flex:0;border-color:hsl(220 15% 30%);">Cancel</button>
+            </div>
+            <div style="font-size:11px;color:var(--muted);text-align:center;">
+              ${isLogin ? 'No account? <a href="#" onclick="showAuthModal(\'register\');return false;">Register</a>' : 'Have an account? <a href="#" onclick="showAuthModal(\'login\');return false;">Login</a>'}
+            </div>
+          </div>
+        </div>`;
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+      document.body.appendChild(modal);
+      document.getElementById('auth-user').focus();
+    }
+
+    async function submitAuth(mode) {
+      const user = document.getElementById('auth-user').value.trim();
+      const pass = document.getElementById('auth-pass').value;
+      const errEl = document.getElementById('auth-error');
+      if (!user || !pass) { errEl.textContent = 'Username and password required'; return; }
+      errEl.textContent = '';
+      try {
+        if (mode === 'login') {
+          await GrudgeAuth.login(user, pass);
+        } else {
+          const email = document.getElementById('auth-email')?.value.trim() || '';
+          await GrudgeAuth.register(user, pass, email);
+        }
+        document.getElementById('auth-modal').remove();
+        toast('Welcome, ' + user + '!');
+        renderAuthBar();
+        render();
+      } catch (e) {
+        errEl.textContent = e.message;
+      }
+    }
+
+    // On load: verify token and render auth bar
+    window._onGrudgeAuthChange = function() { renderAuthBar(); };
+    renderAuthBar();
+    if (GrudgeAuth.isLoggedIn()) {
+      GrudgeAuth.verify().then(() => renderAuthBar());
+    }
   </script>
 </body>
 </html>
