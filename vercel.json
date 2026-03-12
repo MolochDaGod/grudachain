@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "installCommand": "npm install",
+  "outputDirectory": "public",
   "rewrites": [
     { "source": "/favicon.ico", "destination": "/favicon.png" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
@@ -12,6 +14,12 @@
         { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
         { "key": "Access-Control-Max-Age", "value": "86400" }
+      ]
+    },
+    {
+      "source": "/(favicon.*|apple-touch-icon.*|grudge-logo.*|site\\.webmanifest)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
       ]
     }
   ]
