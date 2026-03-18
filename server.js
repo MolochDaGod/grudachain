@@ -28,7 +28,8 @@ const io = new Server(server, {
 // Configuration
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || 'https://auth-gateway-flax.vercel.app';
+const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || 'https://id.grudge-studio.com';
+const GAME_API = process.env.GAME_API_URL || 'https://api.grudge-studio.com';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'grudge-warlords-secret-key';
 
 // ── JWT Auth Middleware (hub-and-spoke: verify against auth-gateway) ──
@@ -106,10 +107,14 @@ app.use(cors({
     'https://www.grudgewarlords.com',
     'https://warlord-crafting-suite.vercel.app',
     'https://grudachain.grudgestudio.com',
-    'https://auth-gateway-flax.vercel.app',
+    'https://id.grudge-studio.com',
+    'https://api.grudge-studio.com',
+    'https://dash.grudge-studio.com',
+    'https://account.grudge-studio.com',
     'https://gruda-legion-production.up.railway.app',
     /\.vercel\.app$/,
     /\.grudgestudio\.com$/,
+    /\.grudge-studio\.com$/,
     /localhost/
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -357,7 +362,9 @@ app.get('/api/grudge-studio/config', (req, res) => {
   res.json({
     success: true,
     ecosystem: {
-      authGateway: 'https://auth-gateway-flax.vercel.app',
+      authGateway: 'https://id.grudge-studio.com',
+      gameApi: 'https://api.grudge-studio.com',
+      dashboard: 'https://dash.grudge-studio.com',
       wcs: 'https://warlord-crafting-suite.vercel.app',
       gge: 'https://grudgewarlords.com',
       grudaLegion: 'https://gruda-legion-production.up.railway.app',
@@ -384,7 +391,9 @@ app.get('/api/grudge-studio/links', (req, res) => {
     links: {
       main: 'https://grudgewarlords.com',
       wcs: 'https://warlord-crafting-suite.vercel.app',
-      auth: 'https://auth-gateway-flax.vercel.app',
+      auth: 'https://id.grudge-studio.com',
+      gameApi: 'https://api.grudge-studio.com',
+      dashboard: 'https://dash.grudge-studio.com',
       legion: 'https://gruda-legion-production.up.railway.app',
       grudachain: 'https://grudachain.grudgestudio.com',
       npm: 'https://www.npmjs.com/package/grudge-studio',
@@ -449,9 +458,19 @@ app.get('/api/admin/ecosystem', verifyGrudgeToken, (req, res) => {
           type: 'Serverless functions + static'
         },
         authGateway: {
-          url: 'https://auth-gateway-flax.vercel.app',
-          platform: 'Vercel',
-          type: 'Authentication gateway'
+          url: 'https://id.grudge-studio.com',
+          platform: 'Grudge Backend',
+          type: 'Authentication & SSO gateway'
+        },
+        gameApi: {
+          url: 'https://api.grudge-studio.com',
+          platform: 'Grudge Backend',
+          type: 'Game API'
+        },
+        dashboard: {
+          url: 'https://dash.grudge-studio.com',
+          platform: 'Grudge Backend',
+          type: 'Admin dashboard'
         },
         wcs: {
           url: 'https://warlord-crafting-suite.vercel.app',
@@ -460,7 +479,7 @@ app.get('/api/admin/ecosystem', verifyGrudgeToken, (req, res) => {
         },
         gge: {
           url: 'https://grudgewarlords.com',
-          platform: 'Replit/Vercel',
+          platform: 'Vercel',
           type: 'Main game portal + GDevelop Assistant'
         }
       },
@@ -474,9 +493,9 @@ app.get('/api/admin/ecosystem', verifyGrudgeToken, (req, res) => {
         puterAI: 'Client-side via puter.ai.chat() — free unlimited'
       },
       storage: {
-        provider: 'Puter Cloud (puter.fs + puter.kv)',
-        hosting: 'Puter Hosting (*.puter.site)',
-        cost: 'Free unlimited'
+        provider: 'Grudge ObjectStore (molochdagod.github.io/ObjectStore)',
+        backend: 'https://api.grudge-studio.com',
+        cdn: 'https://molochdagod.github.io/ObjectStore'
       },
       repo: {
         github: 'https://github.com/MolochDaGod/grudachain',
@@ -681,54 +700,54 @@ io.on('connection', (socket) => {
 
 // Initialize AI services
 async function initializeAIServices() {
-  console.log('🤖 Initializing AI services...');
+  console.log('\u{1F916} Initializing AI services...');
   
   // Initialize Puter.js
   try {
     aiServices.puter.status = 'ready';
-    console.log('✅ Puter.js AI service ready');
+    console.log('\u2705 Puter.js AI service ready');
   } catch (error) {
-    console.warn('⚠️ Puter.js initialization failed:', error.message);
+    console.warn('\u26A0\uFE0F Puter.js initialization failed:', error.message);
     aiServices.puter.status = 'error';
   }
   
   // Initialize HuggingFace
   try {
     aiServices.huggingface.status = 'ready';
-    console.log('✅ HuggingFace AI service ready');
+    console.log('\u2705 HuggingFace AI service ready');
   } catch (error) {
-    console.warn('⚠️ HuggingFace initialization failed:', error.message);
+    console.warn('\u26A0\uFE0F HuggingFace initialization failed:', error.message);
     aiServices.huggingface.status = 'error';
   }
   
   // Initialize OpenRouter
   try {
     aiServices.openrouter.status = 'ready';
-    console.log('✅ OpenRouter AI service ready');
+    console.log('\u2705 OpenRouter AI service ready');
   } catch (error) {
-    console.warn('⚠️ OpenRouter initialization failed:', error.message);
+    console.warn('\u26A0\uFE0F OpenRouter initialization failed:', error.message);
     aiServices.openrouter.status = 'error';
   }
   
   systemStatus.ai = 'ready';
-  console.log('🎉 All AI services initialized');
+  console.log('\u{1F389} All AI services initialized');
 }
 
 // Start server
 server.listen(PORT, async () => {
   console.log(`
-  ██████╗ ██████╗ ██╗   ██╗██████╗  █████╗     ██╗     ███████╗ ██████╗ ██╗ ██████╗ ███╗   ██╗
- ██╔════╝ ██╔══██╗██║   ██║██╔══██╗██╔══██╗    ██║     ██╔════╝██╔════╝ ██║██╔═══██╗████╗  ██║
- ██║  ███╗██████╔╝██║   ██║██║  ██║███████║    ██║     █████╗  ██║  ███╗██║██║   ██║██╔██╗ ██║
- ██║   ██║██╔══██╗██║   ██║██║  ██║██╔══██║    ██║     ██╔══╝  ██║   ██║██║██║   ██║██║╚██╗██║
- ╚██████╔╝██║  ██║╚██████╔╝██████╔╝██║  ██║    ███████╗███████╗╚██████╔╝██║╚██████╔╝██║ ╚████║
-  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝    ╚══════╝╚══════╝ ╚═════╝ ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+  \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557   \u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2588\u2588\u2588\u2557     \u2588\u2588\u2557     \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2557   \u2588\u2588\u2557
+ \u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557    \u2588\u2588\u2551     \u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2551
+ \u2588\u2588\u2551  \u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551    \u2588\u2588\u2551     \u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2551  \u2588\u2588\u2588\u2557\u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2554\u2588\u2588\u2557 \u2588\u2588\u2551
+ \u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551    \u2588\u2588\u2551     \u2588\u2588\u2554\u2550\u2550\u255D  \u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2551\u255A\u2588\u2588\u2557\u2588\u2588\u2551
+ \u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551  \u2588\u2588\u2551\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551  \u2588\u2588\u2551    \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551 \u255A\u2588\u2588\u2588\u2588\u2551
+  \u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D  \u255A\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D  \u255A\u2550\u255D    \u255A\u2550\u2550\u2550\u2550\u2550\u2550\u255D\u255A\u2550\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D  \u255A\u2550\u2550\u2550\u255D
   `);
   
-  console.log('🚀 GRUDA Legion Server Started');
-  console.log(`📡 Server running on http://localhost:${PORT}`);
-  console.log(`🌐 Environment: ${NODE_ENV}`);
-  console.log(`⚡ Free AI services enabled`);
+  console.log('\u{1F680} GRUDA Legion Server Started');
+  console.log(`\u{1F4E1} Server running on http://localhost:${PORT}`);
+  console.log(`\u{1F310} Environment: ${NODE_ENV}`);
+  console.log(`\u26A1 Free AI services enabled`);
   
   systemStatus.server = 'running';
   systemStatus.network = 'connected';
@@ -737,52 +756,54 @@ server.listen(PORT, async () => {
   await initializeAIServices();
   
   console.log(`
-🎯 Access Points:
-• Main Interface: http://localhost:${PORT}
-• Health Check:   http://localhost:${PORT}/health
-• API Status:     http://localhost:${PORT}/api/status
-• Vibe Providers: http://localhost:${PORT}/api/vibe/providers
-• Vibe Chat:      http://localhost:${PORT}/api/vibe/chat
-• SDK Info:       http://localhost:${PORT}/api/sdk/info
-• Grudge Config:  http://localhost:${PORT}/api/grudge-studio/config
-• Storage Info:   http://localhost:${PORT}/api/storage/info
-• Admin Stats:    http://localhost:${PORT}/api/admin/stats
-• Admin Ecosystem:http://localhost:${PORT}/api/admin/ecosystem
-• WebSocket:      ws://localhost:${PORT}
+\u{1F3AF} Access Points:
+\u2022 Main Interface: http://localhost:${PORT}
+\u2022 Health Check:   http://localhost:${PORT}/health
+\u2022 API Status:     http://localhost:${PORT}/api/status
+\u2022 Vibe Providers: http://localhost:${PORT}/api/vibe/providers
+\u2022 Vibe Chat:      http://localhost:${PORT}/api/vibe/chat
+\u2022 SDK Info:       http://localhost:${PORT}/api/sdk/info
+\u2022 Grudge Config:  http://localhost:${PORT}/api/grudge-studio/config
+\u2022 Storage Info:   http://localhost:${PORT}/api/storage/info
+\u2022 Admin Stats:    http://localhost:${PORT}/api/admin/stats
+\u2022 Admin Ecosystem:http://localhost:${PORT}/api/admin/ecosystem
+\u2022 WebSocket:      ws://localhost:${PORT}
 
-🤖 Vibe 8.0.0 AI Providers (Real):
-• MegaLLM (gpt-4o-mini, claude-3-haiku) - Free
-• OpenRouter (llama-3.1, phi-3) - Free
-• AgentRouter (gpt-4o-mini, claude-3-haiku) - Free
-• Routeway (gpt-4o-mini, claude-3-haiku) - Free
-• Puter.js (Claude, GPT-4o) - Client-side
-• Local AI Fallback - Always available
+\u{1F916} Vibe 8.0.0 AI Providers (Real):
+\u2022 MegaLLM (gpt-4o-mini, claude-3-haiku) - Free
+\u2022 OpenRouter (llama-3.1, phi-3) - Free
+\u2022 AgentRouter (gpt-4o-mini, claude-3-haiku) - Free
+\u2022 Routeway (gpt-4o-mini, claude-3-haiku) - Free
+\u2022 Puter.js (Claude, GPT-4o) - Client-side
+\u2022 Local AI Fallback - Always available
 
-🎮 Grudge Studio Ecosystem:
-• Auth Gateway: https://auth-gateway-flax.vercel.app
-• WCS: https://warlord-crafting-suite.vercel.app
-• GGE: https://grudgewarlords.com
+\u{1F3AE} Grudge Studio Ecosystem:
+\u2022 Auth (SSO):     https://id.grudge-studio.com
+\u2022 Game API:       https://api.grudge-studio.com
+\u2022 Dashboard:      https://dash.grudge-studio.com
+\u2022 WCS:            https://warlord-crafting-suite.vercel.app
+\u2022 GGE:            https://grudgewarlords.com
 
-✅ GRUDA Legion is fully operational!
+\u2705 GRUDA Legion is fully operational!
   `);
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\n🛑 Shutting down GRUDA Legion server...');
+  console.log('\n\u{1F6D1} Shutting down GRUDA Legion server...');
   server.close(() => {
-    console.log('✅ Server closed gracefully');
+    console.log('\u2705 Server closed gracefully');
     process.exit(0);
   });
 });
 
 process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
+  console.error('\u274C Uncaught Exception:', error);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error('\u274C Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });
 
