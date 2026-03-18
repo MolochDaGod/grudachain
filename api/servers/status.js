@@ -24,15 +24,15 @@ module.exports = async function handler(req, res) {
     servers.push({ name: 'Grudge Lobbies (Colyseus)', type: 'colyseus', url: null, status: 'not-deployed', rooms: ['lobby', 'island'], note: 'Set COLYSEUS_SERVER_URL env var when deployed' });
   }
 
-  // Probe Railway Legion Socket.IO server
+  // Probe Grudge Game API
   try {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 5000);
-    const r = await _fetch('https://gruda-legion-production.up.railway.app/health', { signal: controller.signal });
+    const r = await _fetch('https://api.grudge-studio.com/health', { signal: controller.signal });
     const data = await r.json().catch(() => ({}));
-    servers.push({ name: 'GRUDA Legion (Railway)', type: 'socketio', url: 'https://gruda-legion-production.up.railway.app', status: r.ok ? 'online' : 'offline', data });
+    servers.push({ name: 'Grudge Game API', type: 'rest', url: 'https://api.grudge-studio.com', status: r.ok ? 'online' : 'offline', data });
   } catch (e) {
-    servers.push({ name: 'GRUDA Legion (Railway)', type: 'socketio', url: 'https://gruda-legion-production.up.railway.app', status: 'offline', error: e.message });
+    servers.push({ name: 'Grudge Game API', type: 'rest', url: 'https://api.grudge-studio.com', status: 'offline', error: e.message });
   }
 
   // Read from Supabase if available
@@ -62,7 +62,7 @@ module.exports = async function handler(req, res) {
         LobbyState: { fields: ['players', 'phase', 'countdown', 'maxPlayers'] },
         IslandState: { fields: ['players', 'islandId', 'islandName', 'biome', 'timeOfDay', 'weather'] }
       },
-      auth: 'Bearer token via auth-gateway-flax.vercel.app/api/verify',
+      auth: 'Bearer token via id.grudge-studio.com/auth/verify',
       clientPackage: 'colyseus.js@0.15.x'
     },
     timestamp: new Date().toISOString()

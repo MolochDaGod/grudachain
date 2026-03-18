@@ -3,13 +3,12 @@ const { getSupabase } = require('../_lib/supabase');
 // Fallback when Supabase is not configured
 const FALLBACK_SERVICES = [
   { slug: 'nexus-hub', name: 'GrudaChain Nexus Hub', platform: 'vercel', url: 'https://grudachain-rho.vercel.app', type: 'app', status: 'active', health_endpoint: '/api/health' },
-  { slug: 'auth-gateway', name: 'Auth Gateway', platform: 'vercel', url: 'https://auth-gateway-flax.vercel.app', type: 'auth', status: 'active', health_endpoint: '/api/health' },
-  { slug: 'wcs', name: 'Warlord Crafting Suite', platform: 'vercel', url: 'https://warlord-crafting-suite.vercel.app', type: 'app', status: 'active' },
+  { slug: 'auth-gateway', name: 'Grudge Auth (SSO)', platform: 'vps', url: 'https://id.grudge-studio.com', type: 'auth', status: 'active', health_endpoint: '/health' },
+  { slug: 'game-api', name: 'Grudge Game API', platform: 'vps', url: 'https://api.grudge-studio.com', type: 'api', status: 'active', health_endpoint: '/health' },
+  { slug: 'wcs', name: 'Warlord Crafting Suite', platform: 'vercel', url: 'https://grudgewarlords.com', type: 'app', status: 'active' },
   { slug: 'gdevelop-assistant', name: 'GDevelop Assistant', platform: 'vercel', url: 'https://gdevelop-assistant.vercel.app', type: 'app', status: 'active', health_endpoint: '/api/health' },
   { slug: 'objectstore', name: 'ObjectStore Game Data', platform: 'github-pages', url: 'https://molochdagod.github.io/ObjectStore', type: 'cdn', status: 'active' },
-  { slug: 'grudge-platform', name: 'Grudge Platform', platform: 'vercel', url: 'https://grudge-platform.vercel.app', type: 'app', status: 'active' },
-  { slug: 'gruda-legion', name: 'GRUDA Legion AI Node', platform: 'railway', url: 'https://gruda-legion-production.up.railway.app', type: 'api', status: 'active', health_endpoint: '/health' },
-  { slug: 'puter-cloud', name: 'Puter Cloud Dashboard', platform: 'puter', url: 'https://grudge-studio.puter.site', type: 'app', status: 'active' }
+  { slug: 'dashboard', name: 'Grudge Dashboard', platform: 'vps', url: 'https://dash.grudge-studio.com', type: 'app', status: 'active' }
 ];
 
 module.exports = async function handler(req, res) {

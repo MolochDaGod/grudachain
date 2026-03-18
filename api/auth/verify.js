@@ -1,5 +1,5 @@
 const _fetch = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
-const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || 'https://auth-gateway-flax.vercel.app';
+const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || 'https://id.grudge-studio.com';
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const resp = await _fetch(`${AUTH_GATEWAY}/api/verify`, {
+    const resp = await _fetch(`${AUTH_GATEWAY}/auth/verify`, {
       headers: { 'Authorization': authHeader }
     });
     const data = await resp.json();

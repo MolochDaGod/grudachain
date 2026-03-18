@@ -3,13 +3,12 @@ const { getSupabase } = require('../_lib/supabase');
 
 const SERVICES = [
   { slug: 'nexus-hub', name: 'Nexus Hub', url: 'https://grudachain-rho.vercel.app/api/health' },
-  { slug: 'auth-gateway', name: 'Auth Gateway', url: 'https://auth-gateway-flax.vercel.app/api/health' },
-  { slug: 'wcs', name: 'WCS', url: 'https://warlord-crafting-suite.vercel.app' },
+  { slug: 'auth-gateway', name: 'Grudge Auth (SSO)', url: 'https://id.grudge-studio.com/health' },
+  { slug: 'game-api', name: 'Grudge Game API', url: 'https://api.grudge-studio.com/health' },
+  { slug: 'wcs', name: 'Grudge Warlords', url: 'https://grudgewarlords.com' },
   { slug: 'gdevelop', name: 'GDevelop Assistant', url: 'https://gdevelop-assistant.vercel.app/api/health' },
   { slug: 'objectstore', name: 'ObjectStore', url: 'https://molochdagod.github.io/ObjectStore' },
-  { slug: 'grudge-platform', name: 'Platform', url: 'https://grudge-platform.vercel.app' },
-  { slug: 'gruda-legion', name: 'Railway AI Node', url: 'https://gruda-legion-production.up.railway.app/health' },
-  { slug: 'puter-cloud', name: 'Puter Cloud', url: 'https://grudge-studio.puter.site' }
+  { slug: 'dashboard', name: 'Grudge Dashboard', url: 'https://dash.grudge-studio.com' }
 ];
 
 async function probeService(svc) {

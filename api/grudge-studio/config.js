@@ -6,15 +6,15 @@ module.exports = function handler(req, res) {
   res.json({
     success: true,
     ecosystem: {
-      authGateway: 'https://auth-gateway-flax.vercel.app',
-      wcs: 'https://warlord-crafting-suite.vercel.app',
+      authGateway: 'https://id.grudge-studio.com',
+      gameApi: 'https://api.grudge-studio.com',
+      dashboard: 'https://dash.grudge-studio.com',
+      account: 'https://account.grudge-studio.com',
+      wcs: 'https://grudgewarlords.com',
       nexus: 'https://grudachain-rho.vercel.app',
       gdevelop: 'https://gdevelop-assistant.vercel.app',
       objectStore: 'https://molochdagod.github.io/ObjectStore',
-      grudaLegion: 'https://gruda-legion-production.up.railway.app',
-      grudgewarlords: 'https://grudgewarlords.com',
-      platform: 'https://grudge-platform.vercel.app',
-      puterCloud: 'https://grudge-studio.puter.site'
+      grudgewarlords: 'https://grudgewarlords.com'
     },
     sdk: {
       name: 'grudge-studio',
@@ -29,14 +29,14 @@ module.exports = function handler(req, res) {
     },
     auth: {
       endpoints: {
-        login: 'POST /api/login',
-        register: 'POST /api/register',
-        guest: 'POST /api/guest',
-        verify: 'GET /api/verify (Bearer token)',
-        discord: 'GET /api/discord',
-        github: 'GET /api/github',
-        puter: 'POST /api/puter',
-        wallet: 'POST /api/connect-wallet'
+        login: 'POST /auth/login',
+        register: 'POST /auth/register',
+        guest: 'POST /auth/guest',
+        verify: 'POST /auth/verify (Bearer token)',
+        discord: 'GET /auth/discord',
+        github: 'GET /auth/github',
+        puter: 'POST /auth/puter',
+        wallet: 'POST /auth/wallet'
       }
     },
     timestamp: new Date().toISOString()

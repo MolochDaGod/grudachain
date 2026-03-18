@@ -1,11 +1,11 @@
 const _fetch = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
-const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || 'https://auth-gateway-flax.vercel.app';
+const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || 'https://id.grudge-studio.com';
 
 async function verifyAdmin(req) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
   try {
-    const resp = await _fetch(`${AUTH_GATEWAY}/api/verify`, {
+    const resp = await _fetch(`${AUTH_GATEWAY}/auth/verify`, {
       headers: { 'Authorization': authHeader }
     });
     if (!resp.ok) return null;
@@ -42,6 +42,7 @@ module.exports = async function handler(req, res) {
     },
     services: {
       authGateway: { url: AUTH_GATEWAY, status: 'connected' },
+      gameApi: { url: 'https://api.grudge-studio.com', status: 'connected' },
       nexusApi: { endpoints: 16, status: 'healthy' },
       vibeAi: { providers: 4, version: '8.0.0' }
     },

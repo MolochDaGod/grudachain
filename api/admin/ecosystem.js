@@ -1,11 +1,11 @@
 const _fetch = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
-const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || 'https://auth-gateway-flax.vercel.app';
+const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || 'https://id.grudge-studio.com';
 
 async function verifyAdmin(req) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
   try {
-    const resp = await _fetch(`${AUTH_GATEWAY}/api/verify`, {
+    const resp = await _fetch(`${AUTH_GATEWAY}/auth/verify`, {
       headers: { 'Authorization': authHeader }
     });
     if (!resp.ok) return null;
@@ -42,11 +42,16 @@ module.exports = async function handler(req, res) {
         },
         authGateway: {
           url: AUTH_GATEWAY,
-          platform: 'Vercel',
+          platform: 'Grudge Backend (VPS)',
           type: 'Authentication (login/register/guest/verify/oauth)'
         },
+        gameApi: {
+          url: 'https://api.grudge-studio.com',
+          platform: 'Grudge Backend (VPS)',
+          type: 'Game API (characters, economy, crafting, islands)'
+        },
         wcs: {
-          url: 'https://warlord-crafting-suite.vercel.app',
+          url: 'https://grudgewarlords.com',
           platform: 'Vercel',
           type: 'Game systems (crafting, battle, arsenal, dungeon, professions)'
         },
@@ -60,20 +65,10 @@ module.exports = async function handler(req, res) {
           platform: 'GitHub Pages',
           type: 'Game data API (weapons, armor, skills, sprites)'
         },
-        grudaLegion: {
-          url: 'https://gruda-legion-production.up.railway.app',
-          platform: 'Railway',
-          type: 'AI node + Socket.IO realtime'
-        },
-        platform: {
-          url: 'https://grudge-platform.vercel.app',
-          platform: 'Vercel',
-          type: 'App launcher + operations hub'
-        },
-        puterCloud: {
-          url: 'https://grudge-studio.puter.site',
-          platform: 'Puter',
-          type: 'Cloud AI + storage dashboard'
+        dashboard: {
+          url: 'https://dash.grudge-studio.com',
+          platform: 'Grudge Backend (VPS)',
+          type: 'Admin dashboard + operations hub'
         }
       },
       sdk: {
@@ -86,9 +81,9 @@ module.exports = async function handler(req, res) {
         puterAI: 'Client-side via puter.ai.chat() — free unlimited'
       },
       storage: {
-        provider: 'Puter Cloud (puter.fs + puter.kv)',
-        hosting: 'Puter Hosting (*.puter.site)',
-        supabase: process.env.SUPABASE_URL ? 'configured' : 'not configured'
+        provider: 'Grudge Backend (VPS)',
+        objectStore: 'https://molochdagod.github.io/ObjectStore',
+        dashboard: 'https://dash.grudge-studio.com'
       },
       repo: {
         github: 'https://github.com/MolochDaGod/grudachain',
