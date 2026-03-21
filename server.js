@@ -804,7 +804,7 @@ process.on('uncaughtException', (error) => {
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('\u274C Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
+  // Log only — do not crash the process for transient async failures
 });
 
 module.exports = app;
