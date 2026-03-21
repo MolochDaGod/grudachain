@@ -400,7 +400,7 @@ app.get('/api/grudge-studio/links', (req, res) => {
       grudachain: 'https://grudachain.grudgestudio.com',
       npm: 'https://www.npmjs.com/package/grudge-studio',
       github: 'https://github.com/MolochDaGod/GrudgeStudioNPM',
-      discord: 'https://discord.gg/grudgewarlords'
+      discord: 'https://discord.gg/FtGtmxmwkh'
     },
     timestamp: new Date().toISOString()
   });
@@ -831,3 +831,4 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 module.exports = app;
+
