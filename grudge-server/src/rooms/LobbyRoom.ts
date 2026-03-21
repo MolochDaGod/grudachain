@@ -1,7 +1,7 @@
-import { Room, Client } from "@colyseus/core";
+﻿import { Room, Client } from "@colyseus/core";
 import { LobbyState, PlayerState } from "../schemas/PlayerState";
 
-const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || "https://auth-gateway-flax.vercel.app";
+const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || "https://id.grudge-studio.com";
 
 interface JoinOptions {
   token?: string;

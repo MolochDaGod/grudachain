@@ -1,7 +1,7 @@
-import { Room, Client } from "@colyseus/core";
+﻿import { Room, Client } from "@colyseus/core";
 import { IslandState, PlayerState } from "../schemas/PlayerState";
 
-const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || "https://auth-gateway-flax.vercel.app";
+const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || "https://id.grudge-studio.com";
 
 interface JoinOptions {
   token?: string;
@@ -37,10 +37,10 @@ export class IslandRoom extends Room<IslandState> {
 
     console.log(`[IslandRoom] created: ${state.islandName} (${this.roomId})`);
 
-    // Simulation tick — 20 fps for position sync
+    // Simulation tick â€” 20 fps for position sync
     this.setSimulationInterval(() => this.tick(), 1000 / 20);
 
-    // Day/night cycle — advance 1 hour every 5 real minutes
+    // Day/night cycle â€” advance 1 hour every 5 real minutes
     this.clock.setInterval(() => {
       state.timeOfDay = (state.timeOfDay + 1) % 24;
     }, 5 * 60 * 1000);

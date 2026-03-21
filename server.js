@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -32,7 +32,7 @@ const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || 'https://id.grudge-studio.c
 const GAME_API = process.env.GAME_API_URL || 'https://api.grudge-studio.com';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'grudge-warlords-secret-key';
 
-// ── JWT Auth Middleware (hub-and-spoke: verify against auth-gateway) ──
+// â”€â”€ JWT Auth Middleware (hub-and-spoke: verify against auth-gateway) â”€â”€
 
 let jwt;
 try { jwt = require('jsonwebtoken'); } catch { jwt = null; }
@@ -82,7 +82,7 @@ async function verifyGrudgeToken(req, res, next) {
   return res.status(401).json({ error: 'Invalid or expired token' });
 }
 
-/** Optional auth — continues even if no valid token. */
+/** Optional auth â€” continues even if no valid token. */
 async function optionalGrudgeAuth(req, res, next) {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -111,7 +111,7 @@ app.use(cors({
     'https://api.grudge-studio.com',
     'https://dash.grudge-studio.com',
     'https://account.grudge-studio.com',
-    'https://gruda-legion-production.up.railway.app',
+    'https://api.grudge-studio.com',
     /\.vercel\.app$/,
     /\.grudgestudio\.com$/,
     /\.grudge-studio\.com$/,
@@ -128,7 +128,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-// Redirect /favicon.ico → /favicon.png (browsers request .ico by default)
+// Redirect /favicon.ico â†’ /favicon.png (browsers request .ico by default)
 app.get('/favicon.ico', (req, res) => {
   res.redirect(301, '/favicon.png');
 });
@@ -161,19 +161,21 @@ const aiServices = {
 };
 
 // System status
+const SERVER_START_TIME = Date.now();
 let systemStatus = {
   server: 'starting',
   ai: 'initializing',
   network: 'connecting',
-  storage: 'ready',
-  uptime: Date.now()
+  storage: 'ready'
 };
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+  const uptimeMs = Date.now() - SERVER_START_TIME;
   res.json({
     status: 'healthy',
-    uptime: Date.now() - systemStatus.uptime,
+    uptime: uptimeMs,
+    uptimeHuman: formatUptime(uptimeMs),
     services: aiServices,
     system: systemStatus,
     timestamp: new Date().toISOString()
@@ -345,19 +347,19 @@ app.get('/api/network/discover', (req, res) => {
   });
 });
 
-// ─── Vibe AI Routes (ported from Vercel serverless functions) ───
+// â”€â”€â”€ Vibe AI Routes (ported from Vercel serverless functions) â”€â”€â”€
 app.get('/api/vibe/providers', vibeProvidersHandler);
 app.post('/api/vibe/chat', vibeChatHandler);
 app.options('/api/vibe/chat', vibeChatHandler); // CORS preflight
 
-// ─── SDK Info Route ───
+// â”€â”€â”€ SDK Info Route â”€â”€â”€
 app.get('/api/sdk/info', sdkInfoHandler);
 
-// ─── Storage Routes ───
+// â”€â”€â”€ Storage Routes â”€â”€â”€
 app.get('/api/storage/info', storageInfoHandler);
 app.get('/api/storage/list', storageListHandler);
 
-// ─── Grudge Studio Integration Endpoints ───
+// â”€â”€â”€ Grudge Studio Integration Endpoints â”€â”€â”€
 app.get('/api/grudge-studio/config', (req, res) => {
   res.json({
     success: true,
@@ -367,7 +369,7 @@ app.get('/api/grudge-studio/config', (req, res) => {
       dashboard: 'https://dash.grudge-studio.com',
       wcs: 'https://warlord-crafting-suite.vercel.app',
       gge: 'https://grudgewarlords.com',
-      grudaLegion: 'https://gruda-legion-production.up.railway.app',
+      grudaLegion: 'https://api.grudge-studio.com',
       grudachain: 'https://grudachain.grudgestudio.com'
     },
     sdk: {
@@ -394,7 +396,7 @@ app.get('/api/grudge-studio/links', (req, res) => {
       auth: 'https://id.grudge-studio.com',
       gameApi: 'https://api.grudge-studio.com',
       dashboard: 'https://dash.grudge-studio.com',
-      legion: 'https://gruda-legion-production.up.railway.app',
+      legion: 'https://api.grudge-studio.com',
       grudachain: 'https://grudachain.grudgestudio.com',
       npm: 'https://www.npmjs.com/package/grudge-studio',
       github: 'https://github.com/MolochDaGod/GrudgeStudioNPM',
@@ -404,7 +406,7 @@ app.get('/api/grudge-studio/links', (req, res) => {
   });
 });
 
-// ─── Admin / Stats Endpoints (auth-protected) ───
+// â”€â”€â”€ Admin / Stats Endpoints (auth-protected) â”€â”€â”€
 app.get('/api/admin/stats', verifyGrudgeToken, (req, res) => {
   const connectedClients = io.engine.clientsCount || 0;
   res.json({
@@ -447,10 +449,10 @@ app.get('/api/admin/ecosystem', verifyGrudgeToken, (req, res) => {
     ecosystem: {
       services: {
         grudaLegion: {
-          url: 'https://gruda-legion-production.up.railway.app',
+          url: 'https://api.grudge-studio.com',
           platform: 'Railway',
           status: systemStatus.server,
-          uptime: Date.now() - systemStatus.uptime
+          uptime: Date.now() - SERVER_START_TIME
         },
         grudachain: {
           url: 'https://grudachain.grudgestudio.com',
@@ -490,7 +492,7 @@ app.get('/api/admin/ecosystem', verifyGrudgeToken, (req, res) => {
       ai: {
         vibeVersion: '8.0.0',
         providers: Object.keys(VIBE_PROVIDERS),
-        puterAI: 'Client-side via puter.ai.chat() — free unlimited'
+        puterAI: 'Client-side via puter.ai.chat() â€” free unlimited'
       },
       storage: {
         provider: 'Grudge ObjectStore (molochdagod.github.io/ObjectStore)',
@@ -515,7 +517,7 @@ function formatUptime(ms) {
   return `${d}d ${h}h ${m}m`;
 }
 
-// ─── Real AI Provider Chain (from Vibe 8.0.0) ───
+// â”€â”€â”€ Real AI Provider Chain (from Vibe 8.0.0) â”€â”€â”€
 // Keys read from env vars first, falling back to bundled defaults
 const VIBE_PROVIDERS = {
   megallm: {
@@ -544,7 +546,20 @@ const VIBE_PROVIDERS = {
   }
 };
 
-const VIBE_PROVIDER_ORDER = ['megallm', 'openrouter', 'agentrouter', 'routeway'];
+// Add OpenAI as a direct fallback if OPEN_AI_API key is set
+if (process.env.OPEN_AI_API) {
+  VIBE_PROVIDERS.openai = {
+    name: 'OpenAI (Direct)',
+    baseUrl: 'https://api.openai.com/v1',
+    key: process.env.OPEN_AI_API,
+    models: ['gpt-4o-mini', 'gpt-3.5-turbo']
+  };
+}
+
+const VIBE_PROVIDER_ORDER = [
+  'megallm', 'openrouter', 'agentrouter', 'routeway',
+  ...(process.env.OPEN_AI_API ? ['openai'] : [])
+];
 
 async function callVibeProvider(providerKey, messages, model, temperature) {
   const provider = VIBE_PROVIDERS[providerKey];
@@ -559,7 +574,7 @@ async function callVibeProvider(providerKey, messages, model, temperature) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${provider.key}`,
-        'HTTP-Referer': 'https://gruda-legion-production.up.railway.app',
+        'HTTP-Referer': 'https://api.grudge-studio.com',
         'X-Title': 'GRUDA Legion Railway'
       },
       body: JSON.stringify({
@@ -605,7 +620,7 @@ async function callBestAvailableAI(prompt, preferredModel) {
   return generateLocalResponse(prompt);
 }
 
-// Legacy /api/chat stub functions — now backed by real Vibe providers
+// Legacy /api/chat stub functions â€” now backed by real Vibe providers
 async function callPuterAI(message, model, temperature) {
   const messages = [
     { role: 'system', content: 'You are a helpful AI assistant powered by Puter.js.' },
@@ -788,14 +803,22 @@ server.listen(PORT, async () => {
   `);
 });
 
-// Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('\n\u{1F6D1} Shutting down GRUDA Legion server...');
+// Graceful shutdown (SIGINT for local dev, SIGTERM for Railway/Docker)
+function gracefulShutdown(signal) {
+  console.log(`\n\u{1F6D1} ${signal} received â€” shutting down GRUDA Legion server...`);
   server.close(() => {
     console.log('\u2705 Server closed gracefully');
     process.exit(0);
   });
-});
+  // Force exit after 10s if connections hang
+  setTimeout(() => {
+    console.error('\u26A0\uFE0F Forcing shutdown after timeout');
+    process.exit(1);
+  }, 10000).unref();
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 
 process.on('uncaughtException', (error) => {
   console.error('\u274C Uncaught Exception:', error);
@@ -804,7 +827,7 @@ process.on('uncaughtException', (error) => {
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('\u274C Unhandled Rejection at:', promise, 'reason:', reason);
-  // Log only — do not crash the process for transient async failures
+  // Log only â€” do not crash the process for transient async failures
 });
 
 module.exports = app;

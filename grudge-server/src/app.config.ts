@@ -1,4 +1,4 @@
-import config from "@colyseus/tools";
+﻿import config from "@colyseus/tools";
 import { monitor } from "@colyseus/monitor";
 import { playground } from "@colyseus/playground";
 
@@ -18,7 +18,7 @@ export default config({
         status: "healthy",
         app: "grudge-lobbies",
         rooms: ["lobby", "island"],
-        authGateway: process.env.AUTH_GATEWAY_URL || "https://auth-gateway-flax.vercel.app",
+        authGateway: process.env.AUTH_GATEWAY_URL || "https://id.grudge-studio.com",
         timestamp: new Date().toISOString(),
       });
     });
@@ -36,11 +36,11 @@ export default config({
 
   beforeListen: () => {
     console.log(`
-╔═══════════════════════════════════════════╗
-║   Grudge Lobbies — Colyseus Server        ║
-║   Rooms: lobby, island                    ║
-║   Auth: auth-gateway-flax.vercel.app      ║
-╚═══════════════════════════════════════════╝
+â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
+â•‘   Grudge Lobbies â€” Colyseus Server        â•‘
+â•‘   Rooms: lobby, island                    â•‘
+â•‘   Auth: auth-gateway-flax.vercel.app      â•‘
+â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     `);
   },
 });
