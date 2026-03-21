@@ -1,16 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grudge Studio — Legacy Tools</title>
+    <title>Grudge Studio â€” Legacy Tools</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest" />
     <script src="/grudge-auth.js"></script>
-    <script src="https://js.puter.com/v2/"></script>
     <!-- WCS Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -602,8 +601,8 @@
 
     <div class="container">
         <div class="header">
-            <div class="logo">🏴‍☠️ GRUDA LEGION</div>
-            <div class="tagline">Standalone AI System • Free Unlimited Access • Vibe 8.0 AI • Grudge Studio SDK</div>
+            <div class="logo">ðŸ´â€â˜ ï¸ GRUDA LEGION</div>
+            <div class="tagline">Standalone AI System â€¢ Free Unlimited Access â€¢ Vibe 8.0 AI â€¢ Grudge Studio SDK</div>
             <div class="version">v3.0 - Production Ready | Vibe 8.0.0 | grudge-studio@1.2.0 | @grudge/puter-sync@1.0.0</div>
         </div>
 
@@ -621,8 +620,8 @@
                 <span id="vibe-text">Vibe AI: Connecting...</span>
             </div>
             <div class="status-item">
-                <div class="status-dot" id="cloud-status"></div>
-                <span id="cloud-text">Puter Cloud: Connecting...</span>
+            <div class="status-dot" id="cloud-status"></div>
+                <span id="cloud-text">Grudge Cloud: Connecting...</span>
             </div>
             <div class="status-item">
                 <div class="status-dot" id="network-status"></div>
@@ -631,25 +630,28 @@
         </div>
 
         <div class="auth-bar" id="auth-bar">
-            <div class="user-info" id="user-info">Not signed in to Puter Cloud</div>
+            <div class="user-info" id="user-info">Not signed in</div>
             <div>
-                <button id="account-btn" onclick="toggleAccountPanel()" style="display: none; margin-right: 8px;">👤 Account</button>
-                <button id="auth-btn" onclick="handlePuterAuth()">Sign In to Puter</button>
+                <button id="account-btn" onclick="toggleAccountPanel()" style="display: none; margin-right: 8px;">ðŸ‘¤ Account</button>
+                <button id="auth-btn" onclick="handlePuterAuth()" style="display:inline-flex;align-items:center;gap:7px;">
+                    <img src="/grudge-logo.png" alt="" style="width:18px;height:18px;border-radius:3px;flex-shrink:0;">
+                    Grudge Login
+                </button>
             </div>
         </div>
 
         <!-- Grudge Studio Account Panel -->
         <div class="account-panel" id="account-panel">
             <div class="account-header">
-                <h3 style="color: var(--secondary); font-size: 1.15em; border: none; margin: 0; padding: 0;">🎮 Grudge Studio Account</h3>
-                <button onclick="toggleAccountPanel()" style="padding: 6px 14px;">✕ Close</button>
+                <h3 style="color: var(--secondary); font-size: 1.15em; border: none; margin: 0; padding: 0;">ðŸŽ® Grudge Studio Account</h3>
+                <button onclick="toggleAccountPanel()" style="padding: 6px 14px;">âœ• Close</button>
             </div>
             <div class="account-grid" id="account-grid"></div>
             <div class="account-actions">
-                <button onclick="editProfile()">✏️ Edit Profile</button>
-                <button onclick="syncGrudgeData()">🔄 Sync Data</button>
-                <button onclick="exportAccount()">📤 Export Account</button>
-                <button onclick="deployFullToPuter()">🚀 Deploy to Puter</button>
+                <button onclick="editProfile()">âœï¸ Edit Profile</button>
+                <button onclick="syncGrudgeData()">ðŸ”„ Sync Data</button>
+                <button onclick="exportAccount()">ðŸ“¤ Export Account</button>
+                <button onclick="deployFullToPuter()">ðŸš€ Deploy to Puter</button>
             </div>
         </div>
 
@@ -657,7 +659,7 @@
 
         <div class="main-grid">
             <div class="panel">
-                <h3>🤖 AI Chat Interface</h3>
+                <h3>ðŸ¤– AI Chat Interface</h3>
                 <div class="chat-container" id="chat-container">
                     <div class="ai-message chat-message">
                         <strong>GRUDA AI:</strong> Welcome to GRUDA Legion! I'm ready to assist you with any questions or tasks. All AI services are free and unlimited.
@@ -666,7 +668,7 @@
                 <div class="input-group">
                     <input type="text" id="chat-input" placeholder="Ask me anything..." style="flex: 1;">
                     <select id="provider-select">
-                        <option value="auto">Auto (Puter → Vibe)</option>
+                        <option value="auto">Auto (Puter â†’ Vibe)</option>
                         <option value="puter">Puter.js (Claude/GPT-4o)</option>
                         <option value="megallm">Vibe: MegaLLM</option>
                         <option value="openrouter">Vibe: OpenRouter</option>
@@ -680,10 +682,10 @@
             <div class="panel">
                 <div class="tab-container">
                     <div class="tab-buttons">
-                        <div class="tab-button active" onclick="switchTab('code-gen')">💻 Code Gen</div>
-                        <div class="tab-button" onclick="switchTab('file-analysis')">📋 Analysis</div>
-                        <div class="tab-button" onclick="switchTab('network')">🌐 Network</div>
-                        <div class="tab-button" onclick="switchTab('hosting')">🚀 Hosting</div>
+                        <div class="tab-button active" onclick="switchTab('code-gen')">ðŸ’» Code Gen</div>
+                        <div class="tab-button" onclick="switchTab('file-analysis')">ðŸ“‹ Analysis</div>
+                        <div class="tab-button" onclick="switchTab('network')">ðŸŒ Network</div>
+                        <div class="tab-button" onclick="switchTab('hosting')">ðŸš€ Hosting</div>
                     </div>
 
                     <div class="tab-content active" id="code-gen">
@@ -713,20 +715,20 @@
 
                     <div class="tab-content" id="network">
                         <h4>Network Nodes</h4>
-                        <button onclick="discoverNodes()" style="margin-bottom: 15px;">🔍 Discover Nodes</button>
+                        <button onclick="discoverNodes()" style="margin-bottom: 15px;">ðŸ” Discover Nodes</button>
                         <div id="network-nodes">
                             <div class="network-node">
                                 <div>
                                     <strong>Local Node</strong><br>
                                     <small>localhost:3000</small>
                                 </div>
-                                <div style="color: var(--primary);">● Active</div>
+                                <div style="color: var(--primary);">â— Active</div>
                             </div>
                         </div>
                     </div>
 
                     <div class="tab-content" id="hosting">
-                        <h4>🚀 Puter Hosting - Deploy to puter.site</h4>
+                        <h4>ðŸš€ Puter Hosting - Deploy to puter.site</h4>
                         <div class="hosting-section">
                             <input type="text" id="subdomain-input" placeholder="grudge-studio" style="flex: 1;">
                             <button onclick="deployToPuter()">Deploy Grudge Studio</button>
@@ -741,36 +743,36 @@
         <!-- Vibe AI Tools + Grudge Studio SDK -->
         <div class="main-grid">
             <div class="panel">
-                <h3>⚡ Vibe 8.0.0 - AI Development Tools</h3>
-                <p style="color: var(--secondary); margin-bottom: 15px; font-size: 0.9em;">Free AI via 4 providers: MegaLLM, OpenRouter, AgentRouter, Routeway — no API keys needed</p>
+                <h3>âš¡ Vibe 8.0.0 - AI Development Tools</h3>
+                <p style="color: var(--secondary); margin-bottom: 15px; font-size: 0.9em;">Free AI via 4 providers: MegaLLM, OpenRouter, AgentRouter, Routeway â€” no API keys needed</p>
                 <div id="vibe-providers" style="margin-bottom: 15px;"></div>
                 <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-                    <button onclick="loadVibeProviders()">🔄 Check Providers</button>
-                    <a href="/downloads/vibe-8.0.0.zip" download style="text-decoration: none;"><button>⬇️ Download Vibe 8.0.0</button></a>
-                    <a href="https://github.com/mk-knight23/vibe" target="_blank" style="text-decoration: none;"><button>💻 GitHub</button></a>
+                    <button onclick="loadVibeProviders()">ðŸ”„ Check Providers</button>
+                    <a href="/downloads/vibe-8.0.0.zip" download style="text-decoration: none;"><button>â¬‡ï¸ Download Vibe 8.0.0</button></a>
+                    <a href="https://github.com/mk-knight23/vibe" target="_blank" style="text-decoration: none;"><button>ðŸ’» GitHub</button></a>
                 </div>
                 <div style="padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; font-size: 0.8em; line-height: 1.8;">
                     <strong>Vibe CLI Tools (36):</strong><br>
-                    Code Analyzer • Smart Refactor • Test Generator • Bundle Optimizer<br>
-                    Security Scanner • Performance Bench • Doc Generator • Code Migrator<br>
-                    Git Ops • Shell Exec • Web Fetch • Memory System • Multi-File Edit<br>
+                    Code Analyzer â€¢ Smart Refactor â€¢ Test Generator â€¢ Bundle Optimizer<br>
+                    Security Scanner â€¢ Performance Bench â€¢ Doc Generator â€¢ Code Migrator<br>
+                    Git Ops â€¢ Shell Exec â€¢ Web Fetch â€¢ Memory System â€¢ Multi-File Edit<br>
                     <span style="color: var(--secondary);">Install: <code>npm i -g vibe-ai-cli</code></span>
                 </div>
             </div>
 
             <div class="panel">
-                <h3>🎮 Grudge Studio SDK</h3>
-                <p style="color: var(--secondary); margin-bottom: 15px; font-size: 0.9em;">3D Game Dev SDK — Three.js, Socket.io, AI Agent, Puter Cloud Sync</p>
+                <h3>ðŸŽ® Grudge Studio SDK</h3>
+                <p style="color: var(--secondary); margin-bottom: 15px; font-size: 0.9em;">3D Game Dev SDK â€” Three.js, Socket.io, AI Agent, Puter Cloud Sync</p>
                 <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-                    <button onclick="loadSDKInfo()">📦 SDK Modules</button>
-                    <a href="https://github.com/MolochDaGod/GrudgeStudioNPM" target="_blank" style="text-decoration: none;"><button>💻 GitHub</button></a>
-                    <a href="https://www.npmjs.com/package/grudge-studio" target="_blank" style="text-decoration: none;"><button>📦 NPM</button></a>
+                    <button onclick="loadSDKInfo()">ðŸ“¦ SDK Modules</button>
+                    <a href="https://github.com/MolochDaGod/GrudgeStudioNPM" target="_blank" style="text-decoration: none;"><button>ðŸ’» GitHub</button></a>
+                    <a href="https://www.npmjs.com/package/grudge-studio" target="_blank" style="text-decoration: none;"><button>ðŸ“¦ NPM</button></a>
                 </div>
                 <div id="sdk-modules" style="padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; font-size: 0.8em; line-height: 1.8;">
-                    <strong>grudge-studio@1.2.0</strong> — <code>npm install grudge-studio</code><br>
-                    core • render • controllers • terrain • net • ui • assets • ai-agent<br><br>
+                    <strong>grudge-studio@1.2.0</strong> â€” <code>npm install grudge-studio</code><br>
+                    core â€¢ render â€¢ controllers â€¢ terrain â€¢ net â€¢ ui â€¢ assets â€¢ ai-agent<br><br>
                     <strong>@grudge/puter-sync@1.0.0</strong><br>
-                    Puter cloud sync • Auto-backup • Auth bridge • @heyputer/puter.js
+                    Puter cloud sync â€¢ Auto-backup â€¢ Auth bridge â€¢ @heyputer/puter.js
                 </div>
             </div>
         </div>
@@ -778,7 +780,7 @@
         <!-- Puter Cloud Storage Panel -->
         <div class="main-grid">
             <div class="panel full-width-panel">
-                <h3>☁️ Puter Cloud Storage - Grudge Studio Object Storage</h3>
+                <h3>â˜ï¸ Puter Cloud Storage - Grudge Studio Object Storage</h3>
 
                 <div class="storage-stats" id="storage-stats">
                     <div class="stat-card">
@@ -796,10 +798,10 @@
                 </div>
 
                 <div style="display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap;">
-                    <button onclick="createBucket()">📁 New Bucket</button>
-                    <button onclick="uploadFileToPuter()">⬆️ Upload File</button>
-                    <button onclick="refreshStorage()">🔄 Refresh</button>
-                    <button onclick="showKVManager()">🗃️ KV Store</button>
+                    <button onclick="createBucket()">ðŸ“ New Bucket</button>
+                    <button onclick="uploadFileToPuter()">â¬†ï¸ Upload File</button>
+                    <button onclick="refreshStorage()">ðŸ”„ Refresh</button>
+                    <button onclick="showKVManager()">ðŸ—ƒï¸ KV Store</button>
                     <input type="file" id="puter-file-input" multiple style="display: none;" onchange="handlePuterUpload(event)">
                 </div>
 
@@ -808,18 +810,18 @@
                 </div>
 
                 <div class="drop-zone" id="drop-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-                    📦 Drag & drop files here to upload to Puter Cloud
+                    ðŸ“¦ Drag & drop files here to upload to Puter Cloud
                 </div>
 
                 <div class="storage-browser" id="storage-browser">
-                    <p style="color: var(--secondary);">Sign in to Puter to access cloud storage...</p>
+                    <p style="color: var(--secondary);">Sign in to Grudge Studio to access cloud storage...</p>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>🏴‍☠️ GRUDA Legion v3.0 | Vibe 8.0.0 AI | grudge-studio@1.2.0 | @grudge/puter-sync | Puter Cloud</p>
-            <p>MegaLLM • OpenRouter • AgentRouter • Routeway • Puter AI • Claude • GPT-4o • DeepSeek • Llama 3</p>
+            <p>ðŸ´â€â˜ ï¸ GRUDA Legion v3.0 | Vibe 8.0.0 AI | grudge-studio@1.2.0 | @grudge/puter-sync | Puter Cloud</p>
+            <p>MegaLLM â€¢ OpenRouter â€¢ AgentRouter â€¢ Routeway â€¢ Puter AI â€¢ Claude â€¢ GPT-4o â€¢ DeepSeek â€¢ Llama 3</p>
         </div>
     </div>
 
@@ -867,14 +869,14 @@
         // INITIALIZATION
         // =============================================
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🏴‍☠️ GRUDA Legion initializing...');
+            console.log('ðŸ´â€â˜ ï¸ GRUDA Legion initializing...');
             initParticles();
             await initializePuterJS();
             await loadSystemStatus();
             setupEventListeners();
             initEntranceAnimations();
             updateStatus('network', 'connected', 'Network: Connected');
-            console.log('✅ GRUDA Legion fully loaded');
+            console.log('âœ… GRUDA Legion fully loaded');
         });
 
         // =============================================
@@ -884,8 +886,8 @@
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-            toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
+            const icons = { success: 'âœ…', error: 'âŒ', warning: 'âš ï¸', info: 'â„¹ï¸' };
+            toast.innerHTML = `<span>${icons[type] || 'â„¹ï¸'}</span><span>${message}</span>`;
             container.appendChild(toast);
             requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
             setTimeout(() => {
@@ -996,70 +998,126 @@
         // =============================================
         // PUTER.JS INITIALIZATION & AUTH
         // =============================================
+
+        // Dynamically load Puter SDK only when needed (avoids /get-gui-token 401 on cold page loads)
+        function loadPuterSdk() {
+            return new Promise((resolve, reject) => {
+                if (typeof puter !== 'undefined' && puter.auth) { resolve(); return; }
+                if (document.querySelector('script[src*="js.puter.com"]')) {
+                    // Script tag already injected â€” poll until SDK is ready
+                    const poll = setInterval(() => {
+                        if (typeof puter !== 'undefined' && puter.auth) { clearInterval(poll); resolve(); }
+                    }, 100);
+                    setTimeout(() => { clearInterval(poll); resolve(); }, 8000);
+                    return;
+                }
+                const s = document.createElement('script');
+                s.src = 'https://js.puter.com/v2/';
+                s.onload = () => {
+                    const poll = setInterval(() => {
+                        if (typeof puter !== 'undefined' && puter.auth) { clearInterval(poll); resolve(); }
+                    }, 100);
+                    setTimeout(() => { clearInterval(poll); resolve(); }, 5000);
+                };
+                s.onerror = () => reject(new Error('Failed to load Puter SDK'));
+                document.head.appendChild(s);
+            });
+        }
+
         async function initializePuterJS() {
+            // If user was previously signed in, eager-load SDK to auto-reconnect
+            const wasSignedIn = localStorage.getItem('grudge_puter_was_signed_in');
+            if (!wasSignedIn) {
+                // Fresh visitor â€” don't load SDK; wait for button click
+                updateStatus('ai', 'ready', 'AI Services: Ready');
+                updateStatus('cloud', 'loading', 'Grudge Cloud: Sign in required');
+                return;
+            }
             try {
-                if (typeof puter !== 'undefined') {
-                    console.log('✅ Puter.js SDK loaded');
-                    updateStatus('ai', 'ready', 'AI Services: Ready');
-                    if (puter.auth.isSignedIn()) {
-                        puterReady = true;
-                        await onPuterAuthenticated();
-                    } else {
-                        updateStatus('cloud', 'loading', 'Puter Cloud: Sign in required');
-                    }
+                await loadPuterSdk();
+                updateStatus('ai', 'ready', 'AI Services: Ready');
+                if (typeof puter !== 'undefined' && puter.auth.isSignedIn()) {
+                    puterReady = true;
+                    await onPuterAuthenticated();
                 } else {
-                    console.warn('⚠️ Puter.js not available');
-                    updateStatus('ai', 'loading', 'AI Services: Loading...');
-                    updateStatus('cloud', 'error', 'Puter Cloud: Unavailable');
+                    updateStatus('cloud', 'loading', 'Grudge Cloud: Sign in required');
                 }
             } catch (error) {
                 console.error('Puter.js initialization failed:', error);
                 updateStatus('ai', 'error', 'AI Services: Local only');
-                updateStatus('cloud', 'error', 'Puter Cloud: Error');
+                updateStatus('cloud', 'error', 'Grudge Cloud: Error');
+            }
+        }
+
+        function _setAuthBtn(signingIn) {
+            const btn = document.getElementById('auth-btn');
+            if (signingIn) {
+                btn.innerHTML = '<img src="/grudge-logo.png" alt="" style="width:18px;height:18px;border-radius:3px;flex-shrink:0;"> Grudge Login';
+            } else {
+                btn.textContent = 'Sign Out';
             }
         }
 
         async function handlePuterAuth() {
             try {
+                // Lazy-load SDK on first click
+                const btn = document.getElementById('auth-btn');
+                btn.disabled = true;
+                btn.textContent = 'Loading...';
+                await loadPuterSdk();
+
                 if (typeof puter === 'undefined') {
-                    showToast('Puter.js SDK not loaded. Please refresh.', 'error');
+                    showToast('Could not load Grudge Cloud. Please refresh.', 'error');
+                    _setAuthBtn(true);
+                    btn.disabled = false;
                     return;
                 }
+
                 if (puter.auth.isSignedIn()) {
+                    // Sign out
                     await updateOnlineStatus(false);
                     await logGrudgeActivity('logout');
                     await puter.auth.signOut();
+                    localStorage.removeItem('grudge_puter_was_signed_in');
                     puterReady = false;
                     puterUser = null;
                     grudgeProfile = null;
-                    document.getElementById('user-info').textContent = 'Not signed in to Puter Cloud';
-                    document.getElementById('auth-btn').textContent = 'Sign In to Puter';
+                    document.getElementById('user-info').textContent = 'Not signed in';
+                    _setAuthBtn(true);
                     document.getElementById('account-btn').style.display = 'none';
                     document.getElementById('account-panel').classList.remove('active');
-                    updateStatus('cloud', 'loading', 'Puter Cloud: Signed out');
-                    document.getElementById('storage-browser').innerHTML = '<p style="color: var(--secondary);">Sign in to Puter to access cloud storage...</p>';
-                    showToast('Signed out of Puter Cloud', 'info');
+                    updateStatus('cloud', 'loading', 'Grudge Cloud: Signed out');
+                    document.getElementById('storage-browser').innerHTML = '<p style="color: var(--secondary);">Sign in to Grudge Studio to access cloud storage...</p>';
+                    showToast('Signed out of Grudge Studio', 'info');
+                    btn.disabled = false;
                     return;
                 }
+
                 const user = await puter.auth.signIn();
                 if (user) {
                     puterReady = true;
                     await onPuterAuthenticated();
+                } else {
+                    _setAuthBtn(true);
                 }
+                btn.disabled = false;
             } catch (error) {
-                console.error('Puter auth failed:', error);
+                console.error('Grudge auth failed:', error);
                 showToast('Authentication failed: ' + error.message, 'error');
+                _setAuthBtn(true);
+                document.getElementById('auth-btn').disabled = false;
             }
         }
 
         async function onPuterAuthenticated() {
             try {
                 puterUser = await puter.auth.getUser();
-                document.getElementById('user-info').textContent = `Signed in as: ${puterUser.username} | Puter Cloud Connected`;
-                document.getElementById('auth-btn').textContent = 'Sign Out';
+                localStorage.setItem('grudge_puter_was_signed_in', '1');
+                document.getElementById('user-info').textContent = `ðŸŸ¢ ${puterUser.username} â€” Grudge Studio`;
+                _setAuthBtn(false);
                 document.getElementById('account-btn').style.display = '';
-                updateStatus('cloud', 'ready', 'Puter Cloud: Connected');
-                showToast(`Welcome, ${puterUser.username}!`, 'success');
+                updateStatus('cloud', 'ready', 'Grudge Cloud: Connected');
+                showToast(`Welcome back, ${puterUser.username}!`, 'success');
                 await initializeGrudgeStudioStorage();
                 await loadGrudgeProfile();
                 await updateOnlineStatus(true);
@@ -1067,7 +1125,7 @@
                 await createGrudgeSession();
                 await navigateTo(STUDIO_ROOT);
                 await updateStorageStats();
-                console.log('\u2705 Puter Cloud fully connected for Grudge Studio');
+                console.log('\u2705 Grudge Studio cloud connected');
             } catch (error) {
                 console.error('Post-auth setup failed:', error);
             }
@@ -1087,7 +1145,7 @@
                     buckets: BUCKETS, description: 'GrudaChain Free AI Node System - Cloud Storage'
                 };
                 await puter.fs.write(`${STUDIO_ROOT}/manifest.json`, JSON.stringify(manifest, null, 2));
-                console.log('✅ Grudge Studio storage initialized');
+                console.log('âœ… Grudge Studio storage initialized');
             } catch (error) {
                 console.error('Storage init failed:', error);
             }
@@ -1095,7 +1153,7 @@
 
         async function navigateTo(path) {
             if (!puterReady) {
-                document.getElementById('storage-browser').innerHTML = '<p style="color: var(--warning);">Sign in to Puter to browse cloud storage</p>';
+                document.getElementById('storage-browser').innerHTML = '<p style="color: var(--warning);">Sign in to Grudge Studio to browse cloud storage</p>';
                 return;
             }
             currentPath = path;
@@ -1117,15 +1175,15 @@
                 sorted.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'storage-item';
-                    const icon = item.is_dir ? '📁' : getFileIcon(item.name);
+                    const icon = item.is_dir ? 'ðŸ“' : getFileIcon(item.name);
                     const size = item.is_dir ? '--' : formatSize(item.size || 0);
                     div.innerHTML = `
                         <span class="item-icon">${icon}</span>
                         <span class="item-name">${item.name}</span>
                         <span class="item-size">${size}</span>
                         <span class="item-actions">
-                            ${!item.is_dir ? '<button onclick="downloadFile(\'' + item.path + '\')">⬇️</button>' : ''}
-                            <button onclick="deleteItem(\'' + item.path + '\', ' + item.is_dir + ')">❌</button>
+                            ${!item.is_dir ? '<button onclick="downloadFile(\'' + item.path + '\')">â¬‡ï¸</button>' : ''}
+                            <button onclick="deleteItem(\'' + item.path + '\', ' + item.is_dir + ')">âŒ</button>
                         </span>
                     `;
                     if (item.is_dir) {
@@ -1134,8 +1192,14 @@
                     browser.appendChild(div);
                 });
             } catch (error) {
-                console.error('Failed to list directory:', error);
-                browser.innerHTML = `<p style="color: var(--error);">Error: ${error.message}</p>`;
+                // 404 / ENOENT means directory doesn't exist yet â€” treat as empty
+                const isNotFound = error.status === 404 || (error.message || '').toLowerCase().includes('not found') || (error.message || '').toLowerCase().includes('enoent');
+                if (isNotFound) {
+                    browser.innerHTML = '<p style="color: var(--secondary);">Empty directory</p>';
+                } else {
+                    console.error('Failed to list directory:', error);
+                    browser.innerHTML = `<p style="color: var(--error);">Error: ${error.message}</p>`;
+                }
             }
         }
 
@@ -1153,7 +1217,7 @@
         }
 
         async function createBucket() {
-            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            if (!puterReady) { showToast('Sign in to Grudge Studio first', 'warning'); return; }
             const name = prompt('Bucket name (e.g. textures, sounds, maps):');
             if (!name) return;
             const sanitized = name.replace(/[^a-zA-Z0-9_-]/g, '-').toLowerCase();
@@ -1168,7 +1232,7 @@
         }
 
         function uploadFileToPuter() {
-            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            if (!puterReady) { showToast('Sign in to Grudge Studio first', 'warning'); return; }
             document.getElementById('puter-file-input').click();
         }
 
@@ -1200,10 +1264,10 @@
         async function handleDrop(e) {
             e.preventDefault(); e.stopPropagation();
             document.getElementById('drop-zone').classList.remove('drag-over');
-            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            if (!puterReady) { showToast('Sign in to Grudge Studio first', 'warning'); return; }
             const files = e.dataTransfer.files;
             if (!files.length) return;
-            document.getElementById('drop-zone').textContent = `⏳ Uploading ${files.length} file(s)...`;
+            document.getElementById('drop-zone').textContent = `â³ Uploading ${files.length} file(s)...`;
             for (const file of files) {
                 try {
                     await puter.fs.write(`${currentPath}/${file.name}`, file, { dedupeName: true });
@@ -1211,7 +1275,7 @@
                     console.error(`Drop upload failed for ${file.name}:`, error);
                 }
             }
-            document.getElementById('drop-zone').textContent = '📦 Drag & drop files here to upload to Puter Cloud';
+            document.getElementById('drop-zone').textContent = 'ðŸ“¦ Drag & drop files here to upload to Grudge Cloud';
             showToast(`${files.length} file(s) uploaded`, 'success');
             await navigateTo(currentPath);
             await updateStorageStats();
@@ -1260,14 +1324,16 @@
                 const items = await puter.fs.readdir(STUDIO_ROOT);
                 document.getElementById('stat-files').textContent = items.filter(i => !i.is_dir).length;
                 document.getElementById('stat-dirs').textContent = items.filter(i => i.is_dir).length;
-                try {
-                    const keys = await puter.kv.list(true);
-                    document.getElementById('stat-kv').textContent = keys.filter(k => k.key && k.key.startsWith('grudge-studio:')).length;
-                } catch (e) {
-                    document.getElementById('stat-kv').textContent = '0';
-                }
             } catch (error) {
-                console.error('Stats update failed:', error);
+                // 404 = dir not created yet; silently show 0
+                document.getElementById('stat-files').textContent = '0';
+                document.getElementById('stat-dirs').textContent = '0';
+            }
+            try {
+                const keys = await puter.kv.list(true);
+                document.getElementById('stat-kv').textContent = keys.filter(k => k.key && k.key.startsWith('grudge-studio:')).length;
+            } catch (e) {
+                document.getElementById('stat-kv').textContent = '0';
             }
         }
 
@@ -1275,7 +1341,7 @@
         // KV STORE MANAGER
         // =============================================
         async function showKVManager() {
-            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            if (!puterReady) { showToast('Sign in to Grudge Studio first', 'warning'); return; }
             const browser = document.getElementById('storage-browser');
             kvManagerVisible = !kvManagerVisible;
             if (!kvManagerVisible) { await navigateTo(currentPath); return; }
@@ -1283,7 +1349,7 @@
             try {
                 const keys = await puter.kv.list(true);
                 let html = `<div style="margin-bottom: 15px;">
-                    <strong style="color: var(--secondary);">🗃️ Key-Value Store</strong>
+                    <strong style="color: var(--secondary);">ðŸ—ƒï¸ Key-Value Store</strong>
                     <button onclick="addKVEntry()" style="margin-left: 15px; padding: 4px 12px;">+ Add Entry</button>
                     <button onclick="showKVManager()" style="margin-left: 5px; padding: 4px 12px;">Back to Files</button>
                 </div>`;
@@ -1294,11 +1360,11 @@
                         const val = typeof entry.value === 'string' ? entry.value : JSON.stringify(entry.value);
                         const truncated = val.length > 80 ? val.substring(0, 80) + '...' : val;
                         html += `<div class="storage-item">
-                            <span class="item-icon">🔑</span>
+                            <span class="item-icon">ðŸ”‘</span>
                             <span class="item-name"><strong>${entry.key}</strong></span>
                             <span class="item-size">${truncated}</span>
                             <span class="item-actions">
-                                <button onclick="deleteKVEntry('${entry.key}')">❌</button>
+                                <button onclick="deleteKVEntry('${entry.key}')">âŒ</button>
                             </span>
                         </div>`;
                     });
@@ -1340,10 +1406,10 @@
         // PUTER HOSTING
         // =============================================
         async function deployToPuter() {
-            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            if (!puterReady) { showToast('Sign in to Grudge Studio first', 'warning'); return; }
             const subdomain = document.getElementById('subdomain-input').value.trim() || 'grudge-studio';
             const statusDiv = document.getElementById('hosting-status');
-            statusDiv.innerHTML = '<p style="color: var(--warning);">⏳ Deploying to puter.site...</p>';
+            statusDiv.innerHTML = '<p style="color: var(--warning);">â³ Deploying to puter.site...</p>';
             try {
                 const hostDir = `grudge-studio-hosting`;
                 try { await puter.fs.mkdir(hostDir); } catch(e) {}
@@ -1377,7 +1443,7 @@
                 await puter.fs.write(`${hostDir}/index.html`, landingPage);
                 const site = await puter.hosting.create(subdomain, hostDir);
                 const url = `https://${site.subdomain}.puter.site`;
-                statusDiv.innerHTML = `<p style="color: var(--primary);">✅ Deployed successfully!</p>
+                statusDiv.innerHTML = `<p style="color: var(--primary);">âœ… Deployed successfully!</p>
                     <a class="hosted-link" href="${url}" target="_blank">${url}</a>`;
                 showToast('Deployed to ' + url, 'success');
                 await puter.kv.set(KV_KEYS.hostedUrl, url);
@@ -1427,12 +1493,12 @@
         function getFileIcon(name) {
             const ext = name.split('.').pop().toLowerCase();
             const icons = {
-                json: '📄', js: '🟨', html: '🌐', css: '🎨', png: '🖼️',
-                jpg: '🖼️', jpeg: '🖼️', gif: '🖼️', svg: '🖼️', mp3: '🎵',
-                wav: '🎵', mp4: '🎬', txt: '📃', md: '📖', zip: '📦',
-                py: '🐍', ts: '🟦', java: '☕', yaml: '⚙️', yml: '⚙️'
+                json: 'ðŸ“„', js: 'ðŸŸ¨', html: 'ðŸŒ', css: 'ðŸŽ¨', png: 'ðŸ–¼ï¸',
+                jpg: 'ðŸ–¼ï¸', jpeg: 'ðŸ–¼ï¸', gif: 'ðŸ–¼ï¸', svg: 'ðŸ–¼ï¸', mp3: 'ðŸŽµ',
+                wav: 'ðŸŽµ', mp4: 'ðŸŽ¬', txt: 'ðŸ“ƒ', md: 'ðŸ“–', zip: 'ðŸ“¦',
+                py: 'ðŸ', ts: 'ðŸŸ¦', java: 'â˜•', yaml: 'âš™ï¸', yml: 'âš™ï¸'
             };
-            return icons[ext] || '📄';
+            return icons[ext] || 'ðŸ“„';
         }
 
         function formatSize(bytes) {
@@ -1573,7 +1639,7 @@
             const language = document.getElementById('language-select').value;
             const output = document.getElementById('generated-code');
             if (!prompt) return;
-            output.value = '⏳ Generating code via Vibe AI...';
+            output.value = 'â³ Generating code via Vibe AI...';
             try {
                 const response = await fetch('/api/vibe/chat', {
                     method: 'POST',
@@ -1608,7 +1674,7 @@
             const resultDiv = document.getElementById('analysis-result');
             if (!fileInput.files.length) return;
             const file = fileInput.files[0];
-            resultDiv.innerHTML = '⏳ Analyzing file...';
+            resultDiv.innerHTML = 'â³ Analyzing file...';
             try {
                 const content = await readFileContent(file);
                 const response = await fetch('/api/analyze-file', {
@@ -1655,7 +1721,7 @@
                 Object.entries(data.providers).forEach(([key, p]) => {
                     html += `<div class="network-node">
                         <div><strong>${p.name}</strong><br><small>${p.models.join(', ')}</small></div>
-                        <div style="color: ${p.free ? 'var(--primary)' : 'var(--warning)'};">● ${p.status} (free)</div>
+                        <div style="color: ${p.free ? 'var(--primary)' : 'var(--warning)'};">â— ${p.status} (free)</div>
                     </div>`;
                 });
                 container.innerHTML = html;
@@ -1673,13 +1739,13 @@
                 const data = await res.json();
                 const gs = data.packages['grudge-studio'];
                 const ps = data.packages['@grudge/puter-sync'];
-                let html = `<strong>${gs.install}</strong> — v${gs.version}<br>`;
+                let html = `<strong>${gs.install}</strong> â€” v${gs.version}<br>`;
                 Object.entries(gs.modules).forEach(([mod, desc]) => {
-                    html += `<div class="storage-item" style="cursor: default; padding: 4px 8px;"><span class="item-icon">📦</span><span class="item-name"><strong>${mod}</strong>: ${desc}</span></div>`;
+                    html += `<div class="storage-item" style="cursor: default; padding: 4px 8px;"><span class="item-icon">ðŸ“¦</span><span class="item-name"><strong>${mod}</strong>: ${desc}</span></div>`;
                 });
                 html += `<br><strong>@grudge/puter-sync</strong> v${ps.version}<br>`;
                 Object.entries(ps.modules).forEach(([mod, desc]) => {
-                    html += `<div class="storage-item" style="cursor: default; padding: 4px 8px;"><span class="item-icon">☁️</span><span class="item-name"><strong>${mod}</strong>: ${desc}</span></div>`;
+                    html += `<div class="storage-item" style="cursor: default; padding: 4px 8px;"><span class="item-icon">â˜ï¸</span><span class="item-name"><strong>${mod}</strong>: ${desc}</span></div>`;
                 });
                 container.innerHTML = html;
             } catch (e) {
@@ -1888,7 +1954,7 @@
         }
 
         async function deployFullToPuter() {
-            if (!puterReady) { showToast('Sign in to Puter first', 'warning'); return; }
+            if (!puterReady) { showToast('Sign in to Grudge Studio first', 'warning'); return; }
             showToast('Deploying Grudge Studio Cloud Dashboard...', 'info');
             try {
                 const hostDir = 'grudge-studio-app';
@@ -2002,7 +2068,7 @@ async function du(e){var f=e.target.files;if(!f.length)return;for(var i=0;i<f.le
                             <strong>${node.name}</strong><br>
                             <small>${node.endpoint}</small>
                         </div>
-                        <div style="color: var(--primary);">● ${node.status}</div>
+                        <div style="color: var(--primary);">â— ${node.status}</div>
                     `;
                     container.appendChild(nodeDiv);
                 });
@@ -2014,3 +2080,4 @@ async function du(e){var f=e.target.files;if(!f.length)return;for(var i=0;i<f.le
     </script>
 </body>
 </html>
+
