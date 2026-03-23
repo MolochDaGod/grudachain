@@ -35,6 +35,29 @@ module.exports = async function handler(req, res) {
     servers.push({ name: 'Grudge Game API', type: 'rest', url: 'https://api.grudge-studio.com', status: 'offline', error: e.message });
   }
 
+  // Probe Unity Dedicated Server (via Node.js API proxy)
+  try {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 5000);
+    const r = await _fetch('https://grudgewarlords.com/api/servers/unity/status', { signal: controller.signal });
+    const data = await r.json().catch(() => ({}));
+    const isOnline = r.ok && data.status === 'online';
+    servers.push({
+      name: 'Grudge Warlords Dedicated (Unity)',
+      type: 'dedicated',
+      url: 'https://grudgewarlords.com',
+      port: data.port || 7777,
+      status: isOnline ? 'online' : (data.status || 'offline'),
+      maxPlayers: data.maxPlayers || 100,
+      currentPlayers: data.currentPlayers || 0,
+      tickRate: data.tickRate || 30,
+      region: data.region || 'us-east-1',
+      data
+    });
+  } catch (e) {
+    servers.push({ name: 'Grudge Warlords Dedicated (Unity)', type: 'dedicated', url: 'https://grudgewarlords.com', port: 7777, status: 'offline', error: e.message });
+  }
+
   // Read from Supabase if available
   const supabase = getSupabase();
   let dbServers = [];

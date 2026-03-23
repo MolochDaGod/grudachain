@@ -5,6 +5,7 @@ const FALLBACK_SERVICES = [
   { slug: 'nexus-hub', name: 'GrudaChain Nexus Hub', platform: 'vercel', url: 'https://grudachain-rho.vercel.app', type: 'app', status: 'active', health_endpoint: '/api/health' },
   { slug: 'auth-gateway', name: 'Grudge Auth (SSO)', platform: 'vps', url: 'https://id.grudge-studio.com', type: 'auth', status: 'active', health_endpoint: '/health' },
   { slug: 'game-api', name: 'Grudge Game API', platform: 'vps', url: 'https://api.grudge-studio.com', type: 'api', status: 'active', health_endpoint: '/health' },
+  { slug: 'unity-dedicated', name: 'Grudge Warlords Dedicated Server', platform: 'vps', url: 'https://grudgewarlords.com', type: 'game-server', status: 'active', health_endpoint: '/api/servers/unity/status' },
   { slug: 'wcs', name: 'Warlord Crafting Suite', platform: 'vercel', url: 'https://grudgewarlords.com', type: 'app', status: 'active' },
   { slug: 'gdevelop-assistant', name: 'GDevelop Assistant', platform: 'vercel', url: 'https://gdevelop-assistant.vercel.app', type: 'app', status: 'active', health_endpoint: '/api/health' },
   { slug: 'objectstore', name: 'ObjectStore Game Data', platform: 'github-pages', url: 'https://molochdagod.github.io/ObjectStore', type: 'cdn', status: 'active' },

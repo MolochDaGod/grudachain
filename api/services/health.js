@@ -6,6 +6,7 @@ const SERVICES = [
   { slug: 'auth-gateway', name: 'Grudge Auth (SSO)', url: 'https://id.grudge-studio.com/health' },
   { slug: 'game-api', name: 'Grudge Game API', url: 'https://api.grudge-studio.com/health' },
   { slug: 'wcs', name: 'Grudge Warlords', url: 'https://grudgewarlords.com' },
+  { slug: 'unity-dedicated', name: 'Unity Dedicated Server', url: 'https://grudgewarlords.com/api/servers/unity/status' },
   { slug: 'gdevelop', name: 'GDevelop Assistant', url: 'https://gdevelop-assistant.vercel.app/api/health' },
   { slug: 'objectstore', name: 'ObjectStore', url: 'https://molochdagod.github.io/ObjectStore' },
   { slug: 'dashboard', name: 'Grudge Dashboard', url: 'https://dash.grudge-studio.com' }
