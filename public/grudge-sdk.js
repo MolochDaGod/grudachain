@@ -61,20 +61,19 @@
   const auth = {
     /** Login with username/email + password */
     async login(identifier, password) {
-      const d = await post(ID_API, '/auth/login', { identifier, password });
+      const d = await post(ID_API, '/api/auth/login', { username: identifier, password });
       setToken(d.token); _user = d.user || d; return d;
     },
 
     /** Register new account */
     async register(username, password, email) {
-      const d = await post(ID_API, '/auth/register', { username, password, email: email || undefined });
+      const d = await post(ID_API, '/api/auth/register', { username, password, email: email || undefined });
       setToken(d.token); _user = d.user || d; return d;
     },
 
     /** Guest login (instant, no credentials) */
     async guest() {
-      const id = 'web_' + (crypto.randomUUID ? crypto.randomUUID().slice(0,12) : Math.random().toString(36).slice(2,14));
-      const d = await post(ID_API, '/auth/guest', { deviceId: id });
+      const d = await post(ID_API, '/api/auth/guest', {});
       setToken(d.token); _user = d.user || d; return d;
     },
 
@@ -91,6 +90,7 @@
     oauth(provider, redirectUri) {
       const redir = redirectUri || window.location.origin + window.location.pathname;
       window.location.href = ID_API + '/auth/' + provider + '?redirect_uri=' + encodeURIComponent(redir);
+      // Note: Discord OAuth is handled by the backend at /auth/discord (no /api prefix)
     },
     discord(r) { auth.oauth('discord', r); },
     google(r) { auth.oauth('google', r); },
@@ -106,7 +106,7 @@
     async getUser() {
       if (!getToken()) return null;
       try {
-        const d = await get(ID_API, '/auth/user');
+        const d = await get(ID_API, '/api/auth/user');
         _user = d; return d;
       } catch { setToken(null); _user = null; return null; }
     },
@@ -122,7 +122,7 @@
 
     /** Logout */
     async logout() {
-      try { await post(ID_API, '/auth/logout', {}); } catch {}
+      try { await post(ID_API, '/api/auth/logout', {}); } catch {}
       setToken(null); _user = null;
     },
 
