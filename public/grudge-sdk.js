@@ -1,143 +1,153 @@
 /**
- * GRUDGE SDK — Universal Browser Client
- * Drop this into ANY Grudge Studio frontend for instant auth + API + AI.
+ * GRUDGE SDK v2.0 — Universal Browser Client
+ * Drop into ANY Grudge Studio frontend for instant auth + API + AI + storage.
  *
  * Usage:
  *   <script src="https://js.puter.com/v2/"></script>
  *   <script src="grudge-sdk.js"></script>
  *   <script>
- *     await Grudge.auth.login('user', 'pass');
- *     const user = Grudge.auth.user();
- *     const recipes = await Grudge.api.get('/crafting/recipes');
- *     const ai = await Grudge.ai.chat('Generate a quest for a level 5 warrior');
+ *     await Grudge.auth.init();               // auto-login from URL/Puter
+ *     await Grudge.auth.discord();            // OAuth redirect
+ *     await Grudge.auth.google();             // OAuth redirect
+ *     await Grudge.auth.github();             // OAuth redirect
+ *     await Grudge.auth.phantom();            // Phantom wallet
+ *     const user = Grudge.auth.user();        // { grudgeId, username, email, ... }
+ *     const ai = await Grudge.ai.chat('Quest for a level 5 warrior');
+ *     const url = await Grudge.assets.upload(file, 'avatar.png', 'avatars');
  *   </script>
  *
- * All auth flows go through id.grudge-studio.com
- * All game data goes through api.grudge-studio.com
- * AI uses Puter.js (free, client-side) with backend fallback
- * NO direct database connections. Ever.
+ * Auth: password | guest | puter | discord | google | github | phantom/wallet
+ * API  → api.grudge-studio.com
+ * AI   → ai.grudge-studio.com (CF Workers AI / Anthropic fallback)
+ * CDN  → assets.grudge-studio.com (R2)
  *
- * @version 1.0.0
+ * @version 2.0.0
  * @license Grudge Studio — Racalvin The Pirate King
  */
 
 (function(global) {
   'use strict';
 
-  const ID_API = 'https://id.grudge-studio.com';
-  const GAME_API = 'https://api.grudge-studio.com';
-  const ACCOUNT_API = 'https://account.grudge-studio.com';
-  const WS_URL = 'wss://ws.grudge-studio.com';
-  const ASSETS_URL = 'https://assets.grudge-studio.com';
+  const API_BASE   = 'https://api.grudge-studio.com';
+  const AI_BASE    = 'https://ai.grudge-studio.com';
+  const ASSETS_CDN = 'https://assets.grudge-studio.com';
+  const WS_URL     = 'wss://api.grudge-studio.com/ws';
+  // Legacy aliases
+  const ID_API = API_BASE;
+  const GAME_API = API_BASE;
   const TOKEN_KEY = 'grudge_token';
 
   let _token = null;
-  let _user = null;
+  let _user  = null;
 
-  // ── Token management ────────────────────────────────────────
-  function getToken() { return _token || sessionStorage.getItem(TOKEN_KEY); }
-  function setToken(t) { _token = t; if (t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY); }
+  // ── Token helpers ────────────────────────────────────────────────
+  function getToken() {
+    return _token || sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY) || null;
+  }
+  function setToken(t) {
+    _token = t;
+    if (t) { sessionStorage.setItem(TOKEN_KEY, t); localStorage.setItem(TOKEN_KEY, t); }
+    else   { sessionStorage.removeItem(TOKEN_KEY); localStorage.removeItem(TOKEN_KEY); }
+  }
+  function _authHdr() {
+    const t = getToken(); return t ? { Authorization: 'Bearer ' + t } : {};
+  }
 
   // ── HTTP helpers ────────────────────────────────────────────
-  async function post(baseUrl, path, body) {
-    const headers = { 'Content-Type': 'application/json' };
-    const t = getToken(); if (t) headers.Authorization = 'Bearer ' + t;
-    const res = await fetch(baseUrl + path, { method: 'POST', headers, body: JSON.stringify(body) });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'Request failed (' + res.status + ')');
-    return data;
+  async function _post(base, path, body) {
+    const res = await fetch(base + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ..._authHdr() },
+      body: JSON.stringify(body),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(d.error || 'Request failed (' + res.status + ')');
+    return d;
   }
-
-  async function get(baseUrl, path) {
-    const headers = {};
-    const t = getToken(); if (t) headers.Authorization = 'Bearer ' + t;
-    const res = await fetch(baseUrl + path, { headers });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'Request failed (' + res.status + ')');
-    return data;
+  async function _get(base, path) {
+    const res = await fetch(base + path, { headers: _authHdr() });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(d.error || 'Request failed (' + res.status + ')');
+    return d;
   }
+  function _setAuth(d) { if (d.token) setToken(d.token); _user = d.user || d; return d; }
+  // Legacy aliases for any existing code
+  const post = (base, path, body) => _post(base, path, body);
+  const get  = (base, path)       => _get(base, path);
 
-  // ── Auth ─────────────────────────────────────────────────────
+  // ── Auth ─────────────────────────────────────────────────
   const auth = {
-    /** Login with username/email + password */
-    async login(identifier, password) {
-      const d = await post(ID_API, '/api/auth/login', { username: identifier, password });
-      setToken(d.token); _user = d.user || d; return d;
+    /** Username + password */
+    async login(username, password) {
+      return _setAuth(await _post(API_BASE, '/api/auth/login', { username, password }));
     },
-
     /** Register new account */
     async register(username, password, email) {
-      const d = await post(ID_API, '/api/auth/register', { username, password, email: email || undefined });
-      setToken(d.token); _user = d.user || d; return d;
+      return _setAuth(await _post(API_BASE, '/api/auth/register', { username, password, email: email || undefined }));
     },
-
-    /** Guest login (instant, no credentials) */
+    /** Instant guest (upgradeable later) */
     async guest() {
-      const d = await post(ID_API, '/api/auth/guest', {});
-      setToken(d.token); _user = d.user || d; return d;
+      return _setAuth(await _post(API_BASE, '/api/auth/guest', {}));
     },
-
-    /** Puter cloud login */
+    /** Puter cloud login — links puter UUID to Grudge ID */
     async puter() {
       if (typeof puter === 'undefined' || !puter.auth) throw new Error('Puter SDK not loaded');
       await puter.auth.signIn();
       const pu = await puter.auth.getUser();
-      const d = await post(ID_API, '/auth/puter', { puterUuid: pu.uuid, puterUsername: pu.username });
-      setToken(d.token); _user = d.user || d; return d;
+      return _setAuth(await _post(API_BASE, '/api/auth/puter', {
+        puterId: pu.uuid,
+        displayName: pu.username || pu.name || undefined,
+      }));
     },
-
-    /** OAuth redirect (Discord, Google, GitHub) */
-    oauth(provider, redirectUri) {
-      const redir = redirectUri || window.location.origin + window.location.pathname;
-      window.location.href = ID_API + '/auth/' + provider + '?redirect_uri=' + encodeURIComponent(redir);
-      // Note: Discord OAuth is handled by the backend at /auth/discord (no /api prefix)
+    /** Discord OAuth redirect */
+    discord() { window.location.href = API_BASE + '/auth/discord'; },
+    /** Google/Gmail OAuth redirect */
+    google()  { window.location.href = API_BASE + '/auth/google'; },
+    /** GitHub OAuth redirect */
+    github()  { window.location.href = API_BASE + '/auth/github'; },
+    /** Phantom / Solflare / Backpack — Ed25519 nonce-challenge */
+    async phantom(provider, walletType) {
+      const sol = provider || window.solana || window.solflare;
+      if (!sol) throw new Error('No Solana wallet detected. Install Phantom or Solflare.');
+      await sol.connect();
+      const pubkey = sol.publicKey.toString();
+      const { nonce, message } = await _get(API_BASE, '/api/auth/nonce?wallet=' + encodeURIComponent(pubkey));
+      const encoded = new TextEncoder().encode(message);
+      const { signature } = await sol.signMessage(encoded, 'utf8');
+      return _setAuth(await _post(API_BASE, '/api/auth/wallet', {
+        walletAddress: pubkey,
+        signature: Array.from(signature),
+        nonce,
+        walletType: walletType || (window.solana && window.solana.isPhantom ? 'phantom' : 'solana'),
+      }));
     },
-    discord(r) { auth.oauth('discord', r); },
-    google(r) { auth.oauth('google', r); },
-    github(r) { auth.oauth('github', r); },
-
-    /** Wallet login (Phantom/Web3Auth) */
-    async wallet(walletAddress, web3authToken) {
-      const d = await post(ID_API, '/auth/wallet', { wallet_address: walletAddress, web3auth_token: web3authToken });
-      setToken(d.token); _user = d.user || d; return d;
-    },
-
-    /** Get current user profile from token */
+    /** Fetch full profile from server (refreshes cache) */
     async getUser() {
       if (!getToken()) return null;
-      try {
-        const d = await get(ID_API, '/api/auth/user');
-        _user = d; return d;
-      } catch { setToken(null); _user = null; return null; }
+      try { const d = await _get(API_BASE, '/api/auth/user'); _user = d; return d; }
+      catch { setToken(null); _user = null; return null; }
     },
-
-    /** Return cached user (call getUser() first for fresh data) */
-    user() { return _user; },
-
-    /** Is user logged in? */
-    isLoggedIn() { return !!getToken(); },
-
-    /** Get the raw JWT token */
-    token() { return getToken(); },
-
-    /** Logout */
+    user()      { return _user; },
+    grudgeId()  { return _user && _user.grudgeId || null; },
+    isLoggedIn(){ return !!getToken(); },
+    token()     { return getToken(); },
     async logout() {
-      try { await post(ID_API, '/api/auth/logout', {}); } catch {}
+      try { await _post(API_BASE, '/api/auth/logout', {}); } catch {}
       setToken(null); _user = null;
     },
-
-    /** Check URL for OAuth callback token and initialize */
+    /** Call on page load — picks up ?token= from OAuth callbacks, tries Puter auto-login */
     async init() {
       const params = new URLSearchParams(window.location.search);
       const t = params.get('token') || params.get('sso_token');
       if (t) {
         setToken(t);
-        window.history.replaceState({}, '', window.location.pathname);
+        const u = new URL(window.location.href);
+        u.searchParams.delete('token'); u.searchParams.delete('sso_token'); u.searchParams.delete('provider');
+        window.history.replaceState({}, '', u.pathname + (u.search || ''));
       }
       if (getToken()) {
         try { await auth.getUser(); return true; } catch { return false; }
       }
-      // Try Puter auto-login
       try {
         if (typeof puter !== 'undefined' && puter.auth && puter.auth.isSignedIn()) {
           const pu = await puter.auth.getUser();
@@ -148,71 +158,116 @@
     },
   };
 
-  // ── Game API ────────────────────────────────────────────────
-  const api = {
-    get(path) { return get(GAME_API, path); },
-    post(path, body) { return post(GAME_API, path, body); },
+  // ── Wallet management ───────────────────────────────────────
+  const wallet = {
+    all()              { return _get(API_BASE, '/api/wallet/all'); },
+    get()              { return _get(API_BASE, '/api/wallet'); },
+    create()           { return _post(API_BASE, '/api/wallet/create', {}); },
+    link(addr, type)   { return _post(API_BASE, '/api/wallet/link', { walletAddress: addr, walletType: type || 'phantom' }); },
+  };
 
-    // Shortcuts
-    async recipes(classFilter, tier) {
-      let q = '/crafting/recipes?';
-      if (classFilter) q += 'class=' + classFilter + '&';
-      if (tier) q += 'tier=' + tier;
-      return get(GAME_API, q);
+  // ── Assets (R2 via ALE Worker) ──────────────────────────────
+  const assets = {
+    /** Upload file to R2, returns public CDN URL */
+    async upload(file, filename, category) {
+      const grudgeId = (_user && _user.grudgeId) || 'guest';
+      const meta = await _post(AI_BASE, '/assets/upload', {
+        filename: filename || (file && file.name) || 'upload',
+        category: category || 'general', grudgeId,
+      });
+      await fetch(meta.uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': meta.contentType || (file && file.type) || 'application/octet-stream' },
+        body: file,
+      });
+      return meta.publicUrl;
     },
-    leaderboard() { return get(GAME_API, '/combat/leaderboard'); },
-    islands() { return get(GAME_API, '/islands'); },
-    missions() { return get(GAME_API, '/missions'); },
-    balance(charId) { return get(GAME_API, '/economy/balance?char_id=' + charId); },
+    list(category) {
+      const grudgeId = (_user && _user.grudgeId) || 'guest';
+      return _get(AI_BASE, '/assets/list?prefix=players/' + grudgeId + (category ? '/' + category : ''));
+    },
   };
 
-  // ── Account API ─────────────────────────────────────────────
-  const account = {
-    get(path) { return get(ACCOUNT_API, path); },
-    post(path, body) { return post(ACCOUNT_API, path, body); },
-    profile() { return get(ACCOUNT_API, '/profile'); },
+  // ── Cloud Sync (DB + Puter KV) ──────────────────────────────
+  const sync = {
+    async push(gameState, islandId) {
+      const hdrs = { 'Content-Type': 'application/json', ..._authHdr() };
+      try {
+        if (typeof puter !== 'undefined' && puter.auth && puter.auth.isSignedIn && puter.auth.isSignedIn()) {
+          const pt = puter.authToken || (puter.auth && puter.auth.token);
+          if (pt) hdrs['X-Puter-Token'] = pt;
+        }
+      } catch {}
+      const res = await fetch(API_BASE + '/api/studio/sync/push', {
+        method: 'POST', headers: hdrs, body: JSON.stringify({ gameState, islandId }),
+      });
+      return res.json();
+    },
+    async pull() {
+      const hdrs = _authHdr();
+      try {
+        if (typeof puter !== 'undefined' && puter.auth && puter.auth.isSignedIn && puter.auth.isSignedIn()) {
+          const pt = puter.authToken || (puter.auth && puter.auth.token);
+          if (pt) hdrs['X-Puter-Token'] = pt;
+        }
+      } catch {}
+      const res = await fetch(API_BASE + '/api/studio/sync/pull', { headers: hdrs });
+      return res.json();
+    },
+    status() { return _get(API_BASE, '/api/studio/sync/status'); },
   };
 
-  // ── AI (Puter.js free + backend fallback) ───────────────────
+  // ── Game API ────────────────────────────────────────────
+  const api = {
+    get(path)       { return _get(API_BASE, path); },
+    post(path, body){ return _post(API_BASE, path, body); },
+    characters()    { return _get(API_BASE, '/api/characters'); },
+    createChar(d)   { return _post(API_BASE, '/api/characters', d); },
+    islands()       { return _get(API_BASE, '/api/islands'); },
+    profile()       { return _get(API_BASE, '/api/profile'); },
+    metadata()      { return _get(API_BASE, '/api/metadata'); },
+    health()        { return _get(API_BASE, '/api/health'); },
+  };
+  // Legacy alias
+  const account = { profile() { return _get(API_BASE, '/api/profile'); } };
+  // ── AI (CF Workers AI → Puter → Anthropic fallback) ──────────────
   const ai = {
-    /** Chat with AI — uses Puter.js (free) first, falls back to backend */
     async chat(message, opts) {
-      // Try Puter.js first (FREE — user pays)
+      // 1. CF Workers AI (free, no key needed)
+      try {
+        const d = await _post(AI_BASE, '/ai/cf', { message, model: opts && opts.model || '@cf/meta/llama-3-8b-instruct' });
+        if (d.response) return d.response;
+      } catch {}
+      // 2. Puter.js (free — user's own account)
       if (typeof puter !== 'undefined' && puter.ai) {
         try {
-          const resp = await puter.ai.chat(message, opts || {});
-          return typeof resp === 'string' ? resp : (resp?.message?.content || resp?.toString() || '');
+          const r = await puter.ai.chat(message, opts || {});
+          return typeof r === 'string' ? r : (r && r.message && r.message.content || r && r.toString() || '');
         } catch {}
       }
-      // Fallback to backend AI proxy
+      // 3. Anthropic via backend
       try {
-        const d = await post(GAME_API, '/ai/chat', { message });
-        return d.content || d.error || '';
+        const d = await _post(AI_BASE, '/ai/chat', { message });
+        return d.response || d.content || '';
       } catch (e) { return 'AI unavailable: ' + e.message; }
     },
-
-    /** Stream AI response (Puter.js only) */
+    cf(message, model) {
+      return _post(AI_BASE, '/ai/cf', { message, model: model || '@cf/meta/llama-3-8b-instruct' });
+    },
     async *stream(message, opts) {
       if (typeof puter !== 'undefined' && puter.ai) {
-        const resp = await puter.ai.chat(message, { ...(opts || {}), stream: true });
-        for await (const part of resp) {
-          if (part?.text) yield part.text;
-        }
+        const resp = await puter.ai.chat(message, Object.assign({}, opts, { stream: true }));
+        for await (const part of resp) { if (part && part.text) yield part.text; }
       }
     },
-
-    /** Generate image from text (Puter.js) */
     async image(prompt) {
-      if (typeof puter !== 'undefined' && puter.ai) {
-        return puter.ai.txt2img(prompt);
-      }
+      if (typeof puter !== 'undefined' && puter.ai) return puter.ai.txt2img(prompt);
       throw new Error('Puter SDK required for image generation');
     },
   };
 
-  // ── Cloud storage via Puter.js ──────────────────────────────
+  // ── Puter KV cloud storage ───────────────────────────────────
   const cloud = {
-    /** Save data to user's Puter cloud KV */
     async save(key, value) {
       if (typeof puter !== 'undefined' && puter.kv) {
         await puter.kv.set('grudge_' + key, typeof value === 'string' ? value : JSON.stringify(value));
@@ -220,8 +275,6 @@
       }
       return false;
     },
-
-    /** Load data from user's Puter cloud KV */
     async load(key) {
       if (typeof puter !== 'undefined' && puter.kv) {
         const v = await puter.kv.get('grudge_' + key);
@@ -229,20 +282,17 @@
       }
       return null;
     },
-
-    /** Save file to user's Puter cloud */
     async saveFile(name, data) {
-      if (typeof puter !== 'undefined' && puter.fs) {
+      if (typeof puter !== 'undefined' && puter.fs)
         return puter.fs.write('grudge-studio/' + name, data, { createMissingParents: true });
-      }
       throw new Error('Puter SDK required for cloud file storage');
     },
   };
 
-  // ── Constants ───────────────────────────────────────────────
-  const config = { ID_API, GAME_API, ACCOUNT_API, WS_URL, ASSETS_URL };
+  const config = { API_BASE, AI_BASE, ASSETS_CDN, WS_URL };
 
-  // ── Export ──────────────────────────────────────────────────
-  global.Grudge = { auth, api, account, ai, cloud, config };
+  global.Grudge = { auth, wallet, api, account, sync, assets, ai, cloud, config };
+
+})(typeof window !== 'undefined' ? window : globalThis);
 
 })(typeof window !== 'undefined' ? window : globalThis);
