@@ -1,9 +1,9 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Grudge Studio Nexus</title>
+  <title>GRUDA Legion — Grudge Studio Nexus</title>
 
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -13,11 +13,12 @@
 
   <meta name="theme-color" content="#0d1120" />
   <script src="/grudge-auth.js"></script>
-  <meta name="description" content="Grudge Studio Nexus â€” central hub for all apps, games, AI systems, ObjectStore, WCS, GDevelop Assistant, and ecosystem links." />
+  <meta name="description" content="Grudge Studio Nexus — central hub for all apps, games, AI systems, ObjectStore, WCS, GDevelop Assistant, and ecosystem links." />
 
   <!-- WCS Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Spectral+SC:wght@400;500;600;700&family=IM+Fell+English+SC&family=MedievalSharp&family=Uncial+Antiqua&display=swap" rel="stylesheet" />
 
   <style>
@@ -411,7 +412,7 @@
 
     .footer a { color: hsl(43 80% 65%); }
 
-    /* â”€â”€â”€ Scrollbar â”€â”€â”€ */
+    /* ─── Scrollbar ─── */
     ::-webkit-scrollbar { width: 10px; }
     ::-webkit-scrollbar-track { background: hsl(225 30% 8%); }
     ::-webkit-scrollbar-thumb {
@@ -444,7 +445,7 @@
     /* Corner Ornaments */
     .card.ornate { position: relative; }
     .card.ornate::after {
-      content: 'â—†';
+      content: '◆';
       position: absolute;
       bottom: -6px;
       right: -6px;
@@ -478,18 +479,18 @@
         </div>
         <div>
           <h1>Grudge Studio Nexus</h1>
-          <p>Apps â€¢ Games â€¢ AI â€¢ ObjectStore â€¢ WCS â€¢ Tools</p>
+          <p>Apps • Games • AI • ObjectStore • WCS • Tools</p>
         </div>
       </div>
 
       <div class="actions">
         <div id="auth-bar" style="display:flex;align-items:center;gap:8px;"></div>
-        <a class="chip" href="https://grudge-platform.vercel.app" target="_blank" rel="noreferrer">âš” Platform</a>
-        <a class="chip" href="https://warlord-crafting-suite.vercel.app" target="_blank" rel="noreferrer">ðŸ”¨ WCS</a>
-        <a class="chip" href="https://gdevelop-assistant.vercel.app" target="_blank" rel="noreferrer">ðŸŽ® GDevelop</a>
-        <a class="chip" href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer">ðŸ“¦ ObjectStore</a>
-        <a class="chip" href="https://github.com/MolochDaGod" target="_blank" rel="noreferrer">GitHub</a>
-        <a class="chip" href="https://discord.gg/FtGtmxmwkh" target="_blank" rel="noreferrer">Discord</a>
+        <a class="chip" href="https://grudge-platform.vercel.app" target="_blank" rel="noreferrer"><i class="fas fa-shield-halved"></i> Platform</a>
+        <a class="chip" href="https://warlord-crafting-suite.vercel.app" target="_blank" rel="noreferrer"><i class="fas fa-hammer"></i> WCS</a>
+        <a class="chip" href="https://gdevelop-assistant.vercel.app" target="_blank" rel="noreferrer"><i class="fas fa-gamepad"></i> GDevelop</a>
+        <a class="chip" href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer"><i class="fas fa-box-open"></i> ObjectStore</a>
+        <a class="chip" href="https://github.com/MolochDaGod" target="_blank" rel="noreferrer"><i class="fab fa-github"></i> GitHub</a>
+        <a class="chip" href="https://discord.gg/FtGtmxmwkh" target="_blank" rel="noreferrer"><i class="fab fa-discord"></i> Discord</a>
       </div>
     </div>
   </div>
@@ -498,14 +499,14 @@
     <div class="hero">
       <div class="hero-grid">
         <div class="card">
-          <h2>âœ… Grudge Studio Nexus</h2>
+          <h2><i class="fas fa-circle-check"></i> Grudge Studio Nexus</h2>
           <p>
             This hub is the single place you can bookmark for every Grudge Studio deployment.
             Access all apps, games, AI systems, and tools from one place.
           </p>
 
           <div class="search">
-            <input id="q" type="text" placeholder="Search links (name, url, tags, repoâ€¦)" autocomplete="off" />
+            <input id="q" type="text" placeholder="Search links (name, url, tags, repo…)" autocomplete="off" />
             <select id="owner">
               <option value="MolochDaGod">GitHub owner: MolochDaGod</option>
             </select>
@@ -516,11 +517,11 @@
         </div>
 
         <div class="card">
-          <h2>âš¡ Quick Status</h2>
+          <h2><i class="fas fa-bolt"></i> Quick Status</h2>
           <p>
             These checks run in your browser and may be blocked by CORS on some apps.
           </p>
-          <div class="muted" id="checks">Loadingâ€¦</div>
+          <div class="muted" id="checks">Loading…</div>
         </div>
       </div>
 
@@ -529,12 +530,12 @@
 
       <div class="footer">
         <div>
-        <div><strong style="color: var(--brand); font-family: var(--font-heading);">Grudge Studio</strong> â€” Nexus Hub</div>
+        <div><strong style="color: var(--brand); font-family: var(--font-heading);">Grudge Studio</strong> — Nexus Hub</div>
           <div style="margin-top:6px">Tip: use <strong>+ Add link</strong> to store Render/Railway/Vercel URLs in your browser for quick access.</div>
         </div>
         <div>
-        <div><a href="https://grudge-platform.vercel.app" target="_blank" rel="noreferrer">Platform</a> â€¢ <a href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer">ObjectStore</a> â€¢ <a href="https://gdevelop-assistant.vercel.app" target="_blank" rel="noreferrer">GDevelop</a> â€¢ <a href="/api/status" target="_blank" rel="noreferrer">/api/status</a></div>
-          <div style="margin-top:6px">Â© <span id="year"></span> Grudge Studio</div>
+        <div><a href="https://grudge-platform.vercel.app" target="_blank" rel="noreferrer">Platform</a> • <a href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer">ObjectStore</a> • <a href="https://gdevelop-assistant.vercel.app" target="_blank" rel="noreferrer">GDevelop</a> • <a href="/api/status" target="_blank" rel="noreferrer">/api/status</a></div>
+          <div style="margin-top:6px">© <span id="year"></span> Grudge Studio</div>
         </div>
       </div>
     </div>
@@ -1104,12 +1105,12 @@
 
     const TABS = [
       { id: 'deployments', label: 'Deployments' },
-      { id: 'objectstore', label: 'ðŸ“¦ ObjectStore' },
-      { id: 'wcs', label: 'ðŸ”¨ WCS Systems' },
-      { id: 'devtools', label: 'ðŸ›  Dev Tools' },
-      { id: 'games', label: 'ðŸŽ® Games' },
-      { id: 'ai', label: 'ðŸ¤– AI Systems' },
-      { id: 'platform', label: 'âš” Platform' },
+      { id: 'objectstore', label: '📦 ObjectStore' },
+      { id: 'wcs', label: '🔨 WCS Systems' },
+      { id: 'devtools', label: '🛠 Dev Tools' },
+      { id: 'games', label: '🎮 Games' },
+      { id: 'ai', label: '🤖 AI Systems' },
+      { id: 'platform', label: '⚔ Platform' },
       { id: 'vercel', label: 'Vercel Apps' },
       { id: 'pages', label: 'GitHub Pages' },
       { id: 'repos', label: 'Repos' },
@@ -1421,7 +1422,7 @@
         if (state.reposLoading) {
           const d = document.createElement('div');
           d.className = 'muted';
-          d.textContent = 'Loading Vercel apps from GitHubâ€¦';
+          d.textContent = 'Loading Vercel apps from GitHub…';
           host.appendChild(d);
         } else if (state.reposError) {
           const d = document.createElement('div');
@@ -1440,7 +1441,7 @@
         if (state.reposLoading) {
           const d = document.createElement('div');
           d.className = 'muted';
-          d.textContent = 'Loading GitHub Pagesâ€¦';
+          d.textContent = 'Loading GitHub Pages…';
           host.appendChild(d);
         } else if (state.reposError) {
           const d = document.createElement('div');
@@ -1459,7 +1460,7 @@
         if (state.reposLoading) {
           const d = document.createElement('div');
           d.className = 'muted';
-          d.textContent = 'Loading reposâ€¦';
+          d.textContent = 'Loading repos…';
           host.appendChild(d);
         } else if (state.reposError) {
           const d = document.createElement('div');
@@ -1484,16 +1485,16 @@
       if (!q) {
         const allCats = ['deployments','objectstore','wcs','devtools','games','ai','platform','packages','tools'];
         const total = allCats.reduce((s,c) => s + (CORE[c]?.length || 0), 0);
-        el('statusline').textContent = `${total} links â€¢ ` +
-          `deploys ${CORE.deployments.length} â€¢ ` +
-          `objectstore ${CORE.objectstore.length} â€¢ ` +
-          `wcs ${CORE.wcs.length} â€¢ ` +
-          `devtools ${CORE.devtools.length} â€¢ ` +
-          `games ${CORE.games.length} â€¢ ` +
-          `ai ${CORE.ai.length} â€¢ ` +
-          `platform ${CORE.platform.length} â€¢ ` +
+        el('statusline').textContent = `${total} links • ` +
+          `deploys ${CORE.deployments.length} • ` +
+          `objectstore ${CORE.objectstore.length} • ` +
+          `wcs ${CORE.wcs.length} • ` +
+          `devtools ${CORE.devtools.length} • ` +
+          `games ${CORE.games.length} • ` +
+          `ai ${CORE.ai.length} • ` +
+          `platform ${CORE.platform.length} • ` +
           `custom ${state.custom.length}` +
-          (state.repos ? ` â€¢ repos ${state.repos.length}` : '');
+          (state.repos ? ` • repos ${state.repos.length}` : '');
       }
     }
 
@@ -1556,7 +1557,7 @@
     render();
     runChecks();
 
-    // â”€â”€ Auth UI â”€â”€
+    // ── Auth UI ──
     function renderAuthBar() {
       const bar = document.getElementById('auth-bar');
       if (!bar) return;
