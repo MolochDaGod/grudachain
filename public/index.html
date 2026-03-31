@@ -14,6 +14,8 @@
   <meta name="theme-color" content="#0d1120" />
   <script src="/grudge-sso.js"></script>
   <script src="/grudge-auth.js"></script>
+  <!-- Phantom Connect SDK (wallet auth) -->
+  <script src="https://unpkg.com/@phantom/browser-sdk@latest/dist/index.js" defer></script>
   <meta name="description" content="Grudge Studio Nexus — central hub for all apps, games, AI systems, ObjectStore, WCS, GDevelop Assistant, and ecosystem links." />
 
   <!-- WCS Fonts -->
@@ -1825,23 +1827,56 @@
       window.location.href = '/api/oauth-github';
     }
 
+    // ── Phantom Connect SDK (lazy-loaded) ──
+    var _phantomSdk = null;
+    function getPhantomSdk() {
+      if (_phantomSdk) return _phantomSdk;
+      if (typeof BrowserSDK === 'undefined') return null;
+      _phantomSdk = new BrowserSDK({
+        providers: ['google', 'phantom', 'injected', 'deeplink'],
+        addressTypes: [AddressType.solana, AddressType.ethereum],
+        appId: '656b4ef2-7acc-44fe-bec7-4b288cfdd2e9',
+        authOptions: {
+          authUrl: 'https://connect.phantom.app/login',
+          redirectUrl: window.location.origin + '/',
+        },
+      });
+      return _phantomSdk;
+    }
+
     // ── Phantom / Web3 Wallet ──
     async function doWallet() {
       try {
-        if (!window.solana?.isPhantom) {
+        showAuthSuccess('Connecting Phantom wallet…');
+        // Try Phantom Connect SDK first (supports embedded + extension)
+        var sdk = getPhantomSdk();
+        if (sdk) {
+          var result = await sdk.connect({ provider: 'injected' });
+          var solAddr = result.addresses.find(function(a) { return a.addressType === 'solana'; });
+          var walletAddress = solAddr ? solAddr.address : result.addresses[0].address;
+        } else if (window.solana && window.solana.isPhantom) {
+          // Fallback to raw extension
+          var resp = await window.solana.connect();
+          var walletAddress = resp.publicKey.toString();
+        } else {
           return showAuthError('Phantom wallet not found — install it at phantom.app');
         }
-        showAuthSuccess('Connecting Phantom wallet…');
-        const resp = await window.solana.connect();
-        const walletAddress = resp.publicKey.toString();
-        const res = await fetch(AUTH_BASE + '/api/connect-wallet', {
+        localStorage.setItem('grudge_wallet_address', walletAddress);
+        var res = await fetch(AUTH_BASE + '/api/connect-wallet', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ walletAddress, walletType: 'solana' }),
+          body: JSON.stringify({ walletAddress: walletAddress, walletType: 'solana' }),
         });
-        const data = await res.json();
+        var data = await res.json();
         if (!data.success) return showAuthError(data.error || 'Wallet auth failed');
         await onAuthSuccess(data, 'Signed in via Phantom wallet');
-      } catch (e) { showAuthError('Wallet error: ' + e.message); }
+      } catch (e) {
+        var msg = e.message || '';
+        if (msg.includes('cancel') || msg.includes('closed')) {
+          showAuthError('Wallet connection cancelled.');
+        } else {
+          showAuthError('Wallet error: ' + msg);
+        }
+      }
     }
 
     // ── Puter Auth ──
