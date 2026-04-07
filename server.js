@@ -8,6 +8,9 @@ const path = require('path');
 const fs = require('fs');
 const _fetch = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
 
+// Database connection module (Postgres + Redis)
+const db = require('./lib/db');
+
 // Import Vercel-compatible handlers (work as Express route handlers)
 const vibeProvidersHandler = require('./api/vibe/providers');
 const vibeChatHandler = require('./api/vibe/chat');
@@ -103,6 +106,7 @@ app.use(helmet({
 }));
 app.use(cors({
   origin: [
+    // Grudge Studio external domains
     'https://grudgewarlords.com',
     'https://www.grudgewarlords.com',
     'https://warlord-crafting-suite.vercel.app',
@@ -111,10 +115,12 @@ app.use(cors({
     'https://api.grudge-studio.com',
     'https://dash.grudge-studio.com',
     'https://account.grudge-studio.com',
-    'https://api.grudge-studio.com',
+    // Regex patterns — Vercel previews, all Grudge Studio subdomains, Railway internal
     /\.vercel\.app$/,
     /\.grudgestudio\.com$/,
     /\.grudge-studio\.com$/,
+    /\.railway\.internal$/,
+    /\.up\.railway\.app$/,
     /localhost/
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -172,12 +178,19 @@ let systemStatus = {
 // Health check endpoint
 app.get('/health', (req, res) => {
   const uptimeMs = Date.now() - SERVER_START_TIME;
+  const dbStatus = db.getStatus();
   res.json({
     status: 'healthy',
     uptime: uptimeMs,
     uptimeHuman: formatUptime(uptimeMs),
     services: aiServices,
     system: systemStatus,
+    databases: {
+      postgres: dbStatus.postgres,
+      redis: dbStatus.redis,
+      postgresError: dbStatus.postgresError || undefined,
+      redisError: dbStatus.redisError || undefined
+    },
     timestamp: new Date().toISOString()
   });
 });
@@ -347,6 +360,166 @@ app.get('/api/network/discover', (req, res) => {
   });
 });
 
+// ─── Database Status Endpoint ───
+app.get('/api/db/status', (req, res) => {
+  const dbStatus = db.getStatus();
+  res.json({
+    success: true,
+    databases: {
+      postgres: {
+        status: dbStatus.postgres,
+        error: dbStatus.postgresError || undefined
+      },
+      redis: {
+        status: dbStatus.redis,
+        error: dbStatus.redisError || undefined
+      }
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// ─── Service Registry (Redis-backed, 5-minute TTL) ───
+
+const SERVICE_TTL_SECONDS = 300; // 5 minutes
+const SERVICE_REGISTRY_KEY = 'gruda:services';
+
+/**
+ * POST /api/services/register
+ * Body: { name, url, type, status, [metadata] }
+ * Registers (or refreshes) a service entry in Redis.
+ */
+app.post('/api/services/register', async (req, res) => {
+  const { name, url, type, status = 'active', metadata = {} } = req.body || {};
+
+  if (!name || !url) {
+    return res.status(400).json({ error: 'name and url are required' });
+  }
+
+  const redis = db.getRedis();
+  const entry = {
+    name,
+    url,
+    type: type || 'service',
+    status,
+    metadata,
+    registeredAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + SERVICE_TTL_SECONDS * 1000).toISOString()
+  };
+
+  if (redis && redis.isReady) {
+    try {
+      // Store each service under its own key with a TTL
+      const fieldKey = `gruda:service:${name}`;
+      await redis.set(fieldKey, JSON.stringify(entry), { EX: SERVICE_TTL_SECONDS });
+      // Track all registered names in a set; refresh the set TTL on every write
+      await redis.sAdd(SERVICE_REGISTRY_KEY, name);
+      await redis.expire(SERVICE_REGISTRY_KEY, SERVICE_TTL_SECONDS * 2);
+
+      console.log(`📡 Service registered: ${name} (${url})`);
+      return res.json({ success: true, service: entry, ttl: SERVICE_TTL_SECONDS });
+    } catch (err) {
+      console.error('Service register Redis error:', err.message);
+      // Fall through to in-memory fallback
+    }
+  }
+
+  // In-memory fallback when Redis is unavailable
+  if (!global._serviceRegistry) global._serviceRegistry = {};
+  global._serviceRegistry[name] = entry;
+  console.log(`📡 Service registered (in-memory): ${name} (${url})`);
+  res.json({ success: true, service: entry, ttl: SERVICE_TTL_SECONDS, source: 'memory' });
+});
+
+/**
+ * GET /api/services/discover
+ * Returns all currently registered services.
+ */
+app.get('/api/services/discover', async (req, res) => {
+  const redis = db.getRedis();
+
+  if (redis && redis.isReady) {
+    try {
+      const names = await redis.sMembers(SERVICE_REGISTRY_KEY);
+      const services = [];
+
+      for (const name of names) {
+        const raw = await redis.get(`gruda:service:${name}`);
+        if (raw) {
+          services.push(JSON.parse(raw));
+        } else {
+          // Entry expired — clean up the set
+          await redis.sRem(SERVICE_REGISTRY_KEY, name).catch(() => {});
+        }
+      }
+
+      return res.json({
+        success: true,
+        source: 'redis',
+        services,
+        count: services.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (err) {
+      console.error('Service discover Redis error:', err.message);
+      // Fall through to in-memory fallback
+    }
+  }
+
+  // In-memory fallback
+  const services = Object.values(global._serviceRegistry || {});
+  res.json({
+    success: true,
+    source: 'memory',
+    services,
+    count: services.length,
+    timestamp: new Date().toISOString()
+  });
+});
+
+/**
+ * GET /api/services/self
+ * Returns gruda-legion's own configuration so other services can
+ * bootstrap their connection to the hub.
+ */
+app.get('/api/services/self', (req, res) => {
+  const dbStatus = db.getStatus();
+  const host = req.headers.host || `localhost:${PORT}`;
+  const proto = req.headers['x-forwarded-proto'] || (host.includes('railway') ? 'https' : 'http');
+
+  res.json({
+    success: true,
+    service: {
+      name: 'gruda-legion',
+      url: `${proto}://${host}`,
+      type: 'hub',
+      status: systemStatus.server,
+      platform: 'Railway',
+      capabilities: ['ai', 'service-registry', 'websocket', 'storage'],
+      endpoints: {
+        health:           '/health',
+        status:           '/api/status',
+        dbStatus:         '/api/db/status',
+        vibeChat:         '/api/vibe/chat',
+        vibeProviders:    '/api/vibe/providers',
+        servicesRegister: '/api/services/register',
+        servicesDiscover: '/api/services/discover',
+        grudgeConfig:     '/api/grudge-studio/config'
+      }
+    },
+    config: {
+      authGateway: AUTH_GATEWAY,
+      gameApi:     GAME_API
+    },
+    databases: {
+      postgres: dbStatus.postgres,
+      redis:    dbStatus.redis
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+
 // â”€â”€â”€ Vibe AI Routes (ported from Vercel serverless functions) â”€â”€â”€
 app.get('/api/vibe/providers', vibeProvidersHandler);
 app.post('/api/vibe/chat', vibeChatHandler);
@@ -430,20 +603,41 @@ app.get('/api/admin/stats', verifyGrudgeToken, (req, res) => {
       hasKey: !!p.key
     })),
     routes: [
-      'GET /health', 'GET /api/status',
+      'GET /health', 'GET /api/status', 'GET /api/db/status',
       'POST /api/chat', 'POST /api/generate-code', 'POST /api/analyze-file',
       'GET /api/network/discover',
+      'POST /api/services/register', 'GET /api/services/discover', 'GET /api/services/self',
       'GET /api/vibe/providers', 'POST /api/vibe/chat',
       'GET /api/sdk/info',
       'GET /api/storage/info', 'GET /api/storage/list',
       'GET /api/grudge-studio/config', 'GET /api/grudge-studio/links',
       'GET /api/admin/stats', 'GET /api/admin/ecosystem'
     ],
+
     timestamp: new Date().toISOString()
   });
 });
 
-app.get('/api/admin/ecosystem', verifyGrudgeToken, (req, res) => {
+app.get('/api/admin/ecosystem', verifyGrudgeToken, async (req, res) => {
+  const dbStatus = db.getStatus();
+
+  // Fetch registered services from Redis (or in-memory fallback)
+  let registeredServices = [];
+  const redis = db.getRedis();
+  if (redis && redis.isReady) {
+    try {
+      const names = await redis.sMembers(SERVICE_REGISTRY_KEY);
+      for (const name of names) {
+        const raw = await redis.get(`gruda:service:${name}`);
+        if (raw) registeredServices.push(JSON.parse(raw));
+      }
+    } catch (err) {
+      console.error('Ecosystem Redis error:', err.message);
+    }
+  } else {
+    registeredServices = Object.values(global._serviceRegistry || {});
+  }
+
   res.json({
     success: true,
     ecosystem: {
@@ -460,12 +654,12 @@ app.get('/api/admin/ecosystem', verifyGrudgeToken, (req, res) => {
           type: 'Serverless functions + static'
         },
         authGateway: {
-          url: 'https://id.grudge-studio.com',
+          url: AUTH_GATEWAY,
           platform: 'Grudge Backend',
           type: 'Authentication & SSO gateway'
         },
         gameApi: {
-          url: 'https://api.grudge-studio.com',
+          url: GAME_API,
           platform: 'Grudge Backend',
           type: 'Game API'
         },
@@ -485,6 +679,7 @@ app.get('/api/admin/ecosystem', verifyGrudgeToken, (req, res) => {
           type: 'Main game portal + GDevelop Assistant'
         }
       },
+      registeredServices,
       sdk: {
         'grudge-studio': { version: '1.2.0', npm: 'https://www.npmjs.com/package/grudge-studio' },
         '@grudge/puter-sync': { version: '1.0.0', description: 'Puter cloud sync bridge' }
@@ -492,7 +687,13 @@ app.get('/api/admin/ecosystem', verifyGrudgeToken, (req, res) => {
       ai: {
         vibeVersion: '8.0.0',
         providers: Object.keys(VIBE_PROVIDERS),
-        puterAI: 'Client-side via puter.ai.chat() â€” free unlimited'
+        puterAI: 'Client-side via puter.ai.chat() — free unlimited'
+      },
+      databases: {
+        postgres: dbStatus.postgres,
+        redis: dbStatus.redis,
+        postgresError: dbStatus.postgresError || undefined,
+        redisError: dbStatus.redisError || undefined
       },
       storage: {
         provider: 'Grudge ObjectStore (molochdagod.github.io/ObjectStore)',
@@ -516,6 +717,8 @@ function formatUptime(ms) {
   const m = Math.floor((s % 3600) / 60);
   return `${d}d ${h}h ${m}m`;
 }
+
+
 
 // â”€â”€â”€ Real AI Provider Chain (from Vibe 8.0.0) â”€â”€â”€
 // Keys read from env vars first, falling back to bundled defaults
@@ -748,9 +951,15 @@ async function initializeAIServices() {
   console.log('\u{1F389} All AI services initialized');
 }
 
-// Start server
-server.listen(PORT, async () => {
-  console.log(`
+// Start server — initialise databases first, then bind the HTTP port
+(async () => {
+  // ── Database init (non-blocking: server starts even if DBs are down) ──
+  console.log('\uD83D\uDD27 Initializing database connections...');
+  await db.init();
+
+  // ── Bind HTTP server ──
+  server.listen(PORT, async () => {
+    console.log(`
   \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557   \u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2588\u2588\u2588\u2557     \u2588\u2588\u2557     \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2557   \u2588\u2588\u2557
  \u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557    \u2588\u2588\u2551     \u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2551
  \u2588\u2588\u2551  \u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551    \u2588\u2588\u2551     \u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2551  \u2588\u2588\u2588\u2557\u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2554\u2588\u2588\u2557 \u2588\u2588\u2551
@@ -758,33 +967,42 @@ server.listen(PORT, async () => {
  \u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551  \u2588\u2588\u2551\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551  \u2588\u2588\u2551    \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551 \u255A\u2588\u2588\u2588\u2588\u2551
   \u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D  \u255A\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D  \u255A\u2550\u255D    \u255A\u2550\u2550\u2550\u2550\u2550\u2550\u255D\u255A\u2550\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D  \u255A\u2550\u2550\u2550\u255D
   `);
-  
-  console.log('\u{1F680} GRUDA Legion Server Started');
-  console.log(`\u{1F4E1} Server running on http://localhost:${PORT}`);
-  console.log(`\u{1F310} Environment: ${NODE_ENV}`);
-  console.log(`\u26A1 Free AI services enabled`);
-  
-  systemStatus.server = 'running';
-  systemStatus.network = 'connected';
-  
-  // Initialize AI services
-  await initializeAIServices();
-  
-  console.log(`
-\u{1F3AF} Access Points:
+
+    console.log('\uD83D\uDE80 GRUDA Legion Server Started');
+    console.log(`\uD83D\uDCE1 Server running on http://localhost:${PORT}`);
+    console.log(`\uD83C\uDF10 Environment: ${NODE_ENV}`);
+    console.log(`\u26A1 Free AI services enabled`);
+
+    systemStatus.server = 'running';
+    systemStatus.network = 'connected';
+
+    // Initialize AI services
+    await initializeAIServices();
+
+    // Log database status after init
+    const dbStatus = db.getStatus();
+    console.log(`\uD83D\uDDC4\uFE0F  PostgreSQL: ${dbStatus.postgres}`);
+    console.log(`\uD83D\uDD34 Redis:      ${dbStatus.redis}`);
+
+    console.log(`
+\uD83C\uDFAF Access Points:
 \u2022 Main Interface: http://localhost:${PORT}
 \u2022 Health Check:   http://localhost:${PORT}/health
 \u2022 API Status:     http://localhost:${PORT}/api/status
+\u2022 DB Status:      http://localhost:${PORT}/api/db/status
 \u2022 Vibe Providers: http://localhost:${PORT}/api/vibe/providers
 \u2022 Vibe Chat:      http://localhost:${PORT}/api/vibe/chat
 \u2022 SDK Info:       http://localhost:${PORT}/api/sdk/info
 \u2022 Grudge Config:  http://localhost:${PORT}/api/grudge-studio/config
 \u2022 Storage Info:   http://localhost:${PORT}/api/storage/info
+\u2022 Svc Register:   http://localhost:${PORT}/api/services/register
+\u2022 Svc Discover:   http://localhost:${PORT}/api/services/discover
+\u2022 Svc Self:       http://localhost:${PORT}/api/services/self
 \u2022 Admin Stats:    http://localhost:${PORT}/api/admin/stats
 \u2022 Admin Ecosystem:http://localhost:${PORT}/api/admin/ecosystem
 \u2022 WebSocket:      ws://localhost:${PORT}
 
-\u{1F916} Vibe 8.0.0 AI Providers (Real):
+\uD83E\uDD16 Vibe 8.0.0 AI Providers (Real):
 \u2022 MegaLLM (gpt-4o-mini, claude-3-haiku) - Free
 \u2022 OpenRouter (llama-3.1, phi-3) - Free
 \u2022 AgentRouter (gpt-4o-mini, claude-3-haiku) - Free
@@ -792,21 +1010,26 @@ server.listen(PORT, async () => {
 \u2022 Puter.js (Claude, GPT-4o) - Client-side
 \u2022 Local AI Fallback - Always available
 
-\u{1F3AE} Grudge Studio Ecosystem:
-\u2022 Auth (SSO):     https://id.grudge-studio.com
-\u2022 Game API:       https://api.grudge-studio.com
+\uD83C\uDFAE Grudge Studio Ecosystem:
+\u2022 Auth (SSO):     ${AUTH_GATEWAY}
+\u2022 Game API:       ${GAME_API}
 \u2022 Dashboard:      https://dash.grudge-studio.com
 \u2022 WCS:            https://warlord-crafting-suite.vercel.app
 \u2022 GGE:            https://grudgewarlords.com
 
 \u2705 GRUDA Legion is fully operational!
   `);
+  });
+})().catch((err) => {
+  console.error('\u274C Fatal startup error:', err);
+  process.exit(1);
 });
 
 // Graceful shutdown (SIGINT for local dev, SIGTERM for Railway/Docker)
 function gracefulShutdown(signal) {
-  console.log(`\n\u{1F6D1} ${signal} received â€” shutting down GRUDA Legion server...`);
-  server.close(() => {
+  console.log(`\n\uD83D\uDED1 ${signal} received — shutting down GRUDA Legion server...`);
+  server.close(async () => {
+    await db.close();
     console.log('\u2705 Server closed gracefully');
     process.exit(0);
   });
@@ -827,8 +1050,7 @@ process.on('uncaughtException', (error) => {
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('\u274C Unhandled Rejection at:', promise, 'reason:', reason);
-  // Log only â€” do not crash the process for transient async failures
+  // Log only — do not crash the process for transient async failures
 });
 
 module.exports = app;
-
