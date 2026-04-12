@@ -585,8 +585,8 @@ app.get('/api/admin/stats', verifyGrudgeToken, (req, res) => {
   res.json({
     success: true,
     stats: {
-      uptime: Date.now() - systemStatus.uptime,
-      uptimeHuman: formatUptime(Date.now() - systemStatus.uptime),
+      uptime: Date.now() - SERVER_START_TIME,
+      uptimeHuman: formatUptime(Date.now() - SERVER_START_TIME),
       connectedClients,
       serverStatus: systemStatus.server,
       aiStatus: systemStatus.ai,

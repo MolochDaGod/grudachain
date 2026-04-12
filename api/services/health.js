@@ -1,5 +1,4 @@
 const _fetch = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
-const { getSupabase } = require('../_lib/supabase');
 
 const SERVICES = [
   { slug: 'nexus-hub', name: 'Nexus Hub', url: 'https://grudachain-rho.vercel.app/api/health' },
@@ -34,19 +33,6 @@ module.exports = async function handler(req, res) {
 
   const healthy = results.filter(r => r.status === 'healthy').length;
   const total = results.length;
-
-  // Optionally write health results back to Supabase
-  const supabase = getSupabase();
-  if (supabase) {
-    const now = new Date().toISOString();
-    for (const r of results) {
-      supabase.from('service_registry')
-        .update({ last_health_check: now, last_health_status: r.httpStatus || 0, status: r.status === 'healthy' ? 'active' : r.status })
-        .eq('slug', r.slug)
-        .then(() => {}) // fire-and-forget
-        .catch(() => {});
-    }
-  }
 
   res.json({
     success: true,

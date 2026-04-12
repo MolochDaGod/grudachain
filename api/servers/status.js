@@ -1,5 +1,4 @@
 const _fetch = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
-const { getSupabase } = require('../_lib/supabase');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -58,16 +57,6 @@ module.exports = async function handler(req, res) {
     servers.push({ name: 'Grudge Warlords Dedicated (Unity)', type: 'dedicated', url: 'https://grudgewarlords.com', port: 7777, status: 'offline', error: e.message });
   }
 
-  // Read from Supabase if available
-  const supabase = getSupabase();
-  let dbServers = [];
-  if (supabase) {
-    try {
-      const { data } = await supabase.from('game_servers').select('*');
-      if (data) dbServers = data;
-    } catch { /* noop */ }
-  }
-
   // Colyseus room schema info
   const roomTypes = [
     { type: 'lobby', displayName: 'Lobby', maxClients: 20, authRequired: false, description: 'Waiting room for matchmaking and social chat' },
@@ -77,7 +66,6 @@ module.exports = async function handler(req, res) {
   res.json({
     success: true,
     servers,
-    dbServers,
     roomTypes,
     colyseus: {
       schema: {
