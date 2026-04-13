@@ -1,9 +1,10 @@
-﻿const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const { createAdapter } = require('@socket.io/redis-adapter');
 const path = require('path');
 const fs = require('fs');
 const _fetch = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
@@ -24,15 +25,79 @@ const platformRouter  = require('./api/platform/index');
 const gamesRouter     = require('./api/games/sessions');
 const accountsRouter  = require('./api/accounts/index');
 
+// ── CORS Allowlist (shared between Express & Socket.IO) ──
+const CORS_ORIGINS = [
+  'https://grudgewarlords.com',
+  'https://www.grudgewarlords.com',
+  'https://warlord-crafting-suite.vercel.app',
+  'https://grudachain.grudgestudio.com',
+  'https://id.grudge-studio.com',
+  'https://api.grudge-studio.com',
+  'https://dash.grudge-studio.com',
+  'https://account.grudge-studio.com',
+  'https://grudge-platform.vercel.app',
+  'https://gdevelop-assistant.vercel.app',
+  'https://dungeon-crawler-quest.vercel.app',
+];
+const CORS_PATTERNS = [
+  /\.vercel\.app$/,
+  /\.grudgestudio\.com$/,
+  /\.grudge-studio\.com$/,
+  /\.railway\.internal$/,
+  /\.up\.railway\.app$/,
+  /localhost/,
+];
+
 // Initialize Express app
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"]
-  }
+    origin: [...CORS_ORIGINS, ...CORS_PATTERNS],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  },
+  // Engine tuning
+  pingTimeout: 20000,
+  pingInterval: 25000,
+  maxHttpBufferSize: 1e6,        // 1 MB max message
+  perMessageDeflate: {
+    threshold: 1024,              // compress messages > 1 KB
+  },
+  // Connection state recovery — buffers missed events on reconnect (v4.6+)
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 30 * 1000,   // 30s window
+    skipMiddlewares: false,
+  },
 });
+
+// ── Socket.IO Rate Limiter ──
+const _socketRates = new Map();
+const RATE_LIMIT_MAX = 30;          // events per second
+const RATE_LIMIT_WINDOW = 1000;     // 1 second window
+
+function socketRateLimit(socket, next) {
+  const now = Date.now();
+  const entry = _socketRates.get(socket.id) || { count: 0, reset: now + RATE_LIMIT_WINDOW };
+  if (now > entry.reset) {
+    entry.count = 0;
+    entry.reset = now + RATE_LIMIT_WINDOW;
+  }
+  entry.count++;
+  _socketRates.set(socket.id, entry);
+  if (entry.count > RATE_LIMIT_MAX) {
+    return next(new Error('Rate limit exceeded'));
+  }
+  next();
+}
+
+// Clean up rate limit map periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, entry] of _socketRates) {
+    if (now > entry.reset + 10000) _socketRates.delete(id);
+  }
+}, 30000);
 
 // Configuration
 const PORT = process.env.PORT || 3000;
@@ -111,29 +176,9 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 app.use(cors({
-  origin: [
-    // Grudge Studio external domains
-    'https://grudgewarlords.com',
-    'https://www.grudgewarlords.com',
-    'https://warlord-crafting-suite.vercel.app',
-    'https://grudachain.grudgestudio.com',
-    'https://id.grudge-studio.com',
-    'https://api.grudge-studio.com',
-    'https://dash.grudge-studio.com',
-    'https://account.grudge-studio.com',
-    'https://grudge-platform.vercel.app',
-    'https://gdevelop-assistant.vercel.app',
-    'https://dungeon-crawler-quest.vercel.app',
-    // Regex patterns — Vercel previews, all Grudge Studio subdomains, Railway internal
-    /\.vercel\.app$/,
-    /\.grudgestudio\.com$/,
-    /\.grudge-studio\.com$/,
-    /\.railway\.internal$/,
-    /\.up\.railway\.app$/,
-    /localhost/
-  ],
+  origin: [...CORS_ORIGINS, ...CORS_PATTERNS],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
+  credentials: true,
 }));
 app.use(compression());
 app.use(express.json({ limit: '50mb' }));
@@ -935,14 +980,95 @@ function main() {
 main();`;
 }
 
-// WebSocket handling
+// ── Socket.IO Redis Adapter (horizontal scaling) ──
+function attachRedisAdapter() {
+  const redis = db.getRedis();
+  if (redis && redis.isReady) {
+    try {
+      const pubClient = redis.duplicate();
+      const subClient = redis.duplicate();
+      Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+        io.adapter(createAdapter(pubClient, subClient));
+        console.log('✅ Socket.IO Redis adapter attached');
+      }).catch(err => {
+        console.warn('⚠️  Socket.IO Redis adapter failed:', err.message);
+      });
+    } catch (err) {
+      console.warn('⚠️  Socket.IO Redis adapter setup error:', err.message);
+    }
+  } else {
+    console.warn('⚠️  Redis unavailable — Socket.IO using in-memory adapter (no horizontal scaling)');
+  }
+}
+
+// ── Socket.IO Auth Middleware ──
+function socketAuthMiddleware(socket, next) {
+  const token = socket.handshake.auth?.token;
+  if (!token) {
+    // Allow guest connections but tag them
+    socket.data.grudgeUser = { grudgeId: `guest-${socket.id}`, role: 'guest' };
+    return next();
+  }
+  // Fast path: local JWT decode
+  if (jwt) {
+    try {
+      const decoded = jwt.verify(token, SESSION_SECRET);
+      if (decoded.grudgeId) {
+        socket.data.grudgeUser = {
+          grudgeId: decoded.grudgeId,
+          username: decoded.username,
+          userId: decoded.userId,
+          role: decoded.role || 'player',
+        };
+        return next();
+      }
+    } catch { /* fall through to remote */ }
+  }
+  // Slow path: remote auth-gateway verify
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  _fetch(`${AUTH_GATEWAY}/api/verify`, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: controller.signal,
+  })
+    .then(resp => resp.ok ? resp.json() : null)
+    .then(data => {
+      clearTimeout(timeout);
+      if (data && data.success && data.grudgeId) {
+        socket.data.grudgeUser = {
+          grudgeId: data.grudgeId,
+          username: data.username || data.user?.username,
+          userId: data.user?.id || data.grudgeId,
+          role: data.user?.role || 'player',
+        };
+        return next();
+      }
+      // Invalid token — still allow as guest
+      socket.data.grudgeUser = { grudgeId: `guest-${socket.id}`, role: 'guest' };
+      next();
+    })
+    .catch(() => {
+      clearTimeout(timeout);
+      socket.data.grudgeUser = { grudgeId: `guest-${socket.id}`, role: 'guest' };
+      next();
+    });
+}
+
+// ── Namespace: / (public status) ──
+io.use(socketAuthMiddleware);
+io.use(socketRateLimit);
+
 io.on('connection', (socket) => {
-  console.log(`Client connected: ${socket.id}`);
-  
+  const user = socket.data.grudgeUser || {};
+  console.log(`[io] ${user.username || user.grudgeId} connected (${user.role})`);
+
   // Send initial status
   socket.emit('system-status', systemStatus);
   socket.emit('ai-services', aiServices);
-  
+
+  // Join personal room for targeted messages
+  if (user.grudgeId) socket.join(`user:${user.grudgeId}`);
+
   socket.on('chat-message', async (data) => {
     try {
       const response = await callBestAvailableAI(data.message, data.model);
@@ -958,9 +1084,98 @@ io.on('connection', (socket) => {
       });
     }
   });
-  
+
+  socket.on('disconnect', (reason) => {
+    console.log(`[io] ${user.username || user.grudgeId} disconnected (${reason})`);
+    _socketRates.delete(socket.id);
+  });
+});
+
+// ── Namespace: /game (game session events) ──
+const gameNs = io.of('/game');
+gameNs.use(socketAuthMiddleware);
+gameNs.use(socketRateLimit);
+
+gameNs.on('connection', (socket) => {
+  const user = socket.data.grudgeUser || {};
+  console.log(`[io/game] ${user.username || user.grudgeId} connected`);
+
+  // Join a game session room
+  socket.on('join-session', (sessionId) => {
+    if (typeof sessionId === 'string' && sessionId.length < 64) {
+      socket.join(`session:${sessionId}`);
+      socket.emit('session-joined', { sessionId });
+      gameNs.to(`session:${sessionId}`).emit('player-joined', {
+        grudgeId: user.grudgeId,
+        username: user.username,
+      });
+    }
+  });
+
+  socket.on('leave-session', (sessionId) => {
+    socket.leave(`session:${sessionId}`);
+    gameNs.to(`session:${sessionId}`).emit('player-left', {
+      grudgeId: user.grudgeId,
+      username: user.username,
+    });
+  });
+
+  // Game-session scoped chat
+  socket.on('session-chat', (data) => {
+    if (!data?.sessionId || !data?.text) return;
+    gameNs.to(`session:${data.sessionId}`).emit('session-chat', {
+      grudgeId: user.grudgeId,
+      username: user.username,
+      text: String(data.text).slice(0, 500),
+      timestamp: Date.now(),
+    });
+  });
+
   socket.on('disconnect', () => {
-    console.log(`Client disconnected: ${socket.id}`);
+    console.log(`[io/game] ${user.username || user.grudgeId} disconnected`);
+    _socketRates.delete(socket.id);
+  });
+});
+
+// ── Namespace: /admin (admin-only broadcasts) ──
+const adminNs = io.of('/admin');
+adminNs.use((socket, next) => {
+  socketAuthMiddleware(socket, (err) => {
+    if (err) return next(err);
+    const user = socket.data.grudgeUser;
+    if (!user || (user.role !== 'admin' && user.role !== 'master')) {
+      return next(new Error('Admin access required'));
+    }
+    next();
+  });
+});
+adminNs.use(socketRateLimit);
+
+adminNs.on('connection', (socket) => {
+  const user = socket.data.grudgeUser || {};
+  console.log(`[io/admin] ${user.username} connected`);
+
+  socket.emit('admin-status', {
+    connectedClients: io.engine.clientsCount || 0,
+    gameClients: gameNs.sockets?.size || 0,
+    system: systemStatus,
+    uptime: Date.now() - SERVER_START_TIME,
+  });
+
+  // Broadcast admin messages to all main-namespace clients
+  socket.on('server-broadcast', (data) => {
+    if (data?.message) {
+      io.emit('server-announcement', {
+        message: String(data.message).slice(0, 1000),
+        from: user.username,
+        timestamp: Date.now(),
+      });
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`[io/admin] ${user.username} disconnected`);
+    _socketRates.delete(socket.id);
   });
 });
 
@@ -1004,6 +1219,9 @@ async function initializeAIServices() {
   // ── Database init (non-blocking: server starts even if DBs are down) ──
   console.log('\uD83D\uDD27 Initializing database connections...');
   await db.init();
+
+  // ── Attach Socket.IO Redis adapter ──
+  attachRedisAdapter();
 
   // ── Bind HTTP server ──
   server.listen(PORT, async () => {

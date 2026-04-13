@@ -1,7 +1,6 @@
-﻿import { Room, Client } from "@colyseus/core";
+import { Room, Client } from "@colyseus/core";
 import { LobbyState, PlayerState } from "../schemas/PlayerState";
-
-const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || "https://id.grudge-studio.com";
+import { roomAuth, type AuthResult } from "../utils/auth";
 
 interface JoinOptions {
   token?: string;
@@ -11,50 +10,22 @@ interface JoinOptions {
   faction?: string;
 }
 
-async function verifyToken(token: string): Promise<any | null> {
-  try {
-    const res = await fetch(`${AUTH_GATEWAY}/api/verify`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.success ? data : null;
-  } catch {
-    return null;
-  }
-}
-
 export class LobbyRoom extends Room<LobbyState> {
   maxClients = 20;
 
   onCreate() {
     this.setState(new LobbyState());
+    this.setPatchRate(50); // 20hz patch rate
     console.log(`[LobbyRoom] created: ${this.roomId}`);
 
-    // Tick: broadcast state updates
     this.setSimulationInterval(() => this.tick(), 1000 / 20);
   }
 
-  async onAuth(client: Client, options: JoinOptions) {
-    if (options.token) {
-      const verified = await verifyToken(options.token);
-      if (verified) {
-        return {
-          grudgeId: verified.grudgeId,
-          username: verified.username || verified.user?.username,
-          role: verified.user?.role || "player",
-        };
-      }
-    }
-    // Allow guest connections with limited permissions
-    return {
-      grudgeId: `guest-${client.sessionId}`,
-      username: options.username || `Guest-${client.sessionId.slice(0, 4)}`,
-      role: "guest",
-    };
+  async onAuth(client: Client, options: JoinOptions): Promise<AuthResult> {
+    return roomAuth(client.sessionId, options, "Guest");
   }
 
-  onJoin(client: Client, options: JoinOptions, auth: any) {
+  onJoin(client: Client, options: JoinOptions, auth: AuthResult) {
     const player = new PlayerState();
     player.sessionId = client.sessionId;
     player.grudgeId = auth.grudgeId;
@@ -68,7 +39,6 @@ export class LobbyRoom extends Room<LobbyState> {
     this.state.players.set(client.sessionId, player);
     console.log(`[LobbyRoom] ${auth.username} joined (${auth.role})`);
 
-    // Notify others
     this.broadcast("player-joined", {
       sessionId: client.sessionId,
       username: auth.username,
@@ -76,16 +46,27 @@ export class LobbyRoom extends Room<LobbyState> {
     }, { except: client });
   }
 
-  onLeave(client: Client) {
+  async onLeave(client: Client, consented: boolean) {
     const player = this.state.players.get(client.sessionId);
-    if (player) {
-      this.broadcast("player-left", {
-        sessionId: client.sessionId,
-        username: player.username,
-      }, { except: client });
-      this.state.players.delete(client.sessionId);
-      console.log(`[LobbyRoom] ${player.username} left`);
+    if (!player) return;
+
+    // Allow 30s reconnection window if disconnect was unintentional
+    if (!consented) {
+      try {
+        await this.allowReconnection(client, 30);
+        console.log(`[LobbyRoom] ${player.username} reconnected`);
+        return;
+      } catch {
+        // Reconnection timed out
+      }
     }
+
+    this.broadcast("player-left", {
+      sessionId: client.sessionId,
+      username: player.username,
+    }, { except: client });
+    this.state.players.delete(client.sessionId);
+    console.log(`[LobbyRoom] ${player.username} left`);
   }
 
   onMessage(client: Client, type: string, message: any) {

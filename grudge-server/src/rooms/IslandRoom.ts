@@ -1,7 +1,6 @@
-﻿import { Room, Client } from "@colyseus/core";
+import { Room, Client } from "@colyseus/core";
 import { IslandState, PlayerState } from "../schemas/PlayerState";
-
-const AUTH_GATEWAY = process.env.AUTH_GATEWAY_URL || "https://id.grudge-studio.com";
+import { roomAuth, type AuthResult } from "../utils/auth";
 
 interface JoinOptions {
   token?: string;
@@ -10,19 +9,6 @@ interface JoinOptions {
   characterClass?: string;
   race?: string;
   faction?: string;
-}
-
-async function verifyToken(token: string): Promise<any | null> {
-  try {
-    const res = await fetch(`${AUTH_GATEWAY}/api/verify`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.success ? data : null;
-  } catch {
-    return null;
-  }
 }
 
 export class IslandRoom extends Room<IslandState> {
@@ -34,37 +20,24 @@ export class IslandRoom extends Room<IslandState> {
     state.islandName = options.islandName || "Starter Island";
     state.biome = options.biome || "temperate";
     this.setState(state);
+    this.setPatchRate(50); // 20hz patch rate
 
     console.log(`[IslandRoom] created: ${state.islandName} (${this.roomId})`);
 
-    // Simulation tick â€” 20 fps for position sync
+    // Simulation tick — 20 fps for position sync
     this.setSimulationInterval(() => this.tick(), 1000 / 20);
 
-    // Day/night cycle â€” advance 1 hour every 5 real minutes
+    // Day/night cycle — advance 1 hour every 5 real minutes
     this.clock.setInterval(() => {
       state.timeOfDay = (state.timeOfDay + 1) % 24;
     }, 5 * 60 * 1000);
   }
 
-  async onAuth(client: Client, options: JoinOptions) {
-    if (options.token) {
-      const verified = await verifyToken(options.token);
-      if (verified) {
-        return {
-          grudgeId: verified.grudgeId,
-          username: verified.username || verified.user?.username,
-          role: verified.user?.role || "player",
-        };
-      }
-    }
-    return {
-      grudgeId: `guest-${client.sessionId}`,
-      username: options.username || `Guest-${client.sessionId.slice(0, 4)}`,
-      role: "guest",
-    };
+  async onAuth(client: Client, options: JoinOptions): Promise<AuthResult> {
+    return roomAuth(client.sessionId, options, "Guest");
   }
 
-  onJoin(client: Client, options: JoinOptions, auth: any) {
+  onJoin(client: Client, options: JoinOptions, auth: AuthResult) {
     const player = new PlayerState();
     player.sessionId = client.sessionId;
     player.grudgeId = auth.grudgeId;
@@ -87,16 +60,26 @@ export class IslandRoom extends Room<IslandState> {
     }, { except: client });
   }
 
-  onLeave(client: Client) {
+  async onLeave(client: Client, consented: boolean) {
     const player = this.state.players.get(client.sessionId);
-    if (player) {
-      this.broadcast("player-left", {
-        sessionId: client.sessionId,
-        username: player.username,
-      }, { except: client });
-      this.state.players.delete(client.sessionId);
-      console.log(`[IslandRoom] ${player.username} left ${this.state.islandName}`);
+    if (!player) return;
+
+    if (!consented) {
+      try {
+        await this.allowReconnection(client, 30);
+        console.log(`[IslandRoom] ${player.username} reconnected to ${this.state.islandName}`);
+        return;
+      } catch {
+        // Reconnection timed out
+      }
     }
+
+    this.broadcast("player-left", {
+      sessionId: client.sessionId,
+      username: player.username,
+    }, { except: client });
+    this.state.players.delete(client.sessionId);
+    console.log(`[IslandRoom] ${player.username} left ${this.state.islandName}`);
   }
 
   onMessage(client: Client, type: string, message: any) {
@@ -121,7 +104,6 @@ export class IslandRoom extends Room<IslandState> {
         break;
 
       case "action":
-        // Future: combat, harvesting, interact
         this.broadcast("player-action", {
           sessionId: client.sessionId,
           username: player.username,
