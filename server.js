@@ -18,6 +18,12 @@ const sdkInfoHandler = require('./api/sdk/info');
 const storageInfoHandler = require('./api/storage/info');
 const storageListHandler = require('./api/storage/list');
 
+// New expansion routers
+const gdevelopRouter  = require('./api/gdevelop/config');
+const platformRouter  = require('./api/platform/index');
+const gamesRouter     = require('./api/games/sessions');
+const accountsRouter  = require('./api/accounts/index');
+
 // Initialize Express app
 const app = express();
 const server = createServer(app);
@@ -115,6 +121,9 @@ app.use(cors({
     'https://api.grudge-studio.com',
     'https://dash.grudge-studio.com',
     'https://account.grudge-studio.com',
+    'https://grudge-platform.vercel.app',
+    'https://gdevelop-assistant.vercel.app',
+    'https://dungeon-crawler-quest.vercel.app',
     // Regex patterns — Vercel previews, all Grudge Studio subdomains, Railway internal
     /\.vercel\.app$/,
     /\.grudgestudio\.com$/,
@@ -495,16 +504,27 @@ app.get('/api/services/self', (req, res) => {
       type: 'hub',
       status: systemStatus.server,
       platform: 'Railway',
-      capabilities: ['ai', 'service-registry', 'websocket', 'storage'],
+      capabilities: ['ai', 'service-registry', 'websocket', 'storage', 'accounts', 'games', 'matchmaking', 'gdevelop', 'platform'],
       endpoints: {
-        health:           '/health',
-        status:           '/api/status',
-        dbStatus:         '/api/db/status',
-        vibeChat:         '/api/vibe/chat',
-        vibeProviders:    '/api/vibe/providers',
-        servicesRegister: '/api/services/register',
-        servicesDiscover: '/api/services/discover',
-        grudgeConfig:     '/api/grudge-studio/config'
+        health:             '/health',
+        status:             '/api/status',
+        dbStatus:           '/api/db/status',
+        vibeChat:           '/api/vibe/chat',
+        vibeProviders:      '/api/vibe/providers',
+        servicesRegister:   '/api/services/register',
+        servicesDiscover:   '/api/services/discover',
+        grudgeConfig:       '/api/grudge-studio/config',
+        gdevelopConfig:     '/api/gdevelop/config',
+        gdevelopGames:      '/api/gdevelop/games',
+        gdevelopLaunch:     '/api/gdevelop/launch',
+        platformConfig:     '/api/platform/config',
+        platformFeatured:   '/api/platform/featured',
+        gamesList:          '/api/games/list',
+        gamesSession:       '/api/games/session/create',
+        matchmakingQueue:   '/api/games/matchmaking/queue',
+        accountsMe:         '/api/accounts/me',
+        accountsRegister:   '/api/accounts/register',
+        accountsLinkPuter:  '/api/accounts/link/puter'
       }
     },
     config: {
@@ -520,30 +540,47 @@ app.get('/api/services/self', (req, res) => {
 });
 
 
-// â”€â”€â”€ Vibe AI Routes (ported from Vercel serverless functions) â”€â”€â”€
+// â”àâ”àâ”à Vibe AI Routes (ported from Vercel serverless functions) â”àâ”àâ”à
 app.get('/api/vibe/providers', vibeProvidersHandler);
 app.post('/api/vibe/chat', vibeChatHandler);
 app.options('/api/vibe/chat', vibeChatHandler); // CORS preflight
 
-// â”€â”€â”€ SDK Info Route â”€â”€â”€
+// â”àâ”àâ”à SDK Info Route â”àâ”àâ”à
 app.get('/api/sdk/info', sdkInfoHandler);
 
-// â”€â”€â”€ Storage Routes â”€â”€â”€
+// â”àâ”àâ”à Storage Routes â”àâ”àâ”à
 app.get('/api/storage/info', storageInfoHandler);
 app.get('/api/storage/list', storageListHandler);
+
+// â”àâ”àâ”à Expansion Routers â”àâ”àâ”à
+// GDevelop integration (launcher config, game list, launch tracking)
+app.use('/api/gdevelop', gdevelopRouter);
+// Grudge Platform (featured content, platform config)
+app.use('/api/platform', platformRouter);
+// Game sessions & matchmaking
+app.use('/api/games', gamesRouter);
+// Accounts system — inject verifyGrudgeToken so /me routes are auth-protected
+app.use('/api/accounts', (req, res, next) => {
+  // Attach the server's JWT middleware to req so route handlers can use it
+  req._verifyToken = verifyGrudgeToken;
+  next();
+}, accountsRouter);
 
 // â”€â”€â”€ Grudge Studio Integration Endpoints â”€â”€â”€
 app.get('/api/grudge-studio/config', (req, res) => {
   res.json({
     success: true,
     ecosystem: {
-      authGateway: 'https://id.grudge-studio.com',
-      gameApi: 'https://api.grudge-studio.com',
-      dashboard: 'https://dash.grudge-studio.com',
-      wcs: 'https://warlord-crafting-suite.vercel.app',
-      gge: 'https://grudgewarlords.com',
-      grudaLegion: 'https://api.grudge-studio.com',
-      grudachain: 'https://grudachain.grudgestudio.com'
+      authGateway:  'https://id.grudge-studio.com',
+      gameApi:      'https://api.grudge-studio.com',
+      dashboard:    'https://dash.grudge-studio.com',
+      wcs:          'https://warlord-crafting-suite.vercel.app',
+      gge:          'https://grudgewarlords.com',
+      grudaLegion:  'https://api.grudge-studio.com',
+      grudachain:   'https://grudachain.grudgestudio.com',
+      platform:     process.env.GRUDGE_PLATFORM_URL || 'https://grudge-platform.vercel.app',
+      gdevelop:     process.env.GDEVELOP_URL        || 'https://gdevelop-assistant.vercel.app',
+      dungeonCrawler: 'https://dungeon-crawler-quest.vercel.app'
     },
     sdk: {
       name: 'grudge-studio',
@@ -564,16 +601,19 @@ app.get('/api/grudge-studio/links', (req, res) => {
   res.json({
     success: true,
     links: {
-      main: 'https://grudgewarlords.com',
-      wcs: 'https://warlord-crafting-suite.vercel.app',
-      auth: 'https://id.grudge-studio.com',
-      gameApi: 'https://api.grudge-studio.com',
-      dashboard: 'https://dash.grudge-studio.com',
-      legion: 'https://api.grudge-studio.com',
-      grudachain: 'https://grudachain.grudgestudio.com',
-      npm: 'https://www.npmjs.com/package/grudge-studio',
-      github: 'https://github.com/MolochDaGod/GrudgeStudioNPM',
-      discord: 'https://discord.gg/FtGtmxmwkh'
+      main:          'https://grudgewarlords.com',
+      wcs:           'https://warlord-crafting-suite.vercel.app',
+      auth:          'https://id.grudge-studio.com',
+      gameApi:       'https://api.grudge-studio.com',
+      dashboard:     'https://dash.grudge-studio.com',
+      legion:        'https://api.grudge-studio.com',
+      grudachain:    'https://grudachain.grudgestudio.com',
+      platform:      process.env.GRUDGE_PLATFORM_URL || 'https://grudge-platform.vercel.app',
+      gdevelop:      process.env.GDEVELOP_URL        || 'https://gdevelop-assistant.vercel.app',
+      dungeonCrawler:'https://dungeon-crawler-quest.vercel.app',
+      npm:           'https://www.npmjs.com/package/grudge-studio',
+      github:        'https://github.com/MolochDaGod/GrudgeStudioNPM',
+      discord:       'https://discord.gg/FtGtmxmwkh'
     },
     timestamp: new Date().toISOString()
   });
@@ -611,6 +651,14 @@ app.get('/api/admin/stats', verifyGrudgeToken, (req, res) => {
       'GET /api/sdk/info',
       'GET /api/storage/info', 'GET /api/storage/list',
       'GET /api/grudge-studio/config', 'GET /api/grudge-studio/links',
+      'GET /api/gdevelop/config', 'GET /api/gdevelop/games', 'POST /api/gdevelop/launch',
+      'GET /api/platform/config', 'GET /api/platform/featured', 'GET /api/platform/health',
+      'GET /api/games/list', 'POST /api/games/session/create',
+      'GET /api/games/session/:id', 'DELETE /api/games/session/:id',
+      'GET /api/games/matchmaking/queue',
+      'GET /api/accounts/me', 'PUT /api/accounts/me',
+      'POST /api/accounts/register', 'POST /api/accounts/link/puter',
+      'GET /api/accounts/:grudgeId/public',
       'GET /api/admin/stats', 'GET /api/admin/ecosystem'
     ],
 

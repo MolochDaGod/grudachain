@@ -8,7 +8,9 @@ const SERVICES = [
   { slug: 'unity-dedicated', name: 'Unity Dedicated Server', url: 'https://grudgewarlords.com/api/servers/unity/status' },
   { slug: 'gdevelop', name: 'GDevelop Assistant', url: 'https://gdevelop-assistant.vercel.app/api/health' },
   { slug: 'objectstore', name: 'ObjectStore', url: 'https://molochdagod.github.io/ObjectStore' },
-  { slug: 'dashboard', name: 'Grudge Dashboard', url: 'https://dash.grudge-studio.com' }
+  { slug: 'dashboard', name: 'Grudge Dashboard', url: 'https://dash.grudge-studio.com' },
+  { slug: 'grudge-platform', name: 'Grudge Platform', url: 'https://grudge-platform.vercel.app/api/platform/health' },
+  { slug: 'dungeon-crawler', name: 'Dungeon Crawler Quest', url: 'https://dungeon-crawler-quest.vercel.app' }
 ];
 
 async function probeService(svc) {

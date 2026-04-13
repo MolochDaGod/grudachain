@@ -6,7 +6,9 @@ const SERVICES = [
   { slug: 'wcs', name: 'Warlord Crafting Suite', platform: 'vercel', url: 'https://grudgewarlords.com', type: 'app', status: 'active' },
   { slug: 'gdevelop-assistant', name: 'GDevelop Assistant', platform: 'vercel', url: 'https://gdevelop-assistant.vercel.app', type: 'app', status: 'active', health_endpoint: '/api/health' },
   { slug: 'objectstore', name: 'ObjectStore Game Data', platform: 'github-pages', url: 'https://molochdagod.github.io/ObjectStore', type: 'cdn', status: 'active' },
-  { slug: 'dashboard', name: 'Grudge Dashboard', platform: 'vps', url: 'https://dash.grudge-studio.com', type: 'app', status: 'active' }
+  { slug: 'dashboard', name: 'Grudge Dashboard', platform: 'vps', url: 'https://dash.grudge-studio.com', type: 'app', status: 'active' },
+  { slug: 'grudge-platform', name: 'Grudge Platform', platform: 'vercel', url: 'https://grudge-platform.vercel.app', type: 'launcher', status: 'active', health_endpoint: '/api/platform/health' },
+  { slug: 'dungeon-crawler', name: 'Dungeon Crawler Quest', platform: 'vercel', url: 'https://dungeon-crawler-quest.vercel.app', type: 'game', status: 'active' }
 ];
 
 module.exports = async function handler(req, res) {

@@ -4,11 +4,17 @@ import { playground } from "@colyseus/playground";
 
 import { LobbyRoom } from "./rooms/LobbyRoom";
 import { IslandRoom } from "./rooms/IslandRoom";
+import { MobaRoom } from "./rooms/MobaRoom";
+import { DungeonRoom } from "./rooms/DungeonRoom";
+import { SpaceRtsRoom } from "./rooms/SpaceRtsRoom";
 
 export default config({
   initializeGameServer: (gameServer) => {
     gameServer.define("lobby", LobbyRoom);
     gameServer.define("island", IslandRoom);
+    gameServer.define("moba", MobaRoom);
+    gameServer.define("dungeon", DungeonRoom);
+    gameServer.define("space-rts", SpaceRtsRoom);
   },
 
   initializeExpress: (app) => {
@@ -17,7 +23,7 @@ export default config({
       res.json({
         status: "healthy",
         app: "grudge-lobbies",
-        rooms: ["lobby", "island"],
+        rooms: ["lobby", "island", "moba", "dungeon", "space-rts"],
         authGateway: process.env.AUTH_GATEWAY_URL || "https://id.grudge-studio.com",
         timestamp: new Date().toISOString(),
       });
@@ -38,7 +44,8 @@ export default config({
     console.log(`
 â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
 â•‘   Grudge Lobbies â€” Colyseus Server        â•‘
-â•‘   Rooms: lobby, island                    â•‘
+â•'   Rooms: lobby, island, moba,             â•'
+â•'          dungeon, space-rts               â•'
 â•'   Auth: id.grudge-studio.com               â•'
 â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     `);
