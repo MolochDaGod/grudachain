@@ -1,50 +1,153 @@
 # GrudaChain
 
-Free AI Node System powered by GRUDA Legion v3.0 — part of the [Grudge Studio](https://grudge-studio.com) ecosystem.
+Free AI Node System powered by GRUDA Legion v3.0 — the central backend hub for the [Grudge Studio](https://grudgewarlords.com) ecosystem.
 
-## Live
+## Live Deployments
 
-- **Platform**: [platform.grudge-studio.com](https://platform.grudge-studio.com)
-- **App Gallery**: [grudachain-app-gallery.vercel.app](https://grudachain-app-gallery.vercel.app)
+- **Railway (Backend)**: [api.grudge-studio.com](https://api.grudge-studio.com)
+- **Vercel (Nexus Hub)**: [grudachain.grudgestudio.com](https://grudachain.grudgestudio.com)
 
-## Features
+---
 
-- **Grudge Login** — One-click cloud auth powered by Puter (Grudge-branded; Puter stays backend-only)
-- **Grudge Cloud Storage** — Puter.js FS/KV object storage under the `grudge-studio/` namespace
+## Grudge Studio Ecosystem Wiki
+
+### Custom Domains (Cloudflare-managed)
+
+| Domain | Points To | Purpose |
+|--------|-----------|----------|
+| `grudgewarlords.com` | Vercel (grudge-studio repo) | Main game portal & WCS |
+| `www.grudgewarlords.com` | Vercel (grudge-studio repo) | Main game portal (www) |
+| `api.grudge-studio.com` | Cloudflare → Railway | GRUDA Legion backend hub |
+| `id.grudge-studio.com` | Cloudflare → Backend | Auth gateway / SSO |
+| `dash.grudge-studio.com` | Vercel | Admin dashboard |
+| `account.grudge-studio.com` | Cloudflare → Backend | Account management |
+| `grudachain.grudgestudio.com` | Vercel (grudachain repo) | Nexus hub / app gallery |
+| `info.grudge-studio.com` | Vercel | Game data hub (archived → ObjectStore) |
+
+### Core Deployments (All Live ✅)
+
+| App | URL | Platform | Repo |
+|-----|-----|----------|------|
+| **Grudge Warlords** | [grudgewarlords.com](https://grudgewarlords.com) | Vercel | grudge-studio |
+| **GRUDA Legion** | [api.grudge-studio.com](https://api.grudge-studio.com) | Railway | grudachain |
+| **Auth Gateway** | [id.grudge-studio.com](https://id.grudge-studio.com) | Backend | grudge-studio |
+| **Dashboard** | [dash.grudge-studio.com](https://dash.grudge-studio.com) | Vercel | grudge-studio |
+| **WCS** | [warlord-crafting-suite.vercel.app](https://warlord-crafting-suite.vercel.app) | Vercel | Warlord-Crafting-Suite |
+| **GDevelop Assistant** | [gdevelop-assistant.vercel.app](https://gdevelop-assistant.vercel.app) | Vercel | GDevelopAssistant |
+| **ObjectStore** | [molochdagod.github.io/ObjectStore](https://molochdagod.github.io/ObjectStore) | GitHub Pages | ObjectStore |
+| **Grudge Platform** | [grudge-platform.vercel.app](https://grudge-platform.vercel.app) | Vercel | grudge-platform |
+| **Nexus Hub** | [grudachain.grudgestudio.com](https://grudachain.grudgestudio.com) | Vercel | grudachain |
+
+### Game Deployments (All Live ✅)
+
+| Game | URL | Platform | Status |
+|------|-----|----------|--------|
+| **Dungeon Crawler Quest** | [dungeon-crawler-quest.vercel.app](https://dungeon-crawler-quest.vercel.app) | Vercel | Live |
+| **Grudge Arena** | [grudge-arena.vercel.app](https://grudge-arena.vercel.app) | Vercel | Live |
+| **GrudgeSpace RTS** | [grudge-space-rts.vercel.app](https://grudge-space-rts.vercel.app) | Vercel | Live |
+| **Grudge Warlords RTS** | [grudge-warlords-rts.vercel.app](https://grudge-warlords-rts.vercel.app) | Vercel | Live |
+| **Grudge Engine Web** | [grudge-engine-web.vercel.app](https://grudge-engine-web.vercel.app) | Vercel | Live |
+| **Grudge Pipeline** | [grudge-pipeline.vercel.app](https://grudge-pipeline.vercel.app) | Vercel | Live |
+
+### Tools & Data (GitHub Pages)
+
+| Resource | URL |
+|----------|-----|
+| ObjectStore API | [/ObjectStore](https://molochdagod.github.io/ObjectStore) |
+| Item Database | [/ObjectStore/GRUDGE_Item_Database.html](https://molochdagod.github.io/ObjectStore/GRUDGE_Item_Database.html) |
+| Sprite Database | [/ObjectStore/SPRITE_DATABASE.html](https://molochdagod.github.io/ObjectStore/SPRITE_DATABASE.html) |
+| Item Browser | [/ObjectStore/ItemBrowser.html](https://molochdagod.github.io/ObjectStore/ItemBrowser.html) |
+| Grudge Builder | [/Grudge-Builder](https://molochdagod.github.io/Grudge-Builder) |
+| Character Builder | [/grudge-character-builder](https://molochdagod.github.io/grudge-character-builder/) |
+| Grudge SDK (NPM) | [npmjs.com/package/grudge-studio](https://www.npmjs.com/package/grudge-studio) |
+
+### Known Issues
+
+- `api.grudge-studio.com/health` → 404 (Railway deploy may need redeployment after latest push)
+- `grudge-character-creator.vercel.app` → 404 (deployment missing)
+- `grudge-factions-site.vercel.app` → 404 (deployment missing)
+- `grudgeplatform.com` → Squarespace (separate from Vercel grudge-platform)
+
+### Legal
+
+- **Privacy Policy**: [grudgewarlords.com/privacy](https://grudgewarlords.com/privacy) ✅
+- **Terms of Service**: [grudgewarlords.com/tos](https://grudgewarlords.com/tos) ✅
+- **API endpoint**: `GET /api/legal/links`
+
+---
+
+## GrudaChain Features
+
 - **Vibe AI 8.0.0** — Multi-provider AI with automatic failover (MegaLLM, OpenRouter, AgentRouter, Routeway, Puter.js)
+- **Grudge Auth** — JWT auth via id.grudge-studio.com SSO + Discord, Google, GitHub, Phantom, Puter, Phone, Guest
+- **Accounts System** — Grudge ID registration, profile management, Puter cloud linking
+- **Game Sessions** — Session creation, matchmaking queue, game catalogue
+- **Service Registry** — Redis-backed service discovery with 5-min TTL
+- **WebSocket** — Real-time chat, game sessions, and admin namespaces via Socket.IO
 - **Code Generation** — AI-powered code gen for game development
 - **File Analysis** — Automated code quality, security, and performance analysis
-- **WebSocket** — Real-time AI chat via Socket.io
-- **Grudge Auth** — JWT authentication via id.grudge-studio.com SSO
-- **Network Discovery** — P2P node discovery for distributed AI workloads
+- **Rate Limiting** — Per-IP rate limiting on AI and auth endpoints
+- **Security** — Helmet, CORS allowlist, trust proxy, permissions policy
 
 ## Architecture
 
 ```
-Browser → Vercel (static + serverless)
-           ├─ public/         Static frontend
-           │   ├─ index.html    Grudge Studio Nexus (app gallery)
-           │   ├─ legacy.html   GRUDA Legion AI node + cloud storage
-           │   └─ grudge-auth.js  Shared auth module (id.grudge-studio.com)
-           ├─ api/             Serverless functions
-           └─ server.js        Express (local dev / Railway)
+Clients → Cloudflare → Railway (api.grudge-studio.com)
+                          ├─ server.js         Express + Socket.IO hub
+                          ├─ api/
+                          │   ├─ accounts/     Grudge ID accounts (Postgres)
+                          │   ├─ games/        Sessions & matchmaking
+                          │   ├─ platform/     Featured content & config
+                          │   ├─ gdevelop/     GDevelop Assistant integration
+                          │   ├─ vibe/         AI chat providers
+                          │   ├─ services/     Service registry (Redis)
+                          │   ├─ storage/      Object storage info
+                          │   └─ admin/        Stats & ecosystem overview
+                          ├─ lib/db.js         Postgres + Redis connections
+                          └─ public/           Static frontend (Nexus hub)
+
+Clients → Vercel (grudachain.grudgestudio.com)
+           ├─ public/          Nexus hub static site
+           └─ api/             Serverless function mirrors
 ```
 
-## Auth
+## API Endpoints
 
-All auth is handled by **Grudge Auth** (`public/grudge-auth.js`) backed by `id.grudge-studio.com`.
-Cloud storage uses **Puter.js** as the underlying mechanism but is presented as "Grudge Login" / "Grudge Cloud" in the UI.
+### Public
+- `GET /health` — Health check
+- `GET /api/status` — System status
+- `GET /api/db/status` — Database connections
+- `GET /api/legal/links` — Privacy policy & TOS URLs
+- `GET /api/grudge-studio/config` — Ecosystem config
+- `GET /api/grudge-studio/links` — All deployment links
+- `GET /api/vibe/providers` — Available AI providers
+- `GET /api/services/discover` — Registered services
+- `GET /api/services/self` — This hub's capabilities
+- `GET /api/games/list` — Game catalogue
+- `GET /api/games/matchmaking/queue` — Queue depths
+- `GET /api/platform/config` — Platform config
+- `GET /api/platform/featured` — Featured content
+- `GET /api/gdevelop/config` — GDevelop config
+- `GET /api/sdk/info` — SDK documentation
+- `GET /api/accounts/:grudgeId/public` — Public profile
 
-- Puter SDK is **lazy-loaded** — injected only when the user clicks Grudge Login (no cold-load 401 noise)
-- Returning users auto-reconnect via `grudge_puter_was_signed_in` localStorage flag
-- Puter FS/KV namespace: `grudge-studio/` (buckets: assets, configs, game-data, player-data, exports, backups)
+### Authenticated (Bearer JWT)
+- `POST /api/chat` — AI chat (rate-limited: 20/min)
+- `POST /api/generate-code` — Code gen (rate-limited: 10/min)
+- `POST /api/analyze-file` — File analysis (rate-limited: 10/min)
+- `GET /api/accounts/me` — Own profile
+- `PUT /api/accounts/me` — Update profile
+- `POST /api/accounts/register` — Create account
+- `POST /api/accounts/link/puter` — Link Puter ID
+- `POST /api/games/session/create` — Start game session
+- `POST /api/services/register` — Register a service
+- `GET /api/admin/stats` — Server stats
+- `GET /api/admin/ecosystem` — Full ecosystem overview
 
-## Backend Connections
-
-- **Auth**: https://id.grudge-studio.com
-- **Game API**: https://api.grudge-studio.com
-- **ObjectStore**: https://molochdagod.github.io/ObjectStore
-- **Dashboard**: https://dash.grudge-studio.com
+### WebSocket Namespaces
+- `/` — Public status + AI chat
+- `/game` — Game session events (join/leave/chat)
+- `/admin` — Admin-only broadcasts
 
 ## Quick Start
 
@@ -55,25 +158,36 @@ npm start          # Local dev server on :3000
 
 ## Deploy
 
-Push to `master` → Vercel auto-deploys `public/` + `api/` serverless functions.
+- **Railway**: Push to `master` → Railway auto-deploys `server.js` (Node 20 LTS)
+- **Vercel**: Push to `master` → Vercel auto-deploys `public/` + `api/` serverless functions
 
 ## Environment Variables
 
-Copy `.env.example` → `.env`:
+Copy `.env.example` → `.env` — see file for full list including:
 
 ```bash
+PORT=3000
+NODE_ENV=development
+SESSION_SECRET=change-me-in-production
 AUTH_GATEWAY_URL=https://id.grudge-studio.com
-MEGALLM_API_KEY=
-OPENROUTER_API_KEY=
+GAME_API_URL=https://api.grudge-studio.com
+# DATABASE_URL=postgresql://...
+# REDIS_URL=redis://...
 ```
 
 ## Recent Changes
 
-- **Grudge Login branding** — auth button shows Grudge logo; all "Puter" UI text replaced with Grudge Studio
-- **Lazy Puter SDK** — eliminates `/get-gui-token 401` console error on page load
-- **readdir 404 fix** — cloud storage panel handles missing directories gracefully
-- **favicon.ico** — removed conflicting vercel.json rewrite; static file now serves directly
+- **Privacy & TOS** — Added /privacy and /tos pages to grudgewarlords.com and api.grudge-studio.com
+- **Server hardening** — Trust proxy, API rate limiting, enhanced Helmet security headers
+- **Railway best practices** — Node 20 LTS, sleepApplication false, numReplicas 1
+- **Accounts validation** — Username regex (3-20 chars), email format validation
+- **Legal API** — `GET /api/legal/links` for frontend privacy/TOS discovery
+- **Ecosystem config** — Added legal URLs to /api/grudge-studio/config and /links
+- **Expansion routes** — GDevelop, Platform, Games, Accounts routers
+- **Service registry** — Redis-backed with in-memory fallback
+- **Grudge Login branding** — auth shows Grudge logo; Puter stays backend-only
+- **Vibe AI 8.0.0** — Real multi-provider AI chain with automatic failover
 
-## Part of [Grudge Studio](https://grudge-studio.com)
+---
 
-© 2026 Grudge Studio
+Created by **Racalvin The Pirate King** — © 2026 [Grudge Studio](https://grudgewarlords.com) | [Privacy](https://grudgewarlords.com/privacy) | [Terms](https://grudgewarlords.com/tos) | [Discord](https://discord.gg/FtGtmxmwkh)
