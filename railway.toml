@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [build.nixpacks]
-nixPkgs = ["nodejs_18"]
+nixPkgs = ["nodejs_20"]
 
 [deploy]
 startCommand = "node server.js"
@@ -10,3 +10,4 @@ healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 5
+numReplicas = 1

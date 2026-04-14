@@ -33,6 +33,16 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ error: 'username is required' });
   }
 
+  // Validate username: 3-20 chars, alphanumeric + underscore only
+  if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+    return res.status(400).json({ error: 'Username must be 3-20 characters (letters, numbers, underscores only)' });
+  }
+
+  // Validate email format if provided
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Invalid email format' });
+  }
+
   const grudgeId = requestedId || puterId
     ? `gruda-${(puterId || require('crypto').randomUUID()).slice(0, 8)}`
     : `gruda-${require('crypto').randomUUID().slice(0, 8)}`;

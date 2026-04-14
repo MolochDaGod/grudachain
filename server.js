@@ -50,6 +50,7 @@ const CORS_PATTERNS = [
 
 // Initialize Express app
 const app = express();
+app.set('trust proxy', 1); // Railway runs behind a reverse proxy
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
@@ -173,7 +174,15 @@ async function optionalGrudgeAuth(req, res, next) {
 // Middleware
 app.use(helmet({
   contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  permissionsPolicy: {
+    features: {
+      camera: ["'none'"],
+      microphone: ["'none'"],
+      geolocation: ["'none'"]
+    }
+  }
 }));
 app.use(cors({
   origin: [...CORS_ORIGINS, ...CORS_PATTERNS],
@@ -259,8 +268,32 @@ app.get('/api/status', (req, res) => {
   });
 });
 
+// ── API Rate Limiter (in-memory, per-IP) ──
+const _apiRates = new Map();
+function apiRateLimit(maxReqs, windowMs) {
+  return (req, res, next) => {
+    const key = req.ip || req.connection.remoteAddress;
+    const now = Date.now();
+    const entry = _apiRates.get(key) || { count: 0, reset: now + windowMs };
+    if (now > entry.reset) { entry.count = 0; entry.reset = now + windowMs; }
+    entry.count++;
+    _apiRates.set(key, entry);
+    if (entry.count > maxReqs) {
+      return res.status(429).json({ error: 'Too many requests, please try again later' });
+    }
+    next();
+  };
+}
+// Clean up stale rate-limit entries every 60s
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of _apiRates) {
+    if (now > entry.reset + 60000) _apiRates.delete(key);
+  }
+}, 60000);
+
 // AI Chat endpoint with multiple fallbacks
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', apiRateLimit(20, 60000), async (req, res) => {
   try {
     const { message, model = 'auto', temperature = 0.7 } = req.body;
     
@@ -326,7 +359,7 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // Code generation endpoint
-app.post('/api/generate-code', async (req, res) => {
+app.post('/api/generate-code', apiRateLimit(10, 60000), async (req, res) => {
   try {
     const { description, language = 'javascript', framework = 'vanilla' } = req.body;
     
@@ -361,7 +394,7 @@ Return only the code, no explanations.`;
 });
 
 // File analysis endpoint
-app.post('/api/analyze-file', async (req, res) => {
+app.post('/api/analyze-file', apiRateLimit(10, 60000), async (req, res) => {
   try {
     const { content, filename, type } = req.body;
     
@@ -627,6 +660,10 @@ app.get('/api/grudge-studio/config', (req, res) => {
       gdevelop:     process.env.GDEVELOP_URL        || 'https://gdevelop-assistant.vercel.app',
       dungeonCrawler: 'https://dungeon-crawler-quest.vercel.app'
     },
+    legal: {
+      privacyPolicy:  'https://grudgewarlords.com/privacy',
+      termsOfService: 'https://grudgewarlords.com/tos'
+    },
     sdk: {
       name: 'grudge-studio',
       version: '1.2.0',
@@ -638,6 +675,16 @@ app.get('/api/grudge-studio/config', (req, res) => {
       providers: ['megallm', 'openrouter', 'agentrouter', 'routeway'],
       puterAI: true
     },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// ── Legal links API (for all frontends to discover) ──
+app.get('/api/legal/links', (req, res) => {
+  res.json({
+    success: true,
+    privacyPolicy:  'https://grudgewarlords.com/privacy',
+    termsOfService: 'https://grudgewarlords.com/tos',
     timestamp: new Date().toISOString()
   });
 });
@@ -658,7 +705,9 @@ app.get('/api/grudge-studio/links', (req, res) => {
       dungeonCrawler:'https://dungeon-crawler-quest.vercel.app',
       npm:           'https://www.npmjs.com/package/grudge-studio',
       github:        'https://github.com/MolochDaGod/GrudgeStudioNPM',
-      discord:       'https://discord.gg/FtGtmxmwkh'
+      discord:       'https://discord.gg/FtGtmxmwkh',
+      privacyPolicy: 'https://grudgewarlords.com/privacy',
+      termsOfService:'https://grudgewarlords.com/tos'
     },
     timestamp: new Date().toISOString()
   });
