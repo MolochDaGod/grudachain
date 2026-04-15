@@ -4,8 +4,10 @@ Free AI Node System powered by GRUDA Legion v3.0 — the central backend hub for
 
 ## Live Deployments
 
-- **Railway (Backend)**: [api.grudge-studio.com](https://api.grudge-studio.com)
+- **Railway (Backend)**: Deployed on Railway (auto-deploy from `master`)
 - **Vercel (Nexus Hub)**: [grudachain.grudgestudio.com](https://grudachain.grudgestudio.com)
+
+> **Note**: `api.grudge-studio.com` is served by [grudge-backend](https://github.com/MolochDaGod/grudge-backend) via Cloudflare Tunnel, not by this Railway instance. GrudaChain provides supplemental services (AI, service registry, accounts, game sessions) and can be reached at its Railway-assigned URL.
 
 ---
 
@@ -17,7 +19,7 @@ Free AI Node System powered by GRUDA Legion v3.0 — the central backend hub for
 |--------|-----------|----------|
 | `grudgewarlords.com` | Vercel (grudge-studio repo) | Main game portal & WCS |
 | `www.grudgewarlords.com` | Vercel (grudge-studio repo) | Main game portal (www) |
-| `api.grudge-studio.com` | Cloudflare → Railway | GRUDA Legion backend hub |
+| `api.grudge-studio.com` | Cloudflare Tunnel → VPS | Grudge Backend (unified game API) |
 | `id.grudge-studio.com` | Cloudflare → Backend | Auth gateway / SSO |
 | `dash.grudge-studio.com` | Vercel | Admin dashboard |
 | `account.grudge-studio.com` | Cloudflare → Backend | Account management |
@@ -29,7 +31,7 @@ Free AI Node System powered by GRUDA Legion v3.0 — the central backend hub for
 | App | URL | Platform | Repo |
 |-----|-----|----------|------|
 | **Grudge Warlords** | [grudgewarlords.com](https://grudgewarlords.com) | Vercel | grudge-studio |
-| **GRUDA Legion** | [api.grudge-studio.com](https://api.grudge-studio.com) | Railway | grudachain |
+|| **GRUDA Legion** | Railway (auto-deploy) | Railway | grudachain |
 | **Auth Gateway** | [id.grudge-studio.com](https://id.grudge-studio.com) | Backend | grudge-studio |
 | **Dashboard** | [dash.grudge-studio.com](https://dash.grudge-studio.com) | Vercel | grudge-studio |
 | **WCS** | [warlord-crafting-suite.vercel.app](https://warlord-crafting-suite.vercel.app) | Vercel | Warlord-Crafting-Suite |
@@ -63,7 +65,8 @@ Free AI Node System powered by GRUDA Legion v3.0 — the central backend hub for
 
 ### Known Issues
 
-- `api.grudge-studio.com/health` → 404 (Railway deploy may need redeployment after latest push)
+- `api.grudge-studio.com` is served by grudge-backend (VPS), not Railway. GrudaChain's `/health` is at its Railway URL.
+- `id.grudge-studio.com` → VPS service down (grudge-studio-backend grudge-id container needs restart)
 - `grudge-character-creator.vercel.app` → 404 (deployment missing)
 - `grudge-factions-site.vercel.app` → 404 (deployment missing)
 - `grudgeplatform.com` → Squarespace (separate from Vercel grudge-platform)
