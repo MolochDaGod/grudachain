@@ -220,9 +220,28 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-// Redirect /favicon.ico â†’ /favicon.png (browsers request .ico by default)
-app.get('/favicon.ico', (req, res) => {
-  res.redirect(301, '/favicon.png');
+// Serve favicon variants directly from /public/ with long-lived cache headers
+const FAVICON_FILES = {
+  '/favicon.ico':         { file: 'favicon.ico',          type: 'image/x-icon' },
+  '/favicon.png':         { file: 'favicon.png',          type: 'image/png' },
+  '/favicon-16x16.png':   { file: 'favicon-16x16.png',   type: 'image/png' },
+  '/favicon-32x32.png':   { file: 'favicon-32x32.png',   type: 'image/png' },
+  '/favicon-192x192.png': { file: 'favicon-192x192.png', type: 'image/png' },
+  '/favicon-512x512.png': { file: 'favicon-512x512.png', type: 'image/png' },
+  '/apple-touch-icon.png':{ file: 'apple-touch-icon.png',type: 'image/png' },
+};
+
+Object.entries(FAVICON_FILES).forEach(([route, { file, type }]) => {
+  app.get(route, (req, res) => {
+    const filePath = path.join(__dirname, 'public', file);
+    res.setHeader('Cache-Control', 'public, max-age=604800, immutable'); // 7 days
+    res.setHeader('Content-Type', type);
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        res.status(404).end();
+      }
+    });
+  });
 });
 
 // AI Services Configuration
