@@ -47,6 +47,7 @@
     if (/\.vercel\.app$/.test(hostname)) return true;
     if (/\.grudge-studio\.com$/.test(hostname)) return true;
     if (/\.grudgestudio\.com$/.test(hostname)) return true;
+    if (/\.puter\.site$/.test(hostname)) return true;
     return false;
   }
 

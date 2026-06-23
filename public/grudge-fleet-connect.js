@@ -30,7 +30,14 @@
       nexus: 'https://grudachain.grudge-studio.com',
       grudgedot: 'https://gdevelop-assistant.vercel.app',
       devTool: { download: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest' },
-      legion: 'https://ai.grudge-studio.com'
+      legion: 'https://ai.grudge-studio.com',
+      puterCloud: 'https://grudge-studio.puter.site',
+      ale: 'https://ale.grudge-studio.com'
+    },
+    cloud: {
+      puter: 'https://grudge-studio.puter.site',
+      saves: 'grudge-studio/player-data',
+      assets: 'grudge-studio/assets'
     },
     auth: { gateway: 'https://id.grudge-studio.com' }
   };
@@ -165,6 +172,8 @@
       html += link('Nexus', ssoUrl(tools.nexus));
       html += link('Studio Forge', tools.devTool && tools.devTool.download ? tools.devTool.download : '#');
       html += link('Legion AI', ssoUrl(tools.legion));
+      html += link('Puter Cloud', ssoUrl(tools.puterCloud || (config.cloud && config.cloud.puter)));
+      html += link('My Saves', ssoUrl(tools.puterCloud || 'https://grudge-studio.puter.site'));
       html += '</div>';
     } else {
       var authUrl = ((config && config.auth && config.auth.gateway) || DEFAULT_CONFIG.auth.gateway) + '/auth?app=fleet-connect&return=' + encodeURIComponent(window.location.href);
