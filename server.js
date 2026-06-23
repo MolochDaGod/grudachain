@@ -20,7 +20,7 @@ const storageInfoHandler = require('./api/storage/info');
 const storageListHandler = require('./api/storage/list');
 
 // New expansion routers
-const gdevelopRouter  = require('./api/gdevelop/config');
+const gdevelopRouter  = require('./api/_lib/gdevelop-router');
 const platformRouter  = require('./api/platform/index');
 const gamesRouter     = require('./api/games/sessions');
 const accountsRouter  = require('./api/accounts/index');

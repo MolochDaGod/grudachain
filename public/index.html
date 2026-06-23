@@ -14,6 +14,7 @@
   <meta name="theme-color" content="#0d1120" />
   <script src="/grudge-sso.js"></script>
   <script src="/grudge-auth.js"></script>
+  <script src="/grudge-fleet-connect.js"></script>
   <!-- Phantom Connect SDK (wallet auth) -->
   <script src="https://unpkg.com/@phantom/browser-sdk@latest/dist/index.js" defer></script>
   <meta name="description" content="Grudge Studio Nexus — central hub for all apps, games, AI systems, ObjectStore, WCS, GDevelop Assistant, and ecosystem links." />
@@ -578,7 +579,8 @@
         </div>
         <a class="chip" href="https://grudge-platform.vercel.app" target="_blank" rel="noreferrer"><i class="fas fa-shield-halved"></i> Platform</a>
         <a class="chip" href="https://warlord-crafting-suite.vercel.app" target="_blank" rel="noreferrer"><i class="fas fa-hammer"></i> WCS</a>
-        <a class="chip" href="https://gdevelop-assistant.vercel.app" target="_blank" rel="noreferrer"><i class="fas fa-gamepad"></i> GDevelop</a>
+        <a class="chip" href="https://gdevelop-assistant.vercel.app" target="_blank" rel="noreferrer"><i class="fas fa-gamepad"></i> grudgeDot</a>
+        <a class="chip" href="https://github.com/MolochDaGod/grudge-dev-tool/releases/latest" target="_blank" rel="noreferrer"><i class="fas fa-hammer"></i> Forge</a>
         <a class="chip" href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer"><i class="fas fa-box-open"></i> ObjectStore</a>
         <a class="chip" href="https://github.com/MolochDaGod" target="_blank" rel="noreferrer"><i class="fab fa-github"></i> GitHub</a>
         <a class="chip" href="https://discord.gg/FtGtmxmwkh" target="_blank" rel="noreferrer"><i class="fab fa-discord"></i> Discord</a>
@@ -690,6 +692,12 @@
           </p>
           <div class="muted" id="checks">Loading…</div>
         </div>
+
+        <div class="card" id="fleetConnectCard">
+          <h2><i class="fas fa-link"></i> Fleet Connect</h2>
+          <p>Your account, characters, home-island, and saves — linked across every Grudge app.</p>
+          <div id="grudge-fleet-connect" data-grudge-fleet-connect></div>
+        </div>
       </div>
 
       <div class="tabs" id="tabs"></div>
@@ -715,8 +723,26 @@
         {
           name: 'GrudaChain Nexus (this hub)',
           platform: 'Vercel',
-          url: 'https://grudachain-rho.vercel.app',
+          url: 'https://grudachain.grudge-studio.com',
           tags: ['nexus', 'hub', 'grudge-studio']
+        },
+        {
+          name: 'Grudge Studio Forge (Desktop)',
+          platform: 'GitHub',
+          url: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest',
+          tags: ['devtools', 'launcher', 'legion', 'v0.4']
+        },
+        {
+          name: 'Legion AI Hub',
+          platform: 'Cloudflare',
+          url: 'https://ai.grudge-studio.com',
+          tags: ['ai', 'legion', 'orchestrator']
+        },
+        {
+          name: 'GRUDA Agent',
+          platform: 'Vercel',
+          url: 'https://grudaagent.vercel.app',
+          tags: ['ai', 'agent', 'assistant']
         },
         {
           name: 'Grudge Platform (App Launcher)',
@@ -951,7 +977,57 @@
           tags: ['gameplay', 'tutorial']
         }
       ],
+      playerHub: [
+        {
+          name: 'My Characters',
+          platform: 'Warlords',
+          url: 'https://client.grudge-studio.com/character',
+          tags: ['characters', 'hero', 'account']
+        },
+        {
+          name: 'Home Island',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/island-hub',
+          tags: ['island', 'home', 'factions']
+        },
+        {
+          name: 'Play Warlords',
+          platform: 'Warlords',
+          url: 'https://client.grudge-studio.com',
+          tags: ['mmo', 'play', 'main']
+        },
+        {
+          name: 'Grudge ID Account',
+          platform: 'Auth',
+          url: 'https://id.grudge-studio.com',
+          tags: ['auth', 'account', 'sso']
+        },
+        {
+          name: 'Game Saves API',
+          platform: 'API',
+          url: 'https://api.grudge-studio.com',
+          tags: ['saves', 'sync', 'api']
+        },
+        {
+          name: 'WCS Wallet',
+          platform: 'WCS',
+          url: 'https://warlord-crafting-suite.vercel.app/wallet',
+          tags: ['wallet', 'gbux', 'gold']
+        }
+      ],
       devtools: [
+        {
+          name: 'Grudge Studio Forge (Desktop)',
+          platform: 'Desktop',
+          url: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest',
+          tags: ['devtools', 'launcher', 'legion', 'store', 'v0.4']
+        },
+        {
+          name: 'grudgeDot Launcher',
+          platform: 'GDevelop',
+          url: 'https://gdevelop-assistant.vercel.app/',
+          tags: ['launcher', 'gdevelop', 'grudgedot']
+        },
         {
           name: 'AI Battle Station (Chat)',
           platform: 'GDevelop',
@@ -1273,6 +1349,7 @@
 
     const TABS = [
       { id: 'deployments', label: 'Deployments' },
+      { id: 'playerHub', label: '👤 Player Hub' },
       { id: 'objectstore', label: '📦 ObjectStore' },
       { id: 'wcs', label: '🔨 WCS Systems' },
       { id: 'devtools', label: '🛠 Dev Tools' },
@@ -1530,6 +1607,13 @@
         ], { emptyText: 'No deployments yet. Add one with + Add link.' }));
       }
 
+      if (state.tab === 'playerHub') {
+        host.appendChild(renderGrid([
+          ...CORE.playerHub,
+          ...state.custom.filter(c => c.category === 'playerHub')
+        ], { emptyText: 'Sign in with Grudge ID to sync your characters and islands.' }));
+      }
+
       if (state.tab === 'objectstore') {
         host.appendChild(renderGrid([
           ...CORE.objectstore,
@@ -1651,7 +1735,7 @@
 
       // Show counts in status line (low noise)
       if (!q) {
-        const allCats = ['deployments','objectstore','wcs','devtools','games','ai','platform','packages','tools'];
+        const allCats = ['deployments','playerHub','objectstore','wcs','devtools','games','ai','platform','packages','tools'];
         const total = allCats.reduce((s,c) => s + (CORE[c]?.length || 0), 0);
         el('statusline').textContent = `${total} links • ` +
           `deploys ${CORE.deployments.length} • ` +
@@ -1725,6 +1809,10 @@
     render();
     runChecks();
 
+    if (window.GrudgeFleetConnect) {
+      GrudgeFleetConnect.mount('#grudge-fleet-connect');
+    }
+
     // ═══════════════════ AUTH SYSTEM ═══════════════════
     const AUTH_BASE = '';
     function getAuthToken() { return localStorage.getItem('grudge_auth_token'); }
@@ -1733,9 +1821,13 @@
       localStorage.setItem('grudge_user_id', data.userId || '');
       localStorage.setItem('grudge_id', data.grudgeId || '');
       localStorage.setItem('grudge_username', data.username || '');
+      document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
+      if (window.GrudgeFleetConnect) GrudgeFleetConnect.refresh();
     }
     function clearAuthData() {
       ['grudge_auth_token','grudge_user_id','grudge_id','grudge_username'].forEach(k => localStorage.removeItem(k));
+      document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
+      if (window.GrudgeFleetConnect) GrudgeFleetConnect.refresh();
     }
 
     // ── Form mode toggle ──

@@ -10,11 +10,23 @@ module.exports = function handler(req, res) {
       gameApi: 'https://api.grudge-studio.com',
       dashboard: 'https://dash.grudge-studio.com',
       account: 'https://account.grudge-studio.com',
-      wcs: 'https://grudgewarlords.com',
-      nexus: 'https://grudachain-rho.vercel.app',
+      wcs: 'https://warlord-crafting-suite.vercel.app',
+      nexus: 'https://grudachain.grudge-studio.com',
       gdevelop: 'https://gdevelop-assistant.vercel.app',
-      objectStore: 'https://molochdagod.github.io/ObjectStore',
-      grudgewarlords: 'https://grudgewarlords.com'
+      grudgedot: 'https://gdevelop-assistant.vercel.app',
+      objectStore: 'https://objectstore.grudge-studio.com',
+      assets: 'https://assets.grudge-studio.com',
+      grudgewarlords: 'https://client.grudge-studio.com',
+      legion: 'https://ai.grudge-studio.com',
+      grudaAgent: 'https://grudaagent.vercel.app',
+      devTool: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest',
+      fleetConnect: 'https://grudachain.grudge-studio.com/grudge-fleet-connect.js'
+    },
+    playerHub: {
+      characters: 'https://client.grudge-studio.com/character',
+      island: 'https://warlord-crafting-suite.vercel.app/island-hub',
+      saves: 'https://api.grudge-studio.com',
+      wallet: 'https://warlord-crafting-suite.vercel.app/wallet'
     },
     sdk: {
       name: 'grudge-studio',
@@ -25,7 +37,9 @@ module.exports = function handler(req, res) {
     ai: {
       vibeVersion: '8.0.0',
       providers: ['megallm', 'openrouter', 'agentrouter', 'routeway'],
-      puterAI: true
+      puterAI: true,
+      legion: 'https://ai.grudge-studio.com',
+      grudaAgent: 'https://grudaagent.vercel.app'
     },
     auth: {
       endpoints: {
