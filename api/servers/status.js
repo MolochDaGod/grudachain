@@ -73,7 +73,7 @@ module.exports = async function handler(req, res) {
         LobbyState: { fields: ['players', 'phase', 'countdown', 'maxPlayers'] },
         IslandState: { fields: ['players', 'islandId', 'islandName', 'biome', 'timeOfDay', 'weather'] }
       },
-      auth: 'Bearer token via id.grudge-studio.com/auth/verify',
+      auth: 'Bearer token via id.grudge-studio.com/api/auth/verify',
       clientPackage: 'colyseus.js@0.15.x'
     },
     timestamp: new Date().toISOString()

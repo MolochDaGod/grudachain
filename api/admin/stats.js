@@ -5,7 +5,7 @@ async function verifyAdmin(req) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
   try {
-    const resp = await _fetch(`${AUTH_GATEWAY}/auth/verify`, {
+    const resp = await _fetch(`${AUTH_GATEWAY}/api/auth/verify`, {
       headers: { 'Authorization': authHeader }
     });
     if (!resp.ok) return null;

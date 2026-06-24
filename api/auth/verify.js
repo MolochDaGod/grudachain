@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const resp = await _fetch(`${AUTH_GATEWAY}/auth/verify`, {
+    const resp = await _fetch(`${AUTH_GATEWAY}/api/auth/verify`, {
       headers: { 'Authorization': authHeader }
     });
     const data = await resp.json();

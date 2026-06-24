@@ -3,10 +3,12 @@
 const CANONICAL = {
   nexus: 'https://grudachain.grudge-studio.com',
   auth: 'https://id.grudge-studio.com',
+  authLogin: 'https://id.grudge-studio.com/api/auth/page',
   gameApi: 'https://api.grudge-studio.com',
   warlords: 'https://client.grudge-studio.com',
   puterCloud: 'https://grudge-studio.puter.site',
   grudgedot: 'https://gdevelop-assistant.vercel.app',
+  releasesHub: 'https://launcher.grudge-studio.com',
   legion: 'https://ai.grudge-studio.com',
   grudaAgent: 'https://grudaagent.vercel.app',
   objectStore: 'https://objectstore.grudge-studio.com',
@@ -14,6 +16,13 @@ const CANONICAL = {
   islandHub: 'https://warlord-crafting-suite.vercel.app/island-hub',
   ale: 'https://ale.grudge-studio.com'
 };
+
+const LEGACY_AUTH_PATTERNS = [
+  '/auth?app=',
+  '/auth?redirect=',
+  'id.grudge-studio.com/auth/',
+  'id.grudge-studio.com/auth"'
+];
 
 const STALE_HOSTS = [
   'grudachain-rho.vercel.app',
@@ -77,6 +86,35 @@ async function runFleetMismatchAudit(origin = 'https://grudachain.grudge-studio.
 
     const stale = findStale(collectUrls(c));
     stale.forEach(url => issues.push({ key: 'stale_url', found: url, severity: 'stale' }));
+
+    if (c.auth?.login && !String(c.auth.login).includes('/api/auth/page')) {
+      issues.push({
+        key: 'legacy_auth_login',
+        expected: CANONICAL.authLogin,
+        found: c.auth.login,
+        severity: 'mismatch'
+      });
+    }
+
+    const allUrls = collectUrls(c).join(' ');
+    LEGACY_AUTH_PATTERNS.forEach((pat) => {
+      if (allUrls.includes(pat)) {
+        issues.push({
+          key: 'legacy_auth_path',
+          found: pat,
+          expected: '/api/auth/page',
+          severity: 'legacy'
+        });
+      }
+    });
+
+    if (c.libraries?.gameLibrary && !c.libraries.gameLibrary.canonical) {
+      issues.push({
+        key: 'gameLibrary_not_canonical',
+        found: c.libraries.gameLibrary.url,
+        severity: 'config'
+      });
+    }
 
     checks.push({ source: 'fleet/connect', ok: true, issueCount: diffs.length + stale.length });
   } else {

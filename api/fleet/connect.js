@@ -12,13 +12,46 @@ module.exports = function handler(req, res) {
 
   res.json({
     success: true,
-    version: '1.0.0',
+    version: '2.0.0',
+    sdk: `${nexus}/grudge-fleet-sdk.js`,
     widget: `${nexus}/grudge-fleet-connect.js`,
     sso: `${nexus}/grudge-sso.js`,
+    standards: {
+      pattern: 'oauth2-style',
+      authLoginPath: '/api/auth/page',
+      authLegacyPath: '/auth',
+      redirectParam: 'redirect',
+      tokenStorageKey: 'grudge_auth_token',
+      idStorageKey: 'grudge_id',
+      puterFlow: ['puter.auth.signIn', 'POST /api/auth/puter-sso', 'handoff grudge_token'],
+      note: 'Never link to /auth — it serves a legacy SPA. Use /api/auth/page only.'
+    },
     auth: {
       gateway: 'https://id.grudge-studio.com',
       login: 'https://id.grudge-studio.com/api/auth/page',
-      verify: 'https://id.grudge-studio.com/api/auth/verify'
+      verify: 'https://id.grudge-studio.com/api/auth/verify',
+      puterSso: 'https://id.grudge-studio.com/api/auth/puter-sso',
+      sessionExchange: 'https://api.grudge-studio.com/api/auth/session/exchange',
+      gameDataPuter: 'https://grudge-builder-production.up.railway.app/api/auth/puter'
+    },
+    libraries: {
+      gameLibrary: {
+        id: 'grudgedot',
+        canonical: true,
+        url: 'https://gdevelop-assistant.vercel.app',
+        label: 'grudgeDot Game Library',
+        description: 'Primary launcher — fleet SSO, characters, releases UI',
+        auth: 'grudge-id'
+      },
+      releasesHub: {
+        id: 'releases-hub',
+        canonical: false,
+        url: 'https://launcher.grudge-studio.com',
+        fallback: 'https://gdevelop-assistant.vercel.app',
+        label: 'Grudge Releases (GitHub org)',
+        description: 'GitHub Releases mirror — converges on grudgeDot; use gameLibrary when possible',
+        auth: 'grudge-id'
+      }
     },
     api: {
       game: 'https://api.grudge-studio.com',

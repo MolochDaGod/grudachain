@@ -9,7 +9,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const resp = await _fetch(`${AUTH_GATEWAY}/auth/guest`, {
+    const resp = await _fetch(`${AUTH_GATEWAY}/api/auth/guest`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body || {})

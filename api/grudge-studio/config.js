@@ -42,15 +42,17 @@ module.exports = function handler(req, res) {
       grudaAgent: 'https://grudaagent.vercel.app'
     },
     auth: {
+      loginPage: 'https://id.grudge-studio.com/api/auth/page',
       endpoints: {
-        login: 'POST /auth/login',
-        register: 'POST /auth/register',
-        guest: 'POST /auth/guest',
-        verify: 'POST /auth/verify (Bearer token)',
-        discord: 'GET /auth/discord',
-        github: 'GET /auth/github',
-        puter: 'POST /auth/puter',
-        wallet: 'POST /auth/wallet'
+        login: 'GET /api/auth/page',
+        register: 'GET /api/auth/page',
+        guest: 'POST /api/auth/guest',
+        verify: 'GET /api/auth/verify (Bearer token)',
+        puterSso: 'POST /api/auth/puter-sso',
+        discord: 'GET /api/auth/discord',
+        github: 'GET /api/auth/github',
+        puter: 'POST /api/auth/puter',
+        wallet: 'POST /api/auth/wallet'
       }
     },
     timestamp: new Date().toISOString()
