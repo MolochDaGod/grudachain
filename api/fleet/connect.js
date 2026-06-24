@@ -57,6 +57,8 @@ module.exports = function handler(req, res) {
       game: 'https://api.grudge-studio.com',
       assets: 'https://assets.grudge-studio.com',
       objectStore: 'https://objectstore.grudge-studio.com',
+      objectStoreCatalog: 'https://objectstore.grudge-studio.com/api/v1/catalog',
+      objectStoreDocs: 'https://info.grudge-studio.com/docs',
       ai: 'https://ai.grudge-studio.com',
       grudaAgent: 'https://grudaagent.vercel.app',
       rag: 'https://grudachain.grudge-studio.com/api/ai/rag',
