@@ -17,7 +17,7 @@ module.exports = function handler(req, res) {
     sso: `${nexus}/grudge-sso.js`,
     auth: {
       gateway: 'https://id.grudge-studio.com',
-      login: 'https://id.grudge-studio.com/auth',
+      login: 'https://id.grudge-studio.com/api/auth/page',
       verify: 'https://id.grudge-studio.com/api/auth/verify'
     },
     api: {

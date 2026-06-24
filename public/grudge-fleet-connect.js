@@ -52,6 +52,16 @@
 
   function isSignedIn() { return !!getToken(); }
 
+  function buildAuthLoginUrl(returnUrl, app) {
+    var gateway = (config && config.auth && config.auth.login)
+      ? config.auth.login.replace(/\/api\/auth\/page.*$/, '').replace(/\/auth.*$/, '')
+      : ((config && config.auth && config.auth.gateway) || DEFAULT_CONFIG.auth.gateway);
+    var page = (config && config.auth && config.auth.login && config.auth.login.indexOf('/api/auth/page') >= 0)
+      ? config.auth.login.split('?')[0]
+      : gateway + '/api/auth/page';
+    return page + '?app=' + encodeURIComponent(app || 'fleet-connect') + '&redirect=' + encodeURIComponent(returnUrl || window.location.href);
+  }
+
   function ssoUrl(url) {
     if (!url || !isSignedIn()) return url;
     try {
@@ -176,7 +186,7 @@
       html += link('My Saves', ssoUrl(tools.puterCloud || 'https://grudge-studio.puter.site'));
       html += '</div>';
     } else {
-      var authUrl = ((config && config.auth && config.auth.gateway) || DEFAULT_CONFIG.auth.gateway) + '/auth?app=fleet-connect&return=' + encodeURIComponent(window.location.href);
+      var authUrl = buildAuthLoginUrl(window.location.href, 'fleet-connect');
       html += '<p class="gfc-meta" style="margin:0 0 10px">Sign in to sync characters, islands, and saves across the fleet.</p>';
       html += '<a class="gfc-signin" href="' + authUrl + '">Sign in with Grudge ID</a>';
       html += '<div class="gfc-links" style="margin-top:10px">';

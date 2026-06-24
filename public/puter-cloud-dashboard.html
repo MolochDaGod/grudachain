@@ -160,7 +160,7 @@ async function onAuth(){
 }
 function openGrudgeId(){
   var ret=encodeURIComponent(location.href);
-  location.href='https://id.grudge-studio.com/auth?app=puter-cloud&return='+ret;
+  location.href='https://id.grudge-studio.com/api/auth/page?app=puter-cloud&redirect='+ret;
 }
 async function loadProfile(){
   try{

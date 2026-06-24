@@ -55,32 +55,92 @@
     return hostname === window.location.hostname;
   }
 
+  var AUTH_GATEWAY = 'https://id.grudge-studio.com';
+  var GAME_API = 'https://api.grudge-studio.com';
+
+  var AUTH_PARAM_KEYS = [
+    'token', 'sso_token', 'auth_token', 'grudge_token', 'puter_token',
+    'username', 'grudge_username', 'auth_user',
+    'grudge_id', 'auth_grudge_id', 'grudge_user_id',
+    'displayName', 'provider', 'isNew'
+  ];
+
+  function cleanAuthParamsFromUrl() {
+    var cleanUrl = new URL(window.location.href);
+    AUTH_PARAM_KEYS.forEach(function (k) { cleanUrl.searchParams.delete(k); });
+    var cleanStr = cleanUrl.pathname + cleanUrl.search + cleanUrl.hash;
+    window.history.replaceState({}, '', cleanStr || '/');
+  }
+
+  /** Canonical Grudge ID login URL (Puter SSO page, not /auth portal SPA). */
+  function buildAuthUrl(returnUrl, app) {
+    return AUTH_GATEWAY + '/api/auth/page?app=' + encodeURIComponent(app || 'fleet') +
+      '&redirect=' + encodeURIComponent(returnUrl || window.location.href);
+  }
+
+  /** Bridge id.grudge-studio.com launch token → Game API Bearer JWT. */
+  function bridgeLaunchToken(launchToken) {
+    return fetch(GAME_API + '/api/auth/session/exchange', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: launchToken, audience: window.location.origin })
+    })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (profile) {
+        if (!profile || !profile.grudgeId) return false;
+        return fetch(GAME_API + '/api/auth/puter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            puterId: 'grudge_' + profile.grudgeId,
+            puterUuid: 'grudge_' + profile.grudgeId,
+            displayName: profile.displayName || profile.username
+          })
+        })
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (data) {
+            if (!data) return false;
+            var jwt = data.sessionToken || data.token;
+            if (!jwt) return false;
+            localStorage.setItem(TOKEN_KEY, jwt);
+            if (profile.grudgeId) localStorage.setItem(ID_KEY, profile.grudgeId);
+            if (profile.username || profile.displayName) {
+              localStorage.setItem(USER_KEY, profile.displayName || profile.username);
+            }
+            document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
+            return true;
+          });
+      })
+      .catch(function () { return false; });
+  }
+
   // ── 1. INBOUND: Capture token from URL params ──
   function captureInboundToken() {
     var params = new URLSearchParams(window.location.search);
+    var launchToken = params.get('grudge_token') || params.get('puter_token');
     var token    = params.get('token') || params.get('sso_token') || params.get('auth_token');
     var username = params.get('username') || params.get('grudge_username') || params.get('auth_user');
     var grudgeId = params.get('grudge_id') || params.get('auth_grudge_id');
     var userId   = params.get('grudge_user_id');
 
+    if (launchToken && !token) {
+      cleanAuthParamsFromUrl();
+      bridgeLaunchToken(launchToken).then(function (ok) {
+        if (ok) console.log('[GrudgeSSO] Grudge ID launch token bridged');
+      });
+      return 'pending';
+    }
+
     if (!token) return false;
 
-    // Store auth data
     localStorage.setItem(TOKEN_KEY, token);
     if (username) localStorage.setItem(USER_KEY, username);
     if (grudgeId) localStorage.setItem(ID_KEY, grudgeId);
     if (userId)   localStorage.setItem(USERID_KEY, userId);
 
-    // Clean SSO params from URL (keep non-auth params)
-    var cleanUrl = new URL(window.location.href);
-    ['token', 'sso_token', 'auth_token', 'username', 'grudge_username',
-     'auth_user', 'grudge_id', 'auth_grudge_id', 'grudge_user_id',
-     'displayName', 'provider', 'isNew'].forEach(function (k) {
-      cleanUrl.searchParams.delete(k);
-    });
-    var cleanStr = cleanUrl.pathname + cleanUrl.search + cleanUrl.hash;
-    window.history.replaceState({}, '', cleanStr || '/');
-
+    cleanAuthParamsFromUrl();
+    document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
     return true;
   }
 
@@ -143,6 +203,8 @@
   // Expose for programmatic use
   window.GrudgeSSO = {
     captureInboundToken: captureInboundToken,
+    bridgeLaunchToken: bridgeLaunchToken,
+    buildAuthUrl: buildAuthUrl,
     getAuthParams: getAuthParams,
     isGrudgeDomain: isGrudgeDomain,
     /** Build a cross-app URL with auth params attached */
@@ -158,7 +220,9 @@
     },
   };
 
-  if (captured) {
+  if (captured === true) {
     console.log('[GrudgeSSO] Auth captured from URL — session restored');
+  } else if (captured === 'pending') {
+    console.log('[GrudgeSSO] Bridging Grudge ID launch token…');
   }
 })();
