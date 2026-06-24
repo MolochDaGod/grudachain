@@ -1,5 +1,7 @@
 /** Shared GDevelop launcher catalogue — used by Express router and Vercel handlers */
 
+const { NEXUS_CANONICAL, NEXUS_ORIGIN } = require('./nexus-origin');
+
 const GRUDGE_GAMES = [
   {
     slug: 'grudge-warlords',
@@ -81,7 +83,8 @@ function getGdevelopConfig() {
         platform: process.env.GRUDGE_PLATFORM_URL || 'https://grudge-platform.vercel.app',
         objectStore: 'https://objectstore.grudge-studio.com',
         assets: 'https://assets.grudge-studio.com',
-        nexus: 'https://grudachain.grudge-studio.com',
+        nexus: NEXUS_ORIGIN,
+        nexusCanonical: NEXUS_CANONICAL,
         legion: 'https://ai.grudge-studio.com',
         grudaAgent: 'https://grudaagent.vercel.app'
       },
@@ -104,11 +107,12 @@ function getGdevelopConfig() {
         assistant: process.env.GDEVELOP_URL || 'https://gdevelop-assistant.vercel.app',
         assetGallery: 'https://gdevelop-assistant.vercel.app/asset-gallery',
         dashboard: 'https://dash.grudge-studio.com',
-        nexus: 'https://grudachain.grudge-studio.com',
+        nexus: NEXUS_ORIGIN,
+        nexusCanonical: NEXUS_CANONICAL,
         devTool: 'https://github.com/MolochDaGod/grudge-dev-tool/releases',
         islandHub: 'https://warlord-crafting-suite.vercel.app/island-hub',
         characters: 'https://client.grudge-studio.com/character',
-        fleetConnect: 'https://grudachain.grudge-studio.com/grudge-fleet-connect.js'
+        fleetConnect: `${NEXUS_ORIGIN}/grudge-fleet-connect.js`
       },
       playerHub: {
         characters: 'https://client.grudge-studio.com/character',

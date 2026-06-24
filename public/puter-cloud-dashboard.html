@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Grudge Studio — Puter Cloud Dashboard</title>
 <script src="https://js.puter.com/v2/"></script>
-<script src="https://grudachain.grudge-studio.com/grudge-sso.js"></script>
-<script src="https://grudachain.grudge-studio.com/grudge-fleet-connect.js"></script>
+<script src="/grudge-sso.js"></script>
+<script src="/grudge-fleet-connect.js"></script>
 <style>
 :root{--p:#00ff88;--s:#66aaff;--g:#d4af37;--bg:rgba(0,4,40,0.65);--bd:rgba(0,255,136,0.25)}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -230,7 +230,7 @@ async function sendAi(){
   addMsg(m,'u');inp.value='';
   var task=document.getElementById('aiTask').value;
   try{
-    var r=await fetch('https://grudachain.grudge-studio.com/api/ai/rag/chat',{
+    var r=await fetch((location.origin||'https://grudachain-rho.vercel.app')+'/api/ai/rag/chat',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({message:m,task:task,includeMismatch:task==='mismatch',mode:task==='mismatch'?'query':'chat'})
     });

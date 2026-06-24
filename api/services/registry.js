@@ -1,5 +1,7 @@
+const { NEXUS_CANONICAL, NEXUS_ORIGIN } = require('../_lib/nexus-origin');
+
 const SERVICES = [
-  { slug: 'nexus-hub', name: 'GrudaChain Nexus Hub', platform: 'vercel', url: 'https://grudachain.grudge-studio.com', type: 'app', status: 'active', health_endpoint: '/api/health' },
+  { slug: 'nexus-hub', name: 'GrudaChain Nexus Hub', platform: 'vercel', url: NEXUS_ORIGIN, canonical_url: NEXUS_CANONICAL, type: 'app', status: 'active', health_endpoint: '/api/health' },
   { slug: 'auth-gateway', name: 'Grudge Auth (SSO)', platform: 'vps', url: 'https://id.grudge-studio.com', type: 'auth', status: 'active', health_endpoint: '/health' },
   { slug: 'game-api', name: 'Grudge Game API', platform: 'vps', url: 'https://api.grudge-studio.com', type: 'api', status: 'active', health_endpoint: '/health' },
   { slug: 'unity-dedicated', name: 'Grudge Warlords Dedicated Server', platform: 'vps', url: 'https://grudgewarlords.com', type: 'game-server', status: 'active', health_endpoint: '/api/servers/unity/status' },
@@ -13,7 +15,7 @@ const SERVICES = [
   { slug: 'dashboard', name: 'Grudge Dashboard', platform: 'vps', url: 'https://dash.grudge-studio.com', type: 'app', status: 'active' },
   { slug: 'grudge-platform', name: 'Grudge Platform', platform: 'vercel', url: 'https://grudge-platform.vercel.app', type: 'launcher', status: 'active', health_endpoint: '/api/platform/health' },
   { slug: 'dungeon-crawler', name: 'Dungeon Crawler Quest', platform: 'vercel', url: 'https://dungeon-crawler-quest.vercel.app', type: 'game', status: 'active' },
-  { slug: 'fleet-connect', name: 'Fleet Connect Widget', platform: 'vercel', url: 'https://grudachain.grudge-studio.com/grudge-fleet-connect.js', type: 'sdk', status: 'active' }
+  { slug: 'fleet-connect', name: 'Fleet Connect Widget', platform: 'vercel', url: `${NEXUS_ORIGIN}/grudge-fleet-connect.js`, type: 'sdk', status: 'active' }
 ];
 
 module.exports = async function handler(req, res) {

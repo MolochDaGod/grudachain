@@ -1,3 +1,5 @@
+const { NEXUS_CANONICAL, NEXUS_ORIGIN } = require('../_lib/nexus-origin');
+
 module.exports = function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -11,7 +13,8 @@ module.exports = function handler(req, res) {
       auth: 'https://id.grudge-studio.com',
       gameApi: 'https://api.grudge-studio.com',
       dashboard: 'https://dash.grudge-studio.com',
-      nexus: 'https://grudachain.grudge-studio.com',
+      nexus: NEXUS_ORIGIN,
+      nexusCanonical: NEXUS_CANONICAL,
       wcs: 'https://warlord-crafting-suite.vercel.app',
       islandHub: 'https://warlord-crafting-suite.vercel.app/island-hub',
       characters: 'https://client.grudge-studio.com/character',
@@ -22,7 +25,7 @@ module.exports = function handler(req, res) {
       grudaAgent: 'https://grudaagent.vercel.app',
       objectStore: 'https://objectstore.grudge-studio.com',
       assets: 'https://assets.grudge-studio.com',
-      fleetConnect: 'https://grudachain.grudge-studio.com/grudge-fleet-connect.js',
+      fleetConnect: `${NEXUS_ORIGIN}/grudge-fleet-connect.js`,
       npm: 'https://www.npmjs.com/package/grudge-studio',
       github: 'https://github.com/MolochDaGod',
       discord: 'https://discord.gg/FtGtmxmwkh'

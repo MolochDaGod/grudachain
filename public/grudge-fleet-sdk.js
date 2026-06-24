@@ -19,9 +19,28 @@
 (function () {
   'use strict';
 
-  var MANIFEST_URL = 'https://grudachain.grudge-studio.com/api/fleet/connect';
-  var SSO_SCRIPT = 'https://grudachain.grudge-studio.com/grudge-sso.js';
-  var CONNECT_SCRIPT = 'https://grudachain.grudge-studio.com/grudge-fleet-connect.js';
+  var NEXUS_CANONICAL = 'https://grudachain.grudge-studio.com';
+  var NEXUS_FALLBACK = 'https://grudachain-rho.vercel.app';
+
+  function resolveNexusOrigin() {
+    var scripts = document.getElementsByTagName('script');
+    for (var i = 0; i < scripts.length; i++) {
+      var src = scripts[i].src || '';
+      if (src.indexOf('grudge-fleet-sdk.js') >= 0) {
+        try { return new URL(src).origin; } catch (e) {}
+      }
+    }
+    var host = location.hostname || '';
+    if (host === 'grudachain.grudge-studio.com' || host === 'grudachain-rho.vercel.app') {
+      return location.origin;
+    }
+    return NEXUS_FALLBACK;
+  }
+
+  var NEXUS_ORIGIN = resolveNexusOrigin();
+  var MANIFEST_URL = NEXUS_ORIGIN + '/api/fleet/connect';
+  var SSO_SCRIPT = NEXUS_ORIGIN + '/grudge-sso.js';
+  var CONNECT_SCRIPT = NEXUS_ORIGIN + '/grudge-fleet-connect.js';
   var PUTER_SDK = 'https://js.puter.com/v2/';
 
   var manifest = null;

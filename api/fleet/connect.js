@@ -2,17 +2,24 @@
  * GET /api/fleet/connect
  * Canonical fleet connectivity manifest for embeddable widgets and launchers.
  */
+const { NEXUS_CANONICAL, NEXUS_FALLBACK, NEXUS_ORIGIN } = require('../_lib/nexus-origin');
+
 module.exports = function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  const nexus = 'https://grudachain.grudge-studio.com';
+  const nexus = NEXUS_ORIGIN;
 
   res.json({
     success: true,
-    version: '2.0.0',
+    version: '2.0.1',
+    nexus: {
+      canonical: NEXUS_CANONICAL,
+      fallback: NEXUS_FALLBACK,
+      origin: nexus
+    },
     sdk: `${nexus}/grudge-fleet-sdk.js`,
     widget: `${nexus}/grudge-fleet-connect.js`,
     sso: `${nexus}/grudge-sso.js`,
@@ -61,8 +68,8 @@ module.exports = function handler(req, res) {
       objectStoreDocs: 'https://info.grudge-studio.com/docs',
       ai: 'https://ai.grudge-studio.com',
       grudaAgent: 'https://grudaagent.vercel.app',
-      rag: 'https://grudachain.grudge-studio.com/api/ai/rag',
-      fleetMismatch: 'https://grudachain.grudge-studio.com/api/fleet/mismatch',
+      rag: `${nexus}/api/ai/rag`,
+      fleetMismatch: `${nexus}/api/fleet/mismatch`,
       ale: 'https://ale.grudge-studio.com'
     },
     cloud: {
@@ -72,7 +79,9 @@ module.exports = function handler(req, res) {
       assetsRoot: 'grudge-studio/assets',
       exportsRoot: 'grudge-studio/exports',
       backupsRoot: 'grudge-studio/backups',
-      dashboardSource: 'https://grudachain.grudge-studio.com/puter-cloud-dashboard.html'
+      dashboardSource: `${nexus}/puter-cloud-dashboard.html`,
+      perAccountDashboard: `${nexus}/puter-cloud-dashboard.html`,
+      adminApp: 'https://grudge-cloud.puter.site'
     },
     playerHub: {
       characters: 'https://client.grudge-studio.com/character',

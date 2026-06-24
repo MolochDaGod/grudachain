@@ -15,10 +15,30 @@
 (function () {
   'use strict';
 
+  var NEXUS_CANONICAL = 'https://grudachain.grudge-studio.com';
+  var NEXUS_FALLBACK = 'https://grudachain-rho.vercel.app';
+
+  function resolveNexusOrigin() {
+    var scripts = document.getElementsByTagName('script');
+    for (var i = 0; i < scripts.length; i++) {
+      var src = scripts[i].src || '';
+      if (src.indexOf('grudge-fleet-connect.js') >= 0) {
+        try { return new URL(src).origin; } catch (e) {}
+      }
+    }
+    var host = location.hostname || '';
+    if (host === 'grudachain.grudge-studio.com' || host === 'grudachain-rho.vercel.app') {
+      return location.origin;
+    }
+    return NEXUS_FALLBACK;
+  }
+
+  var NEXUS_ORIGIN = resolveNexusOrigin();
+
   var TOKEN_KEY = 'grudge_auth_token';
   var USER_KEY = 'grudge_username';
   var ID_KEY = 'grudge_id';
-  var CONFIG_URL = 'https://grudachain.grudge-studio.com/api/fleet/connect';
+  var CONFIG_URL = NEXUS_ORIGIN + '/api/fleet/connect';
   var DEFAULT_CONFIG = {
     playerHub: {
       characters: 'https://client.grudge-studio.com/character',
@@ -27,7 +47,7 @@
       account: 'https://id.grudge-studio.com'
     },
     tools: {
-      nexus: 'https://grudachain.grudge-studio.com',
+      nexus: NEXUS_ORIGIN,
       grudgedot: 'https://gdevelop-assistant.vercel.app',
       devTool: { download: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest' },
       legion: 'https://ai.grudge-studio.com',
