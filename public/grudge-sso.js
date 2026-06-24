@@ -78,6 +78,65 @@
       '&redirect=' + encodeURIComponent(returnUrl || window.location.href);
   }
 
+  /**
+   * Two-step scoped auth: simple Puter identity → Grudge ID (+ email account link).
+   * Requires https://js.puter.com/v2/ loaded on the page.
+   */
+  function scopePuterToGrudgeId(appLabel) {
+    if (typeof window.puter === 'undefined') {
+      return Promise.reject(new Error('Puter SDK not loaded'));
+    }
+    var signIn = puter.auth.isSignedIn()
+      ? Promise.resolve()
+      : puter.auth.signIn();
+    var puterUser = null;
+    return signIn
+      .then(function () { return puter.auth.getUser(); })
+      .then(function (pu) {
+        puterUser = pu;
+        if (!pu || !pu.uuid) throw new Error('Puter sign-in cancelled');
+        return fetch(AUTH_GATEWAY + '/api/auth/puter-sso', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            puterId: pu.uuid,
+            puterUsername: pu.username,
+            email: pu.email || undefined,
+            app: appLabel || 'fleet'
+          })
+        });
+      })
+      .then(function (res) {
+        if (!res.ok) return res.json().then(function (e) { throw new Error(e.error || 'Grudge ID scope failed'); });
+        return res.json();
+      })
+      .then(function (profile) {
+        return fetch(GAME_API + '/api/auth/puter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            puterId: puterUser.uuid,
+            puterUuid: puterUser.uuid,
+            puterUsername: profile.displayName || profile.username,
+            email: profile.email || undefined
+          })
+        }).then(function (bridgeRes) { return bridgeRes.ok ? bridgeRes.json() : null; })
+          .then(function (data) {
+            var jwt = data && (data.sessionToken || data.token);
+            if (jwt) {
+              localStorage.setItem(TOKEN_KEY, jwt);
+              if (profile.grudgeId) localStorage.setItem(ID_KEY, profile.grudgeId);
+              if (profile.username || profile.displayName) {
+                localStorage.setItem(USER_KEY, profile.displayName || profile.username);
+              }
+              document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
+            }
+            return { profile: profile, token: jwt, puterUser: puterUser };
+          });
+      });
+  }
+
   /** Bridge id.grudge-studio.com launch token → Game API Bearer JWT. */
   function bridgeLaunchToken(launchToken) {
     return fetch(GAME_API + '/api/auth/session/exchange', {
@@ -204,6 +263,7 @@
   window.GrudgeSSO = {
     captureInboundToken: captureInboundToken,
     bridgeLaunchToken: bridgeLaunchToken,
+    scopePuterToGrudgeId: scopePuterToGrudgeId,
     buildAuthUrl: buildAuthUrl,
     getAuthParams: getAuthParams,
     isGrudgeDomain: isGrudgeDomain,
