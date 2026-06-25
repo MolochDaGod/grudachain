@@ -15,7 +15,8 @@
 (function () {
   'use strict';
 
-  var NEXUS_CANONICAL = 'https://grudachain.grudge-studio.com';
+  var NEXUS_CANONICAL = 'https://nexus.grudge-studio.com';
+  var NEXUS_ALIAS = 'https://grudachain.grudge-studio.com';
   var NEXUS_FALLBACK = 'https://grudachain-rho.vercel.app';
 
   function resolveNexusOrigin() {
@@ -27,7 +28,7 @@
       }
     }
     var host = location.hostname || '';
-    if (host === 'grudachain.grudge-studio.com' || host === 'grudachain-rho.vercel.app') {
+    if (host === 'nexus.grudge-studio.com' || host === 'grudachain.grudge-studio.com' || host === 'grudachain-rho.vercel.app') {
       return location.origin;
     }
     return NEXUS_FALLBACK;

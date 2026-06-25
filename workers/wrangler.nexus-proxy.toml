@@ -1,0 +1,16 @@
+name = "grudge-nexus-proxy"
+main = "nexus-proxy.js"
+compatibility_date = "2025-03-01"
+account_id = "ee475864561b02d4588180b8b9acf694"
+workers_dev = false
+
+[vars]
+NEXUS_ORIGIN = "https://grudachain-rho.vercel.app"
+
+[[routes]]
+pattern = "grudachain.grudge-studio.com/*"
+zone_id = "e8c0c2ee3063f24eb31affddabf9730a"
+
+[[routes]]
+pattern = "nexus.grudge-studio.com/*"
+zone_id = "e8c0c2ee3063f24eb31affddabf9730a"

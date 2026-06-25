@@ -1,7 +1,8 @@
 /** Fleet URL audit — finds canonical vs live config mismatches */
 
 const CANONICAL = {
-  nexus: 'https://grudachain.grudge-studio.com',
+  nexus: 'https://nexus.grudge-studio.com',
+  nexusAlias: 'https://grudachain.grudge-studio.com',
   auth: 'https://id.grudge-studio.com',
   authLogin: 'https://id.grudge-studio.com/api/auth/page',
   gameApi: 'https://api.grudge-studio.com',
