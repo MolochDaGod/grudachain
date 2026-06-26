@@ -6,7 +6,6 @@ const {
   CANONICAL,
   NEXUS_CANONICAL,
   NEXUS_ALIASES,
-  NEXUS_FALLBACK,
   NEXUS_ORIGIN,
   islandHub,
 } = require('../_lib/canonical-urls');
@@ -25,7 +24,6 @@ module.exports = function handler(req, res) {
     nexus: {
       canonical: NEXUS_CANONICAL,
       aliases: NEXUS_ALIASES,
-      fallback: NEXUS_FALLBACK,
       origin: nexus
     },
     sdk: `${nexus}/grudge-fleet-sdk.js`,

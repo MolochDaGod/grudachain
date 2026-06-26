@@ -59,7 +59,7 @@ async function runFleetMismatchAudit(origin = CANONICAL.nexus) {
       diffKey('gameApi', CANONICAL.gameApi, c.api?.game),
       diffKey('puterCloud', CANONICAL.puterCloud, c.cloud?.puter),
       diffKey('grudgedot', CANONICAL.grudgedot, c.tools?.grudgedot),
-      diffKey('wcs', CANONICAL.wcs, c.playerHub?.wcs),
+      diffKey('wcs', `${CANONICAL.wcs}/dashboard`, c.playerHub?.wcs),
       diffKey('grudaAgent', CANONICAL.grudaAgent, c.api?.grudaAgent)
     ].filter(Boolean);
     issues.push(...diffs);

@@ -43,7 +43,6 @@ const NEXUS_ALIASES = [
 /** Legacy Vercel hostnames — should 301 to canonical custom domains */
 const LEGACY_VERCEL_HOSTS = [
   'grudachain-rho.vercel.app',
-  'grudachain-grudgenexus.vercel.app',
   'grudachain.vercel.app',
   'grudge-platform.vercel.app',
   'gdevelop-assistant.vercel.app',
