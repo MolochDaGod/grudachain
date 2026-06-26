@@ -1,4 +1,4 @@
-const { NEXUS_CANONICAL, NEXUS_ORIGIN } = require('../_lib/nexus-origin');
+const { CANONICAL, NEXUS_CANONICAL, NEXUS_ORIGIN, islandHub } = require('../_lib/canonical-urls');
 
 module.exports = function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -8,28 +8,30 @@ module.exports = function handler(req, res) {
   res.json({
     success: true,
     ecosystem: {
-      authGateway: 'https://id.grudge-studio.com',
-      gameApi: 'https://api.grudge-studio.com',
-      dashboard: 'https://dash.grudge-studio.com',
-      account: 'https://account.grudge-studio.com',
-      wcs: 'https://warlord-crafting-suite.vercel.app',
-      nexus: NEXUS_ORIGIN,
+      authGateway: CANONICAL.auth,
+      gameApi: CANONICAL.gameApi,
+      dashboard: CANONICAL.dash,
+      account: CANONICAL.account,
+      wcs: CANONICAL.wcs,
+      nexus: NEXUS_CANONICAL,
       nexusCanonical: NEXUS_CANONICAL,
-      gdevelop: 'https://gdevelop-assistant.vercel.app',
-      grudgedot: 'https://gdevelop-assistant.vercel.app',
-      objectStore: 'https://objectstore.grudge-studio.com',
-      assets: 'https://assets.grudge-studio.com',
-      grudgewarlords: 'https://client.grudge-studio.com',
-      legion: 'https://ai.grudge-studio.com',
-      grudaAgent: 'https://grudaagent.vercel.app',
+      platform: CANONICAL.platform,
+      game: CANONICAL.game,
+      gdevelop: CANONICAL.gdevelop,
+      grudgedot: CANONICAL.grudgedot,
+      objectStore: CANONICAL.objectStore,
+      assets: CANONICAL.assets,
+      grudgewarlords: CANONICAL.warlords,
+      legion: CANONICAL.legion,
+      grudaAgent: CANONICAL.grudaAgent,
       devTool: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest',
       fleetConnect: `${NEXUS_ORIGIN}/grudge-fleet-connect.js`
     },
     playerHub: {
-      characters: 'https://client.grudge-studio.com/character',
-      island: 'https://warlord-crafting-suite.vercel.app/island-hub',
-      saves: 'https://api.grudge-studio.com',
-      wallet: 'https://warlord-crafting-suite.vercel.app/wallet'
+      characters: `${CANONICAL.warlords}/character`,
+      island: islandHub(),
+      saves: CANONICAL.gameApi,
+      wallet: `${CANONICAL.wcs}/wallet`
     },
     sdk: {
       name: 'grudge-studio',
@@ -41,11 +43,11 @@ module.exports = function handler(req, res) {
       vibeVersion: '8.0.0',
       providers: ['megallm', 'openrouter', 'agentrouter', 'routeway'],
       puterAI: true,
-      legion: 'https://ai.grudge-studio.com',
-      grudaAgent: 'https://grudaagent.vercel.app'
+      legion: CANONICAL.legion,
+      grudaAgent: CANONICAL.grudaAgent
     },
     auth: {
-      loginPage: 'https://id.grudge-studio.com/api/auth/page',
+      loginPage: CANONICAL.authLogin,
       endpoints: {
         login: 'GET /api/auth/page',
         register: 'GET /api/auth/page',

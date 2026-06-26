@@ -1,6 +1,6 @@
 /** Shared GDevelop launcher catalogue — used by Express router and Vercel handlers */
 
-const { NEXUS_CANONICAL, NEXUS_ORIGIN } = require('./nexus-origin');
+const { CANONICAL, NEXUS_CANONICAL, NEXUS_ORIGIN, islandHub } = require('./canonical-urls');
 
 const GRUDGE_GAMES = [
   {
@@ -30,7 +30,7 @@ const GRUDGE_GAMES = [
     name: 'Gruda Wars (MOBA)',
     description: 'MOBA-style battles with Dota-inspired map design and Grudge faction heroes.',
     mode: 'moba',
-    url: 'https://warlord-crafting-suite.vercel.app/moba',
+    url: `${CANONICAL.wcs}/moba`,
     platform: 'vercel',
     thumbnail: 'https://molochdagod.github.io/ObjectStore/images/games/gruda-wars.png',
     status: 'beta',
@@ -52,7 +52,7 @@ const GRUDGE_GAMES = [
     name: 'Grudge Platform',
     description: 'Central hub launcher for all Grudge Studio games and services.',
     mode: 'launcher',
-    url: 'https://grudge-platform.vercel.app',
+    url: CANONICAL.platform,
     platform: 'vercel',
     thumbnail: 'https://molochdagod.github.io/ObjectStore/images/games/platform.png',
     status: 'live',
@@ -63,7 +63,7 @@ const GRUDGE_GAMES = [
     name: 'grudgeDot Launcher',
     description: 'Grudge Studio creator launcher — games, tools, crafting, and AI.',
     mode: 'launcher',
-    url: 'https://gdevelop-assistant.vercel.app',
+    url: CANONICAL.grudgedot,
     platform: 'vercel',
     thumbnail: 'https://molochdagod.github.io/ObjectStore/images/games/platform.png',
     status: 'live',
@@ -77,16 +77,16 @@ function getGdevelopConfig() {
     gdevelop: {
       version: '1.1.0',
       backend: {
-        hub: process.env.GRUDA_LEGION_URL || 'https://api.grudge-studio.com',
-        auth: process.env.AUTH_GATEWAY_URL || 'https://id.grudge-studio.com',
-        gameApi: process.env.GAME_API_URL || 'https://api.grudge-studio.com',
-        platform: process.env.GRUDGE_PLATFORM_URL || 'https://grudge-platform.vercel.app',
-        objectStore: 'https://objectstore.grudge-studio.com',
-        assets: 'https://assets.grudge-studio.com',
-        nexus: NEXUS_ORIGIN,
+        hub: process.env.GRUDA_LEGION_URL || CANONICAL.gameApi,
+        auth: process.env.AUTH_GATEWAY_URL || CANONICAL.auth,
+        gameApi: process.env.GAME_API_URL || CANONICAL.gameApi,
+        platform: process.env.GRUDGE_PLATFORM_URL || CANONICAL.platform,
+        objectStore: CANONICAL.objectStore,
+        assets: CANONICAL.assets,
+        nexus: NEXUS_CANONICAL,
         nexusCanonical: NEXUS_CANONICAL,
-        legion: 'https://ai.grudge-studio.com',
-        grudaAgent: 'https://grudaagent.vercel.app'
+        legion: CANONICAL.legion,
+        grudaAgent: CANONICAL.grudaAgent
       },
       features: {
         aiAssistant: true,
@@ -104,22 +104,22 @@ function getGdevelopConfig() {
         npm: 'https://www.npmjs.com/package/grudge-studio'
       },
       urls: {
-        assistant: process.env.GDEVELOP_URL || 'https://gdevelop-assistant.vercel.app',
-        assetGallery: 'https://gdevelop-assistant.vercel.app/asset-gallery',
-        dashboard: 'https://dash.grudge-studio.com',
-        nexus: NEXUS_ORIGIN,
+        assistant: process.env.GDEVELOP_URL || CANONICAL.gdevelop,
+        assetGallery: `${CANONICAL.gdevelop}/asset-gallery`,
+        dashboard: CANONICAL.dash,
+        nexus: NEXUS_CANONICAL,
         nexusCanonical: NEXUS_CANONICAL,
         devTool: 'https://github.com/MolochDaGod/grudge-dev-tool/releases',
-        islandHub: 'https://warlord-crafting-suite.vercel.app/island-hub',
-        characters: 'https://client.grudge-studio.com/character',
-        fleetConnect: `${NEXUS_ORIGIN}/grudge-fleet-connect.js`
+        islandHub: islandHub(),
+        characters: `${CANONICAL.warlords}/character`,
+        fleetConnect: `${NEXUS_CANONICAL}/grudge-fleet-connect.js`
       },
       playerHub: {
-        characters: 'https://client.grudge-studio.com/character',
-        island: 'https://warlord-crafting-suite.vercel.app/island-hub',
-        saves: 'https://api.grudge-studio.com',
-        account: 'https://id.grudge-studio.com',
-        wcs: 'https://warlord-crafting-suite.vercel.app/dashboard'
+        characters: `${CANONICAL.warlords}/character`,
+        island: islandHub(),
+        saves: CANONICAL.gameApi,
+        account: CANONICAL.auth,
+        wcs: `${CANONICAL.wcs}/dashboard`
       }
     },
     timestamp: new Date().toISOString()

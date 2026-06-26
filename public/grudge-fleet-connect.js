@@ -17,7 +17,7 @@
 
   var NEXUS_CANONICAL = 'https://nexus.grudge-studio.com';
   var NEXUS_ALIAS = 'https://grudachain.grudge-studio.com';
-  var NEXUS_FALLBACK = 'https://grudachain-rho.vercel.app';
+  var NEXUS_FALLBACK = NEXUS_CANONICAL;
 
   function resolveNexusOrigin() {
     var scripts = document.getElementsByTagName('script');
@@ -28,7 +28,7 @@
       }
     }
     var host = location.hostname || '';
-    if (host === 'nexus.grudge-studio.com' || host === 'grudachain.grudge-studio.com' || host === 'grudachain-rho.vercel.app') {
+    if (host === 'nexus.grudge-studio.com' || host === 'grudachain.grudge-studio.com' || host === 'platform.grudge-studio.com') {
       return location.origin;
     }
     return NEXUS_FALLBACK;
@@ -43,13 +43,13 @@
   var DEFAULT_CONFIG = {
     playerHub: {
       characters: 'https://client.grudge-studio.com/character',
-      island: 'https://warlord-crafting-suite.vercel.app/island-hub',
+      island: 'https://wcs.grudge-studio.com/island-hub',
       warlords: 'https://client.grudge-studio.com',
       account: 'https://id.grudge-studio.com'
     },
     tools: {
       nexus: NEXUS_ORIGIN,
-      grudgedot: 'https://gdevelop-assistant.vercel.app',
+      grudgedot: 'https://coder.grudge-studio.com',
       devTool: { download: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest' },
       legion: 'https://ai.grudge-studio.com',
       puterCloud: 'https://grudge-studio.puter.site',

@@ -35,7 +35,7 @@ const GAMES = [
     slug: 'gruda-wars',
     name: 'Gruda Wars (MOBA)',
     mode: 'moba',
-    url: 'https://warlord-crafting-suite.vercel.app/moba',
+    url: 'https://wcs.grudge-studio.com/moba',
     status: 'beta',
     maxPlayers: 10,
     colyseus: { room: 'moba', serverUrl: process.env.COLYSEUS_SERVER_URL || null }

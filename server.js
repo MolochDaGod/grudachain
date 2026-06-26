@@ -37,9 +37,9 @@ const CORS_ORIGINS = [
   'https://id.grudge-studio.com',
   'https://api.grudge-studio.com',
   'https://account.grudge-studio.com',
-  'https://warlord-crafting-suite.vercel.app',
-  'https://gdevelop-assistant.vercel.app',
-  'https://grudachain-rho.vercel.app',
+  'https://wcs.grudge-studio.com',
+  'https://coder.grudge-studio.com',
+  'https://nexus.grudge-studio.com',
   'https://grudachain.grudgestudio.com',
   'https://gruda-wars.vercel.app',
   'https://grudge-engine-web.vercel.app',
@@ -53,7 +53,7 @@ const CORS_ORIGINS = [
   'https://grudge-pvp-server.vercel.app',
   'https://grudge-origins.vercel.app',
   'https://the-engine-grudgenexus.vercel.app',
-  'https://grudge-platform.vercel.app',
+  'https://apps.grudge-studio.com',
   'https://grudgeplatform.com',
   'https://www.grudgeplatform.com',
   'https://grudgeplatform.io',
@@ -675,12 +675,12 @@ app.get('/api/grudge-studio/config', (req, res) => {
       authGateway:  'https://id.grudge-studio.com',
       gameApi:      'https://api.grudge-studio.com',
       dashboard:    'https://dash.grudge-studio.com',
-      wcs:          'https://warlord-crafting-suite.vercel.app',
+      wcs:          'https://wcs.grudge-studio.com',
       gge:          'https://grudgewarlords.com',
       grudaLegion:  'https://api.grudge-studio.com',
       grudachain:   'https://grudachain.grudgestudio.com',
-      platform:     process.env.GRUDGE_PLATFORM_URL || 'https://grudge-platform.vercel.app',
-      gdevelop:     process.env.GDEVELOP_URL        || 'https://gdevelop-assistant.vercel.app',
+      platform:     process.env.GRUDGE_PLATFORM_URL || 'https://apps.grudge-studio.com',
+      gdevelop:     process.env.GDEVELOP_URL        || 'https://coder.grudge-studio.com',
       dungeonCrawler: 'https://dungeon-crawler-quest.vercel.app'
     },
     legal: {
@@ -717,14 +717,14 @@ app.get('/api/grudge-studio/links', (req, res) => {
     success: true,
     links: {
       main:          'https://grudgewarlords.com',
-      wcs:           'https://warlord-crafting-suite.vercel.app',
+      wcs:           'https://wcs.grudge-studio.com',
       auth:          'https://id.grudge-studio.com',
       gameApi:       'https://api.grudge-studio.com',
       dashboard:     'https://dash.grudge-studio.com',
       legion:        'https://api.grudge-studio.com',
       grudachain:    'https://grudachain.grudgestudio.com',
-      platform:      process.env.GRUDGE_PLATFORM_URL || 'https://grudge-platform.vercel.app',
-      gdevelop:      process.env.GDEVELOP_URL        || 'https://gdevelop-assistant.vercel.app',
+      platform:      process.env.GRUDGE_PLATFORM_URL || 'https://apps.grudge-studio.com',
+      gdevelop:      process.env.GDEVELOP_URL        || 'https://coder.grudge-studio.com',
       dungeonCrawler:'https://dungeon-crawler-quest.vercel.app',
       npm:           'https://www.npmjs.com/package/grudge-studio',
       github:        'https://github.com/MolochDaGod/GrudgeStudioNPM',
@@ -834,7 +834,7 @@ app.get('/api/admin/ecosystem', verifyGrudgeToken, async (req, res) => {
           type: 'Admin dashboard'
         },
         wcs: {
-          url: 'https://warlord-crafting-suite.vercel.app',
+          url: 'https://wcs.grudge-studio.com',
           platform: 'Vercel',
           type: 'Game systems (crafting, battle, arsenal, dungeon)'
         },
@@ -1352,7 +1352,7 @@ async function initializeAIServices() {
 \u2022 Auth (SSO):     ${AUTH_GATEWAY}
 \u2022 Game API:       ${GAME_API}
 \u2022 Dashboard:      https://dash.grudge-studio.com
-\u2022 WCS:            https://warlord-crafting-suite.vercel.app
+\u2022 WCS:            https://wcs.grudge-studio.com
 \u2022 GGE:            https://grudgewarlords.com
 
 \u2705 GRUDA Legion is fully operational!

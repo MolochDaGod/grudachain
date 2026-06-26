@@ -1,15 +1,16 @@
 const _fetch = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
+const { CANONICAL, NEXUS_CANONICAL } = require('../_lib/canonical-urls');
 
 const SERVICES = [
-  { slug: 'nexus-hub', name: 'Nexus Hub', url: 'https://grudachain-rho.vercel.app/api/health' },
-  { slug: 'auth-gateway', name: 'Grudge Auth (SSO)', url: 'https://id.grudge-studio.com/health' },
-  { slug: 'game-api', name: 'Grudge Game API', url: 'https://api.grudge-studio.com/health' },
-  { slug: 'wcs', name: 'Grudge Warlords', url: 'https://grudgewarlords.com' },
-  { slug: 'unity-dedicated', name: 'Unity Dedicated Server', url: 'https://grudgewarlords.com/api/servers/unity/status' },
-  { slug: 'gdevelop', name: 'GDevelop Assistant', url: 'https://gdevelop-assistant.vercel.app/api/health' },
-  { slug: 'objectstore', name: 'ObjectStore', url: 'https://molochdagod.github.io/ObjectStore' },
-  { slug: 'dashboard', name: 'Grudge Dashboard', url: 'https://dash.grudge-studio.com' },
-  { slug: 'grudge-platform', name: 'Grudge Platform', url: 'https://grudge-platform.vercel.app/api/platform/health' },
+  { slug: 'nexus-hub', name: 'Nexus Hub', url: `${NEXUS_CANONICAL}/api/health` },
+  { slug: 'auth-gateway', name: 'Grudge Auth (SSO)', url: `${CANONICAL.auth}/health` },
+  { slug: 'game-api', name: 'Grudge Game API', url: `${CANONICAL.gameApi}/health` },
+  { slug: 'wcs', name: 'Grudge Warlords', url: CANONICAL.grudgewarlords },
+  { slug: 'unity-dedicated', name: 'Unity Dedicated Server', url: `${CANONICAL.grudgewarlords}/api/servers/unity/status` },
+  { slug: 'gdevelop', name: 'GDevelop Assistant', url: `${CANONICAL.grudgedot}/api/health` },
+  { slug: 'objectstore', name: 'ObjectStore', url: CANONICAL.objectStore },
+  { slug: 'dashboard', name: 'Grudge Dashboard', url: CANONICAL.dash },
+  { slug: 'grudge-platform', name: 'Grudge Platform', url: `${CANONICAL.platform}/api/platform/health` },
   { slug: 'dungeon-crawler', name: 'Dungeon Crawler Quest', url: 'https://dungeon-crawler-quest.vercel.app' }
 ];
 

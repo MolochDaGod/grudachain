@@ -1,36 +1,12 @@
 /** Fleet URL audit — finds canonical vs live config mismatches */
 
-const CANONICAL = {
-  nexus: 'https://nexus.grudge-studio.com',
-  nexusAlias: 'https://grudachain.grudge-studio.com',
-  auth: 'https://id.grudge-studio.com',
-  authLogin: 'https://id.grudge-studio.com/api/auth/page',
-  gameApi: 'https://api.grudge-studio.com',
-  warlords: 'https://client.grudge-studio.com',
-  puterCloud: 'https://grudge-studio.puter.site',
-  grudgedot: 'https://gdevelop-assistant.vercel.app',
-  releasesHub: 'https://launcher.grudge-studio.com',
-  legion: 'https://ai.grudge-studio.com',
-  grudaAgent: 'https://grudaagent.vercel.app',
-  objectStore: 'https://objectstore.grudge-studio.com',
-  assets: 'https://assets.grudge-studio.com',
-  islandHub: 'https://warlord-crafting-suite.vercel.app/island-hub',
-  ale: 'https://ale.grudge-studio.com'
-};
+const { CANONICAL, STALE_HOSTS } = require('./canonical-urls');
 
 const LEGACY_AUTH_PATTERNS = [
   '/auth?app=',
   '/auth?redirect=',
   'id.grudge-studio.com/auth/',
   'id.grudge-studio.com/auth"'
-];
-
-const STALE_HOSTS = [
-  'grudachain-rho.vercel.app',
-  'grudachain.grudgestudio.com',
-  'grudachain.vercel.app',
-  'molochdagod.github.io/ObjectStore',
-  'grudgewarlords.com'
 ];
 
 async function fetchJson(url, timeoutMs = 8000) {
@@ -53,7 +29,7 @@ function collectUrls(obj, out = []) {
 }
 
 function findStale(urls) {
-  return urls.filter(u => STALE_HOSTS.some(s => u.includes(s)));
+  return urls.filter((u) => STALE_HOSTS.some((s) => u.includes(s)));
 }
 
 function diffKey(key, expected, found) {
@@ -63,7 +39,7 @@ function diffKey(key, expected, found) {
   return { key, expected, found, severity: 'mismatch' };
 }
 
-async function runFleetMismatchAudit(origin = 'https://grudachain.grudge-studio.com') {
+async function runFleetMismatchAudit(origin = CANONICAL.nexus) {
   const base = origin.replace(/\/$/, '');
   const [connectR, configR, linksR] = await Promise.all([
     fetchJson(`${base}/api/fleet/connect`),
@@ -78,15 +54,18 @@ async function runFleetMismatchAudit(origin = 'https://grudachain.grudge-studio.
     const c = connectR.data;
     const diffs = [
       diffKey('nexus', CANONICAL.nexus, c.tools?.nexus),
+      diffKey('platform', CANONICAL.platform, c.tools?.platform),
       diffKey('auth', CANONICAL.auth, c.auth?.gateway),
       diffKey('gameApi', CANONICAL.gameApi, c.api?.game),
       diffKey('puterCloud', CANONICAL.puterCloud, c.cloud?.puter),
-      diffKey('grudgedot', CANONICAL.grudgedot, c.tools?.grudgedot)
+      diffKey('grudgedot', CANONICAL.grudgedot, c.tools?.grudgedot),
+      diffKey('wcs', CANONICAL.wcs, c.playerHub?.wcs),
+      diffKey('grudaAgent', CANONICAL.grudaAgent, c.api?.grudaAgent)
     ].filter(Boolean);
     issues.push(...diffs);
 
     const stale = findStale(collectUrls(c));
-    stale.forEach(url => issues.push({ key: 'stale_url', found: url, severity: 'stale' }));
+    stale.forEach((url) => issues.push({ key: 'stale_url', found: url, severity: 'stale' }));
 
     if (c.auth?.login && !String(c.auth.login).includes('/api/auth/page')) {
       issues.push({
@@ -127,10 +106,12 @@ async function runFleetMismatchAudit(origin = 'https://grudachain.grudge-studio.
     const diffs = [
       diffKey('nexus', CANONICAL.nexus, e.nexus),
       diffKey('warlords', CANONICAL.warlords, e.grudgewarlords),
-      diffKey('objectStore', CANONICAL.objectStore, e.objectStore)
+      diffKey('objectStore', CANONICAL.objectStore, e.objectStore),
+      diffKey('wcs', CANONICAL.wcs, e.wcs),
+      diffKey('grudgedot', CANONICAL.grudgedot, e.grudgedot)
     ].filter(Boolean);
     issues.push(...diffs);
-    issues.push(...findStale(collectUrls(e)).map(url => ({ key: 'stale_url', found: url, severity: 'stale' })));
+    issues.push(...findStale(collectUrls(e)).map((url) => ({ key: 'stale_url', found: url, severity: 'stale' })));
     checks.push({ source: 'grudge-studio/config', ok: true, issueCount: diffs.length });
   } else {
     checks.push({ source: 'grudge-studio/config', ok: false, error: configR.error || configR.status });
@@ -140,18 +121,22 @@ async function runFleetMismatchAudit(origin = 'https://grudachain.grudge-studio.
     const l = linksR.data.links;
     const diffs = [
       diffKey('nexus', CANONICAL.nexus, l.nexus),
-      diffKey('main', CANONICAL.warlords, l.main)
+      diffKey('main', CANONICAL.warlords, l.main),
+      diffKey('platform', CANONICAL.platform, l.platform),
+      diffKey('wcs', CANONICAL.wcs, l.wcs)
     ].filter(Boolean);
     issues.push(...diffs);
     checks.push({ source: 'grudge-studio/links', ok: true, issueCount: diffs.length });
   }
 
-  const puterProbe = await fetchJson('https://grudge-studio.puter.site/', 6000);
+  const puterProbe = await fetchJson(`${CANONICAL.puterCloud}/`, 6000);
   checks.push({
     source: 'puter-cloud',
     ok: puterProbe.ok,
     status: puterProbe.status,
-    note: puterProbe.ok ? 'grudge-studio.puter.site reachable' : 'Puter dashboard unreachable or CORS blocked server-side'
+    note: puterProbe.ok
+      ? 'grudge-studio.puter.site reachable'
+      : 'Puter dashboard unreachable or CORS blocked server-side'
   });
 
   const uniqueIssues = [];

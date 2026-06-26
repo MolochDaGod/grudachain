@@ -2,7 +2,7 @@
  * Edge proxy for GrudaChain Nexus — serves nexus.grudge-studio.com and
  * grudachain.grudge-studio.com from the live Vercel deployment.
  */
-const ORIGIN = "https://grudachain-rho.vercel.app";
+const ORIGIN = "https://grudachain-grudgenexus.vercel.app";
 
 export default {
   async fetch(request, env) {

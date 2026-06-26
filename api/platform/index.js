@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const { CANONICAL } = require('../_lib/canonical-urls');
 const router = Router();
 
 // ── CORS preflight ──────────────────────────────────────────────
@@ -37,7 +38,7 @@ const FEATURED = [
     title: 'Gruda Wars',
     subtitle: 'MOBA — Factions at War',
     description: 'Pick a Grudge hero and push lanes in this Dota-inspired battleground.',
-    url: 'https://warlord-crafting-suite.vercel.app/moba',
+    url: `${CANONICAL.wcs}/moba`,
     image: 'https://molochdagod.github.io/ObjectStore/images/featured/moba-banner.png',
     badge: 'BETA',
     priority: 3
@@ -58,7 +59,7 @@ const FEATURED = [
 
 /**
  * GET /api/platform/config
- * Returns full ecosystem config tailored for grudge-platform.vercel.app.
+ * Returns full ecosystem config tailored for apps.grudge-studio.com.
  */
 router.get('/config', (req, res) => {
   res.json({
@@ -66,15 +67,16 @@ router.get('/config', (req, res) => {
     platform: {
       name: 'Grudge Platform',
       version: '1.0.0',
-      url: process.env.GRUDGE_PLATFORM_URL || 'https://grudge-platform.vercel.app',
+      url: process.env.GRUDGE_PLATFORM_URL || CANONICAL.platform,
       backend: {
-        hub:         process.env.GRUDA_LEGION_URL || 'https://api.grudge-studio.com',
-        auth:        process.env.AUTH_GATEWAY_URL || 'https://id.grudge-studio.com',
-        gameApi:     process.env.GAME_API_URL     || 'https://api.grudge-studio.com',
-        objectStore: 'https://molochdagod.github.io/ObjectStore',
-        gdevelop:    process.env.GDEVELOP_URL     || 'https://gdevelop-assistant.vercel.app',
-        dashboard:   'https://dash.grudge-studio.com',
-        wcs:         'https://warlord-crafting-suite.vercel.app'
+        hub:         process.env.GRUDA_LEGION_URL || CANONICAL.gameApi,
+        auth:        process.env.AUTH_GATEWAY_URL || CANONICAL.auth,
+        gameApi:     process.env.GAME_API_URL     || CANONICAL.gameApi,
+        objectStore: CANONICAL.objectStore,
+        gdevelop:    process.env.GDEVELOP_URL     || CANONICAL.gdevelop,
+        dashboard:   CANONICAL.dash,
+        wcs:         CANONICAL.wcs,
+        nexus:       CANONICAL.nexus
       },
       auth: {
         provider: 'id.grudge-studio.com',

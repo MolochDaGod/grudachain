@@ -1,11 +1,11 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html translate="no" lang="en" translate="no">
 <head>
 <meta charset="UTF-8">
     <meta name="google" content="notranslate" />
     <script src="https://client.grudge-studio.com/grudge-game-bootstrap.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Grudge Studio â€” Puter Cloud Dashboard</title>
+<title>Grudge Studio — Puter Cloud Dashboard</title>
 <script src="https://js.puter.com/v2/"></script>
 <script src="/grudge-sso.js"></script>
 <script src="/grudge-fleet-connect.js"></script>
@@ -46,8 +46,8 @@ input,select{background:rgba(0,0,0,0.5);border:1px solid var(--bd);border-radius
 </head>
 <body>
 <div class="wrap">
-  <h1>ğŸ´â€â˜ ï¸ Grudge Studio Cloud</h1>
-  <p class="sub">Puter.js saves Â· assets Â· Grudge ID Â· Fleet Connect Â· AnythingLLM debug</p>
+  <h1>????? Grudge Studio Cloud</h1>
+  <p class="sub">Puter.js saves · assets · Grudge ID · Fleet Connect · AnythingLLM debug</p>
 
   <div class="card row">
     <span id="ui">Not signed in to Puter</span>
@@ -59,17 +59,17 @@ input,select{background:rgba(0,0,0,0.5);border:1px solid var(--bd);border-radius
 
   <div class="grid2">
     <div class="card" id="fleetCard">
-      <h3>âš” Fleet Connect</h3>
+      <h3>? Fleet Connect</h3>
       <div id="grudge-fleet-connect" data-grudge-fleet-connect></div>
     </div>
     <div class="card" id="profileCard" style="display:none">
-      <h3>ğŸ‘¤ Cloud Profile</h3>
+      <h3>?? Cloud Profile</h3>
       <div class="pg" id="pg"></div>
     </div>
   </div>
 
   <div class="card">
-    <h3>â˜ï¸ Cloud Storage</h3>
+    <h3>?? Cloud Storage</h3>
     <div class="tabs" id="pathTabs"></div>
     <div style="color:var(--s);font-size:0.85em;margin-bottom:8px" id="bc">/grudge-studio</div>
     <div id="fs" style="min-height:120px;background:rgba(0,0,0,0.3);border:1px solid var(--bd);border-radius:8px;padding:10px">Sign in to browse...</div>
@@ -83,8 +83,8 @@ input,select{background:rgba(0,0,0,0.5);border:1px solid var(--bd);border-radius
   </div>
 
   <div class="card">
-    <h3>ğŸ¤– Fleet Debug AI</h3>
-    <p style="font-size:0.8rem;color:var(--s);margin-bottom:8px">AnythingLLM via Nexus â€” finds fleet URL mismatches, save path drift, stale hosts.</p>
+    <h3>?? Fleet Debug AI</h3>
+    <p style="font-size:0.8rem;color:var(--s);margin-bottom:8px">AnythingLLM via Nexus — finds fleet URL mismatches, save path drift, stale hosts.</p>
     <select id="aiTask" style="margin-bottom:8px">
       <option value="mismatch">Fleet mismatch audit</option>
       <option value="fleet">Fleet / deploy</option>
@@ -99,10 +99,10 @@ input,select{background:rgba(0,0,0,0.5);border:1px solid var(--bd);border-radius
   </div>
 
   <div class="ft">
-    <p>Grudge Studio v3.1 Â· Puter Cloud Edition</p>
-    <p><a href="https://grudachain.grudge-studio.com" target="_blank">Nexus</a> Â·
-       <a href="https://gdevelop-assistant.vercel.app" target="_blank">grudgeDot</a> Â·
-       <a href="https://client.grudge-studio.com" target="_blank">Warlords</a> Â·
+    <p>Grudge Studio v3.1 · Puter Cloud Edition</p>
+    <p><a href="https://grudachain.grudge-studio.com" target="_blank">Nexus</a> ·
+       <a href="https://coder.grudge-studio.com" target="_blank">grudgeDot</a> ·
+       <a href="https://client.grudge-studio.com" target="_blank">Warlords</a> ·
        <a href="https://ale.grudge-studio.com" target="_blank">ALE / Telegram</a></p>
   </div>
 </div>
@@ -179,7 +179,7 @@ async function loadProfile(){
 function renderProfile(){
   if(!P)return;
   var g=document.getElementById('pg');
-  var f=[['Puter',P.username],['Grudge ID',P.grudgeId||localStorage.getItem('grudge_id')||'â€”'],['UUID',(P.puterUuid||'').slice(0,12)+'â€¦'],['AI Queries',P.aiQueries||0]];
+  var f=[['Puter',P.username],['Grudge ID',P.grudgeId||localStorage.getItem('grudge_id')||'—'],['UUID',(P.puterUuid||'').slice(0,12)+'…'],['AI Queries',P.aiQueries||0]];
   g.innerHTML=f.map(function(x){return '<div class="pf"><div class="l">'+x[0]+'</div><div class="v">'+x[1]+'</div></div>';}).join('');
 }
 async function browse(path){
@@ -188,12 +188,12 @@ async function browse(path){
   var box=document.getElementById('fs');box.innerHTML='Loading...';
   try{
     var items=await puter.fs.readdir(path);
-    if(!items.length){box.innerHTML='<p style="color:var(--s)">Empty â€” upload saves or assets here.</p>';return;}
+    if(!items.length){box.innerHTML='<p style="color:var(--s)">Empty — upload saves or assets here.</p>';return;}
     items.sort(function(a,b){if(a.is_dir&&!b.is_dir)return-1;if(!a.is_dir&&b.is_dir)return 1;return a.name.localeCompare(b.name);});
     box.innerHTML='';
     items.forEach(function(it){
       var d=document.createElement('div');d.className='fi';
-      d.textContent=(it.is_dir?'ğŸ“ ':'ğŸ“„ ')+it.name;
+      d.textContent=(it.is_dir?'?? ':'?? ')+it.name;
       if(it.is_dir) d.onclick=function(){browse(it.path);};
       box.appendChild(d);
     });
@@ -232,7 +232,7 @@ async function sendAi(){
   addMsg(m,'u');inp.value='';
   var task=document.getElementById('aiTask').value;
   try{
-    var r=await fetch((location.origin||'https://grudachain-rho.vercel.app')+'/api/ai/rag/chat',{
+    var r=await fetch((location.origin||'https://nexus.grudge-studio.com')+'/api/ai/rag/chat',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({message:m,task:task,includeMismatch:task==='mismatch',mode:task==='mismatch'?'query':'chat'})
     });

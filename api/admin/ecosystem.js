@@ -36,7 +36,7 @@ module.exports = async function handler(req, res) {
     ecosystem: {
       services: {
         nexus: {
-          url: 'https://grudachain-rho.vercel.app',
+          url: 'https://nexus.grudge-studio.com',
           platform: 'Vercel',
           type: 'Nexus hub + serverless API'
         },
@@ -56,7 +56,7 @@ module.exports = async function handler(req, res) {
           type: 'Game systems (crafting, battle, arsenal, dungeon, professions)'
         },
         gdevelop: {
-          url: 'https://gdevelop-assistant.vercel.app',
+          url: 'https://coder.grudge-studio.com',
           platform: 'Vercel',
           type: 'AI dev tools + game prototypes'
         },

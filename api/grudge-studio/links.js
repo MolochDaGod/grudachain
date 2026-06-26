@@ -1,4 +1,4 @@
-const { NEXUS_CANONICAL, NEXUS_ORIGIN } = require('../_lib/nexus-origin');
+const { CANONICAL, NEXUS_CANONICAL, NEXUS_ORIGIN, islandHub } = require('../_lib/canonical-urls');
 
 module.exports = function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -8,23 +8,25 @@ module.exports = function handler(req, res) {
   res.json({
     success: true,
     links: {
-      main: 'https://client.grudge-studio.com',
-      warlords: 'https://client.grudge-studio.com',
-      auth: 'https://id.grudge-studio.com',
-      gameApi: 'https://api.grudge-studio.com',
-      dashboard: 'https://dash.grudge-studio.com',
-      nexus: NEXUS_ORIGIN,
+      main: CANONICAL.warlords,
+      warlords: CANONICAL.warlords,
+      auth: CANONICAL.auth,
+      gameApi: CANONICAL.gameApi,
+      dashboard: CANONICAL.dash,
+      nexus: NEXUS_CANONICAL,
       nexusCanonical: NEXUS_CANONICAL,
-      wcs: 'https://warlord-crafting-suite.vercel.app',
-      islandHub: 'https://warlord-crafting-suite.vercel.app/island-hub',
-      characters: 'https://client.grudge-studio.com/character',
-      gdevelop: 'https://gdevelop-assistant.vercel.app',
-      grudgedot: 'https://gdevelop-assistant.vercel.app',
+      platform: CANONICAL.platform,
+      game: CANONICAL.game,
+      wcs: CANONICAL.wcs,
+      islandHub: islandHub(),
+      characters: `${CANONICAL.warlords}/character`,
+      gdevelop: CANONICAL.gdevelop,
+      grudgedot: CANONICAL.grudgedot,
       devTool: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest',
-      legion: 'https://ai.grudge-studio.com',
-      grudaAgent: 'https://grudaagent.vercel.app',
-      objectStore: 'https://objectstore.grudge-studio.com',
-      assets: 'https://assets.grudge-studio.com',
+      legion: CANONICAL.legion,
+      grudaAgent: CANONICAL.grudaAgent,
+      objectStore: CANONICAL.objectStore,
+      assets: CANONICAL.assets,
       fleetConnect: `${NEXUS_ORIGIN}/grudge-fleet-connect.js`,
       npm: 'https://www.npmjs.com/package/grudge-studio',
       github: 'https://github.com/MolochDaGod',

@@ -2,7 +2,14 @@
  * GET /api/fleet/connect
  * Canonical fleet connectivity manifest for embeddable widgets and launchers.
  */
-const { NEXUS_CANONICAL, NEXUS_FALLBACK, NEXUS_ORIGIN } = require('../_lib/nexus-origin');
+const {
+  CANONICAL,
+  NEXUS_CANONICAL,
+  NEXUS_ALIASES,
+  NEXUS_FALLBACK,
+  NEXUS_ORIGIN,
+  islandHub,
+} = require('../_lib/canonical-urls');
 
 module.exports = function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,9 +21,10 @@ module.exports = function handler(req, res) {
 
   res.json({
     success: true,
-    version: '2.0.1',
+    version: '2.1.0',
     nexus: {
       canonical: NEXUS_CANONICAL,
+      aliases: NEXUS_ALIASES,
       fallback: NEXUS_FALLBACK,
       origin: nexus
     },
@@ -34,46 +42,46 @@ module.exports = function handler(req, res) {
       note: 'Never link to /auth — it serves a legacy SPA. Use /api/auth/page only.'
     },
     auth: {
-      gateway: 'https://id.grudge-studio.com',
-      login: 'https://id.grudge-studio.com/api/auth/page',
-      verify: 'https://id.grudge-studio.com/api/auth/verify',
-      puterSso: 'https://id.grudge-studio.com/api/auth/puter-sso',
-      sessionExchange: 'https://api.grudge-studio.com/api/auth/session/exchange',
+      gateway: CANONICAL.auth,
+      login: CANONICAL.authLogin,
+      verify: `${CANONICAL.auth}/api/auth/verify`,
+      puterSso: `${CANONICAL.auth}/api/auth/puter-sso`,
+      sessionExchange: `${CANONICAL.gameApi}/api/auth/session/exchange`,
       gameDataPuter: 'https://grudge-builder-production.up.railway.app/api/auth/puter'
     },
     libraries: {
       gameLibrary: {
         id: 'grudgedot',
         canonical: true,
-        url: 'https://gdevelop-assistant.vercel.app',
+        url: CANONICAL.grudgedot,
         label: 'grudgeDot Game Library',
         description: 'Primary launcher — fleet SSO, characters, releases UI',
         auth: 'grudge-id'
       },
       releasesHub: {
         id: 'releases-hub',
-        canonical: false,
-        url: 'https://launcher.grudge-studio.com',
-        fallback: 'https://gdevelop-assistant.vercel.app',
+        canonical: true,
+        url: CANONICAL.releasesHub,
+        fallback: CANONICAL.grudgedot,
         label: 'Grudge Releases (GitHub org)',
         description: 'GitHub Releases mirror — converges on grudgeDot; use gameLibrary when possible',
         auth: 'grudge-id'
       }
     },
     api: {
-      game: 'https://api.grudge-studio.com',
-      assets: 'https://assets.grudge-studio.com',
-      objectStore: 'https://objectstore.grudge-studio.com',
-      objectStoreCatalog: 'https://objectstore.grudge-studio.com/api/v1/catalog',
+      game: CANONICAL.gameApi,
+      assets: CANONICAL.assets,
+      objectStore: CANONICAL.objectStore,
+      objectStoreCatalog: `${CANONICAL.objectStore}/api/v1/catalog`,
       objectStoreDocs: 'https://info.grudge-studio.com/docs',
-      ai: 'https://ai.grudge-studio.com',
-      grudaAgent: 'https://grudaagent.vercel.app',
+      ai: CANONICAL.legion,
+      grudaAgent: CANONICAL.grudaAgent,
       rag: `${nexus}/api/ai/rag`,
       fleetMismatch: `${nexus}/api/fleet/mismatch`,
-      ale: 'https://ale.grudge-studio.com'
+      ale: CANONICAL.ale
     },
     cloud: {
-      puter: 'https://grudge-studio.puter.site',
+      puter: CANONICAL.puterCloud,
       puterSdk: 'https://js.puter.com/v2/',
       savesRoot: 'grudge-studio/player-data',
       assetsRoot: 'grudge-studio/assets',
@@ -84,42 +92,47 @@ module.exports = function handler(req, res) {
       adminApp: 'https://grudge-cloud.puter.site'
     },
     playerHub: {
-      characters: 'https://client.grudge-studio.com/character',
-      island: 'https://warlord-crafting-suite.vercel.app/island-hub',
-      homeIsland: 'https://client.grudge-studio.com/island',
-      warlords: 'https://client.grudge-studio.com',
-      wcs: 'https://warlord-crafting-suite.vercel.app/dashboard',
-      saves: 'https://api.grudge-studio.com',
-      account: 'https://id.grudge-studio.com',
-      wallet: 'https://warlord-crafting-suite.vercel.app/wallet'
+      characters: `${CANONICAL.warlords}/character`,
+      island: islandHub(),
+      homeIsland: `${CANONICAL.warlords}/island`,
+      warlords: CANONICAL.warlords,
+      wcs: `${CANONICAL.wcs}/dashboard`,
+      saves: CANONICAL.gameApi,
+      account: CANONICAL.auth,
+      wallet: `${CANONICAL.wcs}/wallet`
     },
     tools: {
-      nexus: nexus,
-      grudgedot: 'https://gdevelop-assistant.vercel.app',
+      nexus: NEXUS_CANONICAL,
+      grudgedot: CANONICAL.grudgedot,
       devTool: {
         label: 'Grudge Studio Forge',
         version: '0.4.0',
         download: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest',
         repo: 'https://github.com/MolochDaGod/grudge-dev-tool'
       },
-      legion: 'https://ai.grudge-studio.com',
-      grudaAgent: 'https://grudaagent.vercel.app',
-      platform: 'https://grudge-platform.vercel.app',
-      launcher: 'https://launcher.grudge-studio.com'
+      legion: CANONICAL.legion,
+      grudaAgent: CANONICAL.grudaAgent,
+      platform: CANONICAL.platform,
+      launcher: CANONICAL.releasesHub,
+      game: CANONICAL.game,
+      dash: CANONICAL.dash,
+      fleet: CANONICAL.fleet
     },
     quickLinks: [
-      { id: 'sign-in', label: 'Grudge ID', icon: 'shield', url: 'https://id.grudge-studio.com', category: 'auth' },
-      { id: 'characters', label: 'My Characters', icon: 'user', url: 'https://client.grudge-studio.com/character', category: 'player' },
-      { id: 'island', label: 'Home Island', icon: 'island', url: 'https://warlord-crafting-suite.vercel.app/island-hub', category: 'player' },
-      { id: 'warlords', label: 'Play Warlords', icon: 'sword', url: 'https://client.grudge-studio.com', category: 'game' },
-      { id: 'grudgedot', label: 'grudgeDot', icon: 'gamepad', url: 'https://gdevelop-assistant.vercel.app', category: 'tool' },
-      { id: 'nexus', label: 'Nexus Hub', icon: 'link', url: nexus, category: 'tool' },
+      { id: 'sign-in', label: 'Grudge ID', icon: 'shield', url: CANONICAL.auth, category: 'auth' },
+      { id: 'characters', label: 'My Characters', icon: 'user', url: `${CANONICAL.warlords}/character`, category: 'player' },
+      { id: 'island', label: 'Home Island', icon: 'island', url: islandHub(), category: 'player' },
+      { id: 'warlords', label: 'Play Warlords', icon: 'sword', url: CANONICAL.warlords, category: 'game' },
+      { id: 'tactics', label: 'Grudge Tactics', icon: 'sword', url: CANONICAL.game, category: 'game' },
+      { id: 'grudgedot', label: 'grudgeDot', icon: 'gamepad', url: CANONICAL.grudgedot, category: 'tool' },
+      { id: 'nexus', label: 'Nexus Hub', icon: 'link', url: NEXUS_CANONICAL, category: 'tool' },
+      { id: 'platform', label: 'Grudge Platform', icon: 'grid', url: CANONICAL.platform, category: 'tool' },
       { id: 'dev-tool', label: 'Studio Forge', icon: 'hammer', url: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest', category: 'tool' },
-      { id: 'legion', label: 'Legion AI', icon: 'brain', url: 'https://ai.grudge-studio.com', category: 'ai' },
-      { id: 'wcs', label: 'Crafting Suite', icon: 'craft', url: 'https://warlord-crafting-suite.vercel.app', category: 'game' },
-      { id: 'puter-cloud', label: 'Puter Cloud', icon: 'cloud', url: 'https://grudge-studio.puter.site', category: 'cloud' },
+      { id: 'legion', label: 'Legion AI', icon: 'brain', url: CANONICAL.legion, category: 'ai' },
+      { id: 'wcs', label: 'Crafting Suite', icon: 'craft', url: CANONICAL.wcs, category: 'game' },
+      { id: 'puter-cloud', label: 'Puter Cloud', icon: 'cloud', url: CANONICAL.puterCloud, category: 'cloud' },
       { id: 'telegram', label: 'Telegram Bot', icon: 'chat', url: 'https://t.me/grudachainbot', category: 'social' },
-      { id: 'ale', label: 'ALE Assistant', icon: 'brain', url: 'https://ale.grudge-studio.com', category: 'ai' }
+      { id: 'ale', label: 'ALE Assistant', icon: 'brain', url: CANONICAL.ale, category: 'ai' }
     ],
     puterPaths: {
       profile: 'grudge_studio_profile',
@@ -137,12 +150,15 @@ module.exports = function handler(req, res) {
       statusEndpoint: '/api/ai/rag/status'
     },
     ssoDomains: [
+      'nexus.grudge-studio.com',
       'grudachain.grudge-studio.com',
-      'grudachain-rho.vercel.app',
-      'gdevelop-assistant.vercel.app',
-      'grudge-platform.vercel.app',
-      'warlord-crafting-suite.vercel.app',
+      'platform.grudge-studio.com',
+      'apps.grudge-studio.com',
+      'coder.grudge-studio.com',
+      'wcs.grudge-studio.com',
       'client.grudge-studio.com',
+      'game.grudge-studio.com',
+      'dash.grudge-studio.com',
       'grudgewarlords.com',
       'id.grudge-studio.com',
       'grudge-studio.puter.site',

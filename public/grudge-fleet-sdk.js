@@ -19,8 +19,8 @@
 (function () {
   'use strict';
 
-  var NEXUS_CANONICAL = 'https://grudachain.grudge-studio.com';
-  var NEXUS_FALLBACK = 'https://grudachain-rho.vercel.app';
+  var NEXUS_CANONICAL = 'https://nexus.grudge-studio.com';
+  var NEXUS_FALLBACK = 'https://grudachain.grudge-studio.com';
 
   function resolveNexusOrigin() {
     var scripts = document.getElementsByTagName('script');
@@ -31,10 +31,14 @@
       }
     }
     var host = location.hostname || '';
-    if (host === 'grudachain.grudge-studio.com' || host === 'grudachain-rho.vercel.app') {
+    if (
+      host === 'nexus.grudge-studio.com' ||
+      host === 'grudachain.grudge-studio.com' ||
+      host === 'platform.grudge-studio.com'
+    ) {
       return location.origin;
     }
-    return NEXUS_FALLBACK;
+    return NEXUS_CANONICAL;
   }
 
   var NEXUS_ORIGIN = resolveNexusOrigin();
@@ -89,7 +93,7 @@
         gameLibrary: {
           id: 'grudgedot',
           canonical: true,
-          url: 'https://gdevelop-assistant.vercel.app',
+          url: 'https://coder.grudge-studio.com',
           label: 'grudgeDot Game Library',
           auth: 'grudge-id'
         },
@@ -97,7 +101,7 @@
           id: 'releases-hub',
           canonical: false,
           url: 'https://launcher.grudge-studio.com',
-          fallback: 'https://gdevelop-assistant.vercel.app',
+          fallback: 'https://coder.grudge-studio.com',
           label: 'Grudge Releases (GitHub)',
           auth: 'grudge-id'
         }

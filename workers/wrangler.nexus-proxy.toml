@@ -5,7 +5,7 @@ account_id = "ee475864561b02d4588180b8b9acf694"
 workers_dev = false
 
 [vars]
-NEXUS_ORIGIN = "https://grudachain-rho.vercel.app"
+NEXUS_ORIGIN = "https://grudachain-grudgenexus.vercel.app"
 
 [[routes]]
 pattern = "grudachain.grudge-studio.com/*"
