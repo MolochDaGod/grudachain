@@ -5,6 +5,8 @@ param(
     [string]$GameCname = "4585db421456af45.vercel-dns-016.com"
 )
 
+$CfEmail = $env:CF_AUTH_EMAIL
+$CfGlobalKey = $env:CF_GLOBAL_API_KEY
 if (-not $Token) {
     foreach ($path in @(
         "C:\Users\nugye\Documents\1111111\GrudgeBuilder\.env",
@@ -15,7 +17,13 @@ if (-not $Token) {
         if ($line) { $Token = $line.Line.Split("=", 2)[1].Trim().Trim('"'); break }
     }
 }
-if (-not $Token) { throw "Set CF_DNS_API_TOKEN (Zone.DNS Edit) and re-run." }
+if (-not $CfGlobalKey -and (Test-Path "C:\Users\nugye\Desktop\grudgeproduction\.env")) {
+    $prod = Get-Content "C:\Users\nugye\Desktop\grudgeproduction\.env"
+    $CfGlobalKey = ($prod | Where-Object { $_ -match "^Cloudflare_api_token=" } | Select-Object -First 1) -replace "^Cloudflare_api_token=","" -replace '"',''
+}
+if (-not $CfEmail) { $CfEmail = "jonbemmons@gmail.com" }
+$useGlobalKey = [bool]($CfGlobalKey -and -not $Token)
+if (-not $Token -and -not $CfGlobalKey) { throw "Set CF_DNS_API_TOKEN or Cloudflare global API key and re-run." }
 
 function Test-PublicDns([string]$Fqdn) {
     try {
@@ -26,7 +34,11 @@ function Test-PublicDns([string]$Fqdn) {
     }
 }
 
-$headers = @{ Authorization = "Bearer $Token"; "Content-Type" = "application/json" }
+if ($useGlobalKey) {
+    $headers = @{ "X-Auth-Email" = $CfEmail; "X-Auth-Key" = $CfGlobalKey; "Content-Type" = "application/json" }
+} else {
+    $headers = @{ Authorization = "Bearer $Token"; "Content-Type" = "application/json" }
+}
 $base = "https://api.cloudflare.com/client/v4/zones/$ZoneId/dns_records"
 
 function Get-Record([string]$Fqdn) {
