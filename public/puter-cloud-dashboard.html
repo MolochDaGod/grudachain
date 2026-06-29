@@ -1,252 +1,598 @@
 <!DOCTYPE html>
-<html translate="no" lang="en" translate="no">
+<html lang="en" translate="no">
 <head>
-<meta charset="UTF-8">
-    <meta name="google" content="notranslate" />
-    <script src="https://client.grudge-studio.com/grudge-game-bootstrap.js"></script>
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Grudge Studio — Puter Cloud Dashboard</title>
-<script src="https://js.puter.com/v2/"></script>
-<script src="/grudge-sso.js"></script>
-<script src="/grudge-fleet-connect.js"></script>
-<style>
-:root{--p:#00ff88;--s:#66aaff;--g:#d4af37;--bg:rgba(0,4,40,0.65);--bd:rgba(0,255,136,0.25)}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#000428,#001a4d,#000428);background-attachment:fixed;color:var(--p);min-height:100vh;line-height:1.5}
-.wrap{max-width:960px;margin:0 auto;padding:20px}
-h1{text-align:center;font-size:1.8rem;text-shadow:0 0 20px rgba(0,255,136,0.4);margin-bottom:6px}
-.sub{text-align:center;color:var(--s);margin-bottom:20px;font-size:0.9rem}
-.card{background:var(--bg);backdrop-filter:blur(12px);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:14px}
-.card h3{color:var(--s);margin-bottom:10px;font-size:0.95rem;border-bottom:1px solid var(--bd);padding-bottom:8px}
-.row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-.btn{background:linear-gradient(135deg,rgba(0,78,146,0.7),rgba(0,4,40,0.7));border:1px solid var(--bd);border-radius:8px;padding:9px 16px;color:var(--p);cursor:pointer;font-size:0.85rem}
-.btn:hover{background:linear-gradient(135deg,var(--p),var(--s));color:#000428}
-.btn-gold{border-color:rgba(212,175,55,0.5);color:var(--g)}
-input,select{background:rgba(0,0,0,0.5);border:1px solid var(--bd);border-radius:8px;padding:10px;color:var(--p);font-size:0.9rem;width:100%}
-.chat{height:220px;overflow-y:auto;background:rgba(0,0,0,0.4);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:10px;font-size:0.85rem}
-.msg{margin-bottom:8px;padding:8px;border-radius:6px}
-.mu{background:rgba(0,255,136,0.07);border-left:3px solid var(--p)}
-.ma{background:rgba(102,170,255,0.07);border-left:3px solid var(--s)}
-.mwarn{background:rgba(255,180,0,0.1);border-left:3px solid #ffb700}
-.ir{display:flex;gap:8px}
-.fi{display:flex;justify-content:space-between;padding:7px;border-bottom:1px solid rgba(0,255,136,0.08);font-size:0.85rem;cursor:pointer;border-radius:4px}
-.fi:hover{background:rgba(0,255,136,0.06)}
-.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
-.pf{background:rgba(0,0,0,0.3);border:1px solid var(--bd);border-radius:8px;padding:10px}
-.pf .l{font-size:0.6em;color:var(--s);text-transform:uppercase}
-.pf .v{color:var(--p);font-size:0.9em;word-break:break-all}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.tab{padding:6px 12px;border-radius:6px;border:1px solid var(--bd);cursor:pointer;font-size:0.8rem;color:var(--s)}
-.tab.on{background:rgba(0,255,136,0.15);color:var(--p)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:700px){.grid2{grid-template-columns:1fr}}
-.ft{text-align:center;margin-top:20px;padding:14px;border-top:1px solid var(--bd);color:var(--s);font-size:0.8rem}
-.ft a{color:var(--p)}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <meta name="description" content="Grudge Studio Puter Cloud Dashboard â€” user-pays KV saves, FS backups, Grudge ID linking, and fleet debug AI.">
+  <title>Grudge Studio &middot; Puter Cloud Dashboard</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <script src="https://client.grudge-studio.com/grudge-game-bootstrap.js"></script>
+  <script src="https://js.puter.com/v2/"></script>
+  <script src="/grudge-sso.js"></script>
+  <script src="/grudge-fleet-connect.js"></script>
+  <style>
+    :root{--p:#00ff88;--s:#66aaff;--g:#d4af37;--bg:rgba(0,4,40,0.65);--bd:rgba(0,255,136,0.25);--warn:#ffb700}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#000428,#001a4d,#000428);background-attachment:fixed;color:var(--p);min-height:100vh;line-height:1.5}
+    .wrap{max-width:960px;margin:0 auto;padding:20px}
+    h1{text-align:center;font-size:1.8rem;text-shadow:0 0 20px rgba(0,255,136,0.4);margin-bottom:6px}
+    h1 .ico{margin-right:8px;color:var(--s)}
+    .sub{text-align:center;color:var(--s);margin-bottom:20px;font-size:0.9rem}
+    .card{background:var(--bg);backdrop-filter:blur(12px);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:14px}
+    .card h3{color:var(--s);margin-bottom:10px;font-size:0.95rem;border-bottom:1px solid var(--bd);padding-bottom:8px}
+    .card h3 .ico{margin-right:6px;width:1.1em;text-align:center}
+    .hint{font-size:0.78rem;color:var(--s);margin-bottom:10px;line-height:1.45}
+    .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .btn{background:linear-gradient(135deg,rgba(0,78,146,0.7),rgba(0,4,40,0.7));border:1px solid var(--bd);border-radius:8px;padding:9px 16px;color:var(--p);cursor:pointer;font-size:0.85rem}
+    .btn:hover{background:linear-gradient(135deg,var(--p),var(--s));color:#000428}
+    .btn-gold{border-color:rgba(212,175,55,0.5);color:var(--g)}
+    .btn:disabled{opacity:0.45;cursor:not-allowed}
+    input,select{background:rgba(0,0,0,0.5);border:1px solid var(--bd);border-radius:8px;padding:10px;color:var(--p);font-size:0.9rem;width:100%}
+    .chat{height:220px;overflow-y:auto;background:rgba(0,0,0,0.4);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:10px;font-size:0.85rem}
+    .msg{margin-bottom:8px;padding:8px;border-radius:6px;white-space:pre-wrap;word-break:break-word}
+    .mu{background:rgba(0,255,136,0.07);border-left:3px solid var(--p)}
+    .ma{background:rgba(102,170,255,0.07);border-left:3px solid var(--s)}
+    .mwarn{background:rgba(255,180,0,0.1);border-left:3px solid var(--warn)}
+    .ir{display:flex;gap:8px}
+    .fi{display:flex;justify-content:space-between;align-items:center;padding:7px;border-bottom:1px solid rgba(0,255,136,0.08);font-size:0.85rem;cursor:pointer;border-radius:4px;gap:8px}
+    .fi:hover{background:rgba(0,255,136,0.06)}
+    .fi .name{flex:1;overflow:hidden;text-overflow:ellipsis}
+    .fi .meta{color:var(--s);font-size:0.75rem;white-space:nowrap}
+    .pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+    .pf{background:rgba(0,0,0,0.3);border:1px solid var(--bd);border-radius:8px;padding:10px}
+    .pf .l{font-size:0.6em;color:var(--s);text-transform:uppercase}
+    .pf .v{color:var(--p);font-size:0.9em;word-break:break-all}
+    .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+    .tab{padding:6px 12px;border-radius:6px;border:1px solid var(--bd);cursor:pointer;font-size:0.8rem;color:var(--s);background:transparent}
+    .tab.on{background:rgba(0,255,136,0.15);color:var(--p)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .kv-list{margin-top:8px;font-size:0.82rem;color:var(--s)}
+    .kv-row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,255,136,0.06)}
+    @media(max-width:700px){.grid2{grid-template-columns:1fr}}
+    .ft{text-align:center;margin-top:20px;padding:14px;border-top:1px solid var(--bd);color:var(--s);font-size:0.8rem}
+    .ft a{color:var(--p)}
+    .sep{opacity:0.5;margin:0 4px}
+  </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>????? Grudge Studio Cloud</h1>
-  <p class="sub">Puter.js saves · assets · Grudge ID · Fleet Connect · AnythingLLM debug</p>
+  <h1><i class="fa-solid fa-cloud ico" aria-hidden="true"></i>Grudge Studio Cloud</h1>
+  <p class="sub">Puter.js saves &middot; assets &middot; Grudge ID &middot; Fleet Connect &middot; fleet debug AI</p>
 
   <div class="card row">
     <span id="ui">Not signed in to Puter</span>
     <div>
-      <button class="btn" id="btnGrudge" style="display:none" onclick="openGrudgeId()">Grudge ID</button>
-      <button class="btn" id="btnPuter" onclick="togglePuter()">Sign In</button>
+      <button class="btn" id="btnGrudge" type="button" style="display:none">Grudge ID</button>
+      <button class="btn" id="btnPuter" type="button">Sign In</button>
     </div>
   </div>
 
   <div class="grid2">
     <div class="card" id="fleetCard">
-      <h3>? Fleet Connect</h3>
+      <h3><i class="fa-solid fa-link ico" aria-hidden="true"></i>Fleet Connect</h3>
       <div id="grudge-fleet-connect" data-grudge-fleet-connect></div>
     </div>
     <div class="card" id="profileCard" style="display:none">
-      <h3>?? Cloud Profile</h3>
+      <h3><i class="fa-solid fa-user ico" aria-hidden="true"></i>Cloud Profile</h3>
       <div class="pg" id="pg"></div>
     </div>
   </div>
 
   <div class="card">
-    <h3>?? Cloud Storage</h3>
-    <div class="tabs" id="pathTabs"></div>
+    <h3><i class="fa-solid fa-folder-open ico" aria-hidden="true"></i>Cloud Storage</h3>
+    <p class="hint">
+      <strong>KV</strong> (fast JSON, &lt;400KB): live saves like <code>grudge.save.&lt;slot&gt;</code> and scoped keys
+      <code>grudge:&lt;grudgeId&gt;:â€¦</code>.
+      <strong>FS</strong> (files &amp; exports): canonical paths below. Characters stay authoritative on
+      <code>api.grudge-studio.com</code> (D1); Puter is the user-owned backup layer.
+    </p>
+    <div class="tabs" id="pathTabs" role="tablist" aria-label="Storage paths"></div>
     <div style="color:var(--s);font-size:0.85em;margin-bottom:8px" id="bc">/grudge-studio</div>
-    <div id="fs" style="min-height:120px;background:rgba(0,0,0,0.3);border:1px solid var(--bd);border-radius:8px;padding:10px">Sign in to browse...</div>
+    <div id="fs" style="min-height:120px;background:rgba(0,0,0,0.3);border:1px solid var(--bd);border-radius:8px;padding:10px">Sign in to browse Puter FS...</div>
     <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn" onclick="refreshFs()">Refresh</button>
-      <button class="btn" onclick="newFolder()">New Folder</button>
-      <button class="btn btn-gold" onclick="syncSaveSnapshot()">Sync Save Snapshot</button>
-      <button class="btn" onclick="document.getElementById('up').click()">Upload</button>
-      <input type="file" id="up" multiple style="display:none" onchange="uploadFiles(event)">
+      <button class="btn" type="button" id="btnRefresh">Refresh</button>
+      <button class="btn" type="button" id="btnFolder">New Folder</button>
+      <button class="btn btn-gold" type="button" id="btnSnapshot">Sync Save Snapshot</button>
+      <button class="btn" type="button" id="btnKvScan">Scan KV Saves</button>
+      <button class="btn" type="button" id="btnUpload">Upload</button>
+      <input type="file" id="up" multiple hidden>
+    </div>
+    <div class="kv-list" id="kvPanel" hidden>
+      <strong>KV keys (user-pays):</strong>
+      <div id="kvRows"></div>
     </div>
   </div>
 
   <div class="card">
-    <h3>?? Fleet Debug AI</h3>
-    <p style="font-size:0.8rem;color:var(--s);margin-bottom:8px">AnythingLLM via Nexus — finds fleet URL mismatches, save path drift, stale hosts.</p>
-    <select id="aiTask" style="margin-bottom:8px">
+    <h3><i class="fa-solid fa-robot ico" aria-hidden="true"></i>Fleet Debug AI</h3>
+    <p class="hint">Nexus RAG chat (AnythingLLM) &mdash; fleet URL mismatches, save path drift, stale hosts. Falls back to Puter AI if the hub is unreachable.</p>
+    <select id="aiTask" aria-label="AI task mode">
       <option value="mismatch">Fleet mismatch audit</option>
       <option value="fleet">Fleet / deploy</option>
       <option value="debug">Backend debug</option>
       <option value="game">Game data / saves</option>
     </select>
-    <div class="chat" id="ch"></div>
+    <div class="chat" id="ch" role="log" aria-live="polite"></div>
     <div class="ir">
-      <input id="mi" placeholder="Ask about saves, accounts, fleet URLs..." onkeydown="if(event.key==='Enter')sendAi()">
-      <button class="btn" onclick="sendAi()">Send</button>
+      <input id="mi" placeholder="Ask about saves, accounts, fleet URLs..." aria-label="AI message">
+      <button class="btn" type="button" id="btnSend">Send</button>
     </div>
   </div>
 
   <div class="ft">
-    <p>Grudge Studio v3.1 · Puter Cloud Edition</p>
-    <p><a href="https://grudachain.grudge-studio.com" target="_blank">Nexus</a> ·
-       <a href="https://coder.grudge-studio.com" target="_blank">grudgeDot</a> ·
-       <a href="https://client.grudge-studio.com" target="_blank">Warlords</a> ·
-       <a href="https://ale.grudge-studio.com" target="_blank">ALE / Telegram</a></p>
+    <p>Grudge Studio v3.2 &middot; Puter Cloud Edition</p>
+    <p>
+      <a href="https://nexus.grudge-studio.com">Nexus</a><span class="sep">&middot;</span>
+      <a href="https://coder.grudge-studio.com">grudgeDot</a><span class="sep">&middot;</span>
+      <a href="https://client.grudge-studio.com">Warlords</a><span class="sep">&middot;</span>
+      <a href="https://ale.grudge-studio.com">ALE / Telegram</a>
+    </p>
   </div>
 </div>
 <script>
-var R=false,U=null,P=null,D='grudge-studio';
-var PATHS=[
-  {id:'root',label:'Studio',path:'grudge-studio'},
-  {id:'saves',label:'Saves',path:'grudge-studio/player-data'},
-  {id:'assets',label:'Assets',path:'grudge-studio/assets'},
-  {id:'exports',label:'Exports',path:'grudge-studio/exports'},
-  {id:'backups',label:'Backups',path:'grudge-studio/backups'}
-];
-var KK={profile:'grudge_studio_profile',grudgeId:'grudge_cloud_grudge_id'};
+(function () {
+  'use strict';
 
-document.addEventListener('DOMContentLoaded',async function(){
-  renderPathTabs();
-  if(window.GrudgeFleetConnect) GrudgeFleetConnect.mount('#grudge-fleet-connect');
-  if(typeof puter!=='undefined'&&puter.auth&&puter.auth.isSignedIn()){R=true;await onAuth();}
-});
+  var API = 'https://api.grudge-studio.com';
+  var AUTH = 'https://id.grudge-studio.com';
+  var NEXUS = (location.origin && location.origin.indexOf('grudge') >= 0) ? location.origin : 'https://nexus.grudge-studio.com';
 
-function renderPathTabs(){
-  var t=document.getElementById('pathTabs');t.innerHTML='';
-  PATHS.forEach(function(p,i){
-    var b=document.createElement('button');b.className='tab'+(i===0?' on':'');b.textContent=p.label;
-    b.onclick=function(){document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});b.classList.add('on');browse(p.path);};
-    t.appendChild(b);
+  var TOKEN_KEY = 'grudge_auth_token';
+  var ID_KEY = 'grudge_id';
+
+  var LEGACY_KV_PROFILE = 'grudge_studio_profile';
+
+  var PATHS = [
+    { id: 'root', label: 'Studio', path: 'grudge-studio', hint: 'Root namespace' },
+    { id: 'saves', label: 'Saves', path: 'grudge-studio/player-data', hint: 'FS export snapshots' },
+    { id: 'assets', label: 'Assets', path: 'grudge-studio/assets', hint: 'User uploads & GLBs' },
+    { id: 'exports', label: 'Exports', path: 'grudge-studio/exports', hint: 'Sheet / tool exports' },
+    { id: 'backups', label: 'Backups', path: 'grudge-studio/backups', hint: 'Point-in-time backups' },
+    { id: 'sheets', label: 'Sheets', path: 'grudge/sheets', hint: 'WCS sheet sync (canonical)' }
+  ];
+
+  var R = false;
+  var U = null;
+  var P = null;
+  var D = 'grudge-studio';
+  var charCount = 0;
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function getGrudgeId() {
+    return localStorage.getItem(ID_KEY) || (P && P.grudgeId) || '';
+  }
+
+  function scopedKv(suffix) {
+    var gid = getGrudgeId();
+    return gid ? ('grudge:' + gid + ':' + suffix) : ('grudge:cloud:' + suffix);
+  }
+
+  function profileKvKey() {
+    return scopedKv('cloud:profile');
+  }
+
+  function snapshotIndexKey() {
+    return scopedKv('cloud:snapshots:index');
+  }
+
+  function formatBytes(n) {
+    if (!n && n !== 0) return '';
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1048576).toFixed(1) + ' MB';
+  }
+
+  function renderPathTabs() {
+    var t = document.getElementById('pathTabs');
+    t.innerHTML = '';
+    PATHS.forEach(function (p, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tab' + (i === 0 ? ' on' : '');
+      b.textContent = p.label;
+      b.title = p.path + (p.hint ? ' â€” ' + p.hint : '');
+      b.setAttribute('role', 'tab');
+      b.onclick = function () {
+        document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        browse(p.path);
+      };
+      t.appendChild(b);
+    });
+  }
+
+  async function ensureDirs() {
+    for (var i = 0; i < PATHS.length; i++) {
+      try {
+        await puter.fs.mkdir(PATHS[i].path, { createMissingParents: true });
+      } catch (e) { /* exists */ }
+    }
+  }
+
+  async function signInPuter() {
+    if (typeof puter === 'undefined') {
+      alert('Puter SDK is still loading. Try again in a moment.');
+      return;
+    }
+    if (!puter.auth.isSignedIn()) await puter.auth.signIn();
+    R = true;
+    await onAuth();
+  }
+
+  async function signOutPuter() {
+    try {
+      if (puter.auth.isSignedIn()) await puter.auth.signOut();
+    } catch (e) { /* ignore */ }
+    R = false;
+    U = null;
+    P = null;
+    charCount = 0;
+    document.getElementById('ui').textContent = 'Not signed in to Puter';
+    document.getElementById('btnPuter').textContent = 'Sign In';
+    document.getElementById('btnGrudge').style.display = 'none';
+    document.getElementById('profileCard').style.display = 'none';
+    document.getElementById('fs').textContent = 'Sign in to browse Puter FS...';
+    document.getElementById('kvPanel').hidden = true;
+    document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
+    if (window.GrudgeFleetConnect) GrudgeFleetConnect.refresh();
+  }
+
+  function togglePuter() {
+    if (R) signOutPuter();
+    else signInPuter();
+  }
+
+  function openGrudgeId() {
+    var ret = encodeURIComponent(location.href);
+    location.href = AUTH + '/api/auth/page?app=puter-cloud&redirect=' + ret;
+  }
+
+  async function loadProfile() {
+    var key = profileKvKey();
+    var legacy = null;
+    try {
+      var raw = await puter.kv.get(key);
+      if (!raw) {
+        legacy = await puter.kv.get(LEGACY_KV_PROFILE);
+        raw = legacy;
+      }
+      P = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : null;
+      if (!P) {
+        P = {
+          id: U.uuid,
+          username: U.username,
+          puterUuid: U.uuid,
+          createdAt: new Date().toISOString(),
+          aiQueries: 0,
+          schemaVersion: 2
+        };
+      }
+      P.lastLogin = new Date().toISOString();
+      P.puterUuid = U.uuid;
+      P.schemaVersion = 2;
+      var gid = getGrudgeId();
+      if (gid) P.grudgeId = gid;
+      await puter.kv.set(key, P);
+      if (legacy && !raw) {
+        try { await puter.kv.del(LEGACY_KV_PROFILE); } catch (e) { /* ignore */ }
+      }
+    } catch (e) {
+      P = { username: U.username, schemaVersion: 2 };
+    }
+  }
+
+  async function refreshAccountMeta() {
+    var token = localStorage.getItem(TOKEN_KEY);
+    charCount = 0;
+    if (!token) return;
+    try {
+      var chars = await fetch(API + '/api/characters', {
+        headers: { Authorization: 'Bearer ' + token },
+        signal: AbortSignal.timeout(8000)
+      }).then(function (r) { return r.ok ? r.json() : null; });
+      var list = (chars && (chars.characters || chars)) || [];
+      charCount = Array.isArray(list) ? list.length : 0;
+    } catch (e) { /* offline */ }
+  }
+
+  function renderProfile() {
+    if (!P) return;
+    var gid = P.grudgeId || getGrudgeId() || 'not linked';
+    var uuidShort = (P.puterUuid || '').slice(0, 12);
+    var fields = [
+      ['Puter', P.username || 'â€”'],
+      ['Grudge ID', gid],
+      ['Characters (D1)', String(charCount)],
+      ['Puter UUID', uuidShort ? uuidShort + 'â€¦' : 'â€”'],
+      ['KV profile key', profileKvKey()],
+      ['AI queries', String(P.aiQueries || 0)]
+    ];
+    document.getElementById('pg').innerHTML = fields.map(function (x) {
+      return '<div class="pf"><div class="l">' + esc(x[0]) + '</div><div class="v">' + esc(x[1]) + '</div></div>';
+    }).join('');
+  }
+
+  async function onAuth() {
+    U = await puter.auth.getUser();
+    document.getElementById('ui').textContent = 'Puter: ' + U.username;
+    document.getElementById('btnPuter').textContent = 'Sign Out';
+    document.getElementById('btnGrudge').style.display = '';
+    await ensureDirs();
+    await loadProfile();
+    await refreshAccountMeta();
+    renderProfile();
+    document.getElementById('profileCard').style.display = '';
+    browse('grudge-studio');
+    document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
+    if (window.GrudgeFleetConnect) GrudgeFleetConnect.refresh();
+  }
+
+  async function browse(path) {
+    if (!R) return;
+    D = path;
+    document.getElementById('bc').textContent = '/' + path;
+    var box = document.getElementById('fs');
+    box.textContent = 'Loading...';
+    try {
+      var items = await puter.fs.readdir(path);
+      if (!items.length) {
+        box.innerHTML = '<p style="color:var(--s)">Empty folder. Upload saves, assets, or run <strong>Sync Save Snapshot</strong>.</p>';
+        return;
+      }
+      items.sort(function (a, b) {
+        if (a.is_dir && !b.is_dir) return -1;
+        if (!a.is_dir && b.is_dir) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      box.innerHTML = '';
+      items.forEach(function (it) {
+        var d = document.createElement('div');
+        d.className = 'fi';
+        var icon = it.is_dir ? 'fa-folder' : 'fa-file';
+        var size = it.size != null ? formatBytes(it.size) : '';
+        d.innerHTML =
+          '<span class="ico"><i class="fa-solid ' + icon + '" aria-hidden="true"></i></span>' +
+          '<span class="name">' + esc(it.name) + '</span>' +
+          '<span class="meta">' + esc(size) + '</span>';
+        if (it.is_dir) d.onclick = function () { browse(it.path); };
+        box.appendChild(d);
+      });
+    } catch (e) {
+      box.textContent = 'Error: ' + e.message;
+    }
+  }
+
+  async function newFolder() {
+    if (!R) return;
+    var n = prompt('Folder name:');
+    if (!n) return;
+    var safe = n.replace(/[^a-zA-Z0-9_-]/g, '-').toLowerCase();
+    try {
+      await puter.fs.mkdir(D + '/' + safe, { createMissingParents: true });
+      browse(D);
+    } catch (e) {
+      alert(e.message);
+    }
+  }
+
+  async function uploadFiles(e) {
+    var files = e.target.files;
+    if (!files.length || !R) return;
+    for (var i = 0; i < files.length; i++) {
+      try {
+        await puter.fs.write(D + '/' + files[i].name, files[i], { dedupeName: true });
+      } catch (x) { /* skip failed */ }
+    }
+    e.target.value = '';
+    browse(D);
+  }
+
+  async function appendSnapshotIndex(entry) {
+    var idxKey = snapshotIndexKey();
+    var idx = [];
+    try {
+      var existing = await puter.kv.get(idxKey);
+      if (existing) idx = typeof existing === 'string' ? JSON.parse(existing) : existing;
+      if (!Array.isArray(idx)) idx = [];
+    } catch (e) { idx = []; }
+    idx.unshift(entry);
+    idx = idx.slice(0, 40);
+    await puter.kv.set(idxKey, idx);
+  }
+
+  async function syncSaveSnapshot() {
+    if (!R) {
+      alert('Sign in to Puter first.');
+      return;
+    }
+    var token = localStorage.getItem(TOKEN_KEY);
+    var gid = getGrudgeId();
+    var payload = {
+      schemaVersion: 2,
+      kind: 'grudge-cloud-snapshot',
+      exportedAt: new Date().toISOString(),
+      puterUser: U.username,
+      puterUuid: U.uuid,
+      grudgeId: gid || null,
+      sso: !!token,
+      sources: {
+        api: API,
+        characters: API + '/api/characters',
+        account: API + '/api/account/me'
+      }
+    };
+
+    if (token) {
+      try {
+        var acct = await fetch(API + '/api/account/me', {
+          headers: { Authorization: 'Bearer ' + token },
+          signal: AbortSignal.timeout(8000)
+        }).then(function (r) { return r.ok ? r.json() : null; });
+        var chars = await fetch(API + '/api/characters', {
+          headers: { Authorization: 'Bearer ' + token },
+          signal: AbortSignal.timeout(8000)
+        }).then(function (r) { return r.ok ? r.json() : null; });
+        payload.account = (acct && acct.account) || acct;
+        payload.characters = (chars && chars.characters) || chars || [];
+        charCount = Array.isArray(payload.characters) ? payload.characters.length : 0;
+        renderProfile();
+      } catch (e) {
+        payload.fetchError = e.message;
+      }
+    }
+
+    var kvSaves = [];
+    try {
+      var keys = await puter.kv.list('grudge.save.');
+      for (var i = 0; i < Math.min(keys.length, 8); i++) {
+        var slot = keys[i].replace('grudge.save.', '');
+        kvSaves.push({ key: keys[i], slot: slot });
+      }
+      payload.kvSaveKeys = keys;
+    } catch (e) { /* optional */ }
+
+    var stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    var fileName = (gid ? gid + '-' : '') + 'snapshot-' + stamp + '.json';
+    var fsPath = 'grudge-studio/player-data/' + fileName;
+    await puter.fs.write(fsPath, JSON.stringify(payload, null, 2));
+    await appendSnapshotIndex({
+      path: fsPath,
+      exportedAt: payload.exportedAt,
+      grudgeId: gid || null,
+      characterCount: Array.isArray(payload.characters) ? payload.characters.length : 0,
+      kvSaveCount: (payload.kvSaveKeys || []).length
+    });
+    addMsg('Snapshot written to ' + fsPath + ' and indexed in KV (' + snapshotIndexKey() + ').', 'warn');
+    browse('grudge-studio/player-data');
+  }
+
+  async function scanKvSaves() {
+    if (!R) return;
+    var panel = document.getElementById('kvPanel');
+    var rows = document.getElementById('kvRows');
+    panel.hidden = false;
+    rows.innerHTML = '<div class="kv-row">Scanning...</div>';
+    try {
+      var prefixes = ['grudge.save.', scopedKv(''), 'grudge:'];
+      var seen = {};
+      var lines = [];
+      for (var p = 0; p < prefixes.length; p++) {
+        var keys = await puter.kv.list(prefixes[p]);
+        keys.forEach(function (k) {
+          if (seen[k]) return;
+          seen[k] = true;
+          lines.push(k);
+        });
+      }
+      lines.sort();
+      if (!lines.length) {
+        rows.innerHTML = '<div class="kv-row">No grudge* KV keys yet. RTS uses <code>grudge.save.&lt;slot&gt;</code>.</div>';
+        return;
+      }
+      rows.innerHTML = lines.slice(0, 30).map(function (k) {
+        return '<div class="kv-row"><span>' + esc(k) + '</span></div>';
+      }).join('');
+      if (lines.length > 30) {
+        rows.innerHTML += '<div class="kv-row">+' + (lines.length - 30) + ' more keys</div>';
+      }
+    } catch (e) {
+      rows.innerHTML = '<div class="kv-row">KV scan failed: ' + esc(e.message) + '</div>';
+    }
+  }
+
+  function addMsg(text, kind) {
+    var c = document.getElementById('ch');
+    var d = document.createElement('div');
+    d.className = 'msg m' + (kind || 'a');
+    var label = kind === 'u' ? 'You' : (kind === 'warn' ? 'System' : 'AI');
+    d.innerHTML = '<b>' + label + ':</b> ' + esc(text);
+    c.appendChild(d);
+    c.scrollTop = c.scrollHeight;
+  }
+
+  async function sendAi() {
+    var inp = document.getElementById('mi');
+    var m = inp.value.trim();
+    if (!m) return;
+    addMsg(m, 'u');
+    inp.value = '';
+    var task = document.getElementById('aiTask').value;
+    try {
+      var r = await fetch(NEXUS + '/api/ai/rag/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: m,
+          task: task,
+          includeMismatch: task === 'mismatch',
+          mode: task === 'mismatch' ? 'query' : 'chat'
+        }),
+        signal: AbortSignal.timeout(30000)
+      });
+      var data = await r.json();
+      if (!r.ok) throw new Error(data.error || String(r.status));
+      addMsg(data.textResponse || data.response || JSON.stringify(data).slice(0, 2000), 'a');
+      if (P) {
+        P.aiQueries = (P.aiQueries || 0) + 1;
+        await puter.kv.set(profileKvKey(), P);
+        renderProfile();
+      }
+    } catch (e) {
+      try {
+        var fb = await puter.ai.chat(
+          'You are the Grudge Studio fleet assistant. Canonical API: ' + API +
+          '. Puter saves use KV grudge.save.<slot> and FS grudge-studio/player-data. User asks: ' + m
+        );
+        addMsg(typeof fb === 'string' ? fb : (fb && fb.message) || String(fb), 'a');
+      } catch (e2) {
+        addMsg('AI error: ' + e.message + ' (Puter fallback: ' + e2.message + ')', 'a');
+      }
+    }
+  }
+
+  function onGrudgeAuthChanged() {
+    if (!R) return;
+    loadProfile().then(function () {
+      refreshAccountMeta().then(renderProfile);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    renderPathTabs();
+    document.getElementById('btnPuter').onclick = togglePuter;
+    document.getElementById('btnGrudge').onclick = openGrudgeId;
+    document.getElementById('btnRefresh').onclick = function () { if (R) browse(D); };
+    document.getElementById('btnFolder').onclick = newFolder;
+    document.getElementById('btnSnapshot').onclick = syncSaveSnapshot;
+    document.getElementById('btnKvScan').onclick = scanKvSaves;
+    document.getElementById('btnUpload').onclick = function () { document.getElementById('up').click(); };
+    document.getElementById('up').onchange = uploadFiles;
+    document.getElementById('btnSend').onclick = sendAi;
+    document.getElementById('mi').onkeydown = function (ev) {
+      if (ev.key === 'Enter') sendAi();
+    };
+
+    if (window.GrudgeFleetConnect) GrudgeFleetConnect.mount('#grudge-fleet-connect');
+
+    document.addEventListener('grudge-auth-changed', onGrudgeAuthChanged);
+    window.addEventListener('grudge:auth:ready', onGrudgeAuthChanged);
+    window.addEventListener('grudge:auth:storage', onGrudgeAuthChanged);
+
+    if (typeof puter !== 'undefined' && puter.auth && puter.auth.isSignedIn()) {
+      R = true;
+      await onAuth();
+    }
   });
-}
-
-function togglePuter(){if(R){signOutPuter();}else{signInPuter();}}
-async function signInPuter(){
-  try{
-    if(typeof puter==='undefined'){alert('Puter SDK loading...');return;}
-    if(!puter.auth.isSignedIn()) await puter.auth.signIn();
-    R=true;await onAuth();
-  }catch(e){alert('Puter auth failed: '+e.message);}
-}
-async function signOutPuter(){
-  try{if(puter.auth.isSignedIn()) await puter.auth.signOut();}catch(e){}
-  R=false;U=null;P=null;
-  document.getElementById('ui').textContent='Not signed in to Puter';
-  document.getElementById('btnGrudge').style.display='none';
-  document.getElementById('profileCard').style.display='none';
-  document.getElementById('fs').innerHTML='Sign in to browse...';
-  document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
-  if(window.GrudgeFleetConnect) GrudgeFleetConnect.refresh();
-}
-async function onAuth(){
-  U=await puter.auth.getUser();
-  document.getElementById('ui').textContent='Puter: '+U.username;
-  document.getElementById('btnPuter').textContent='Sign Out';
-  document.getElementById('btnGrudge').style.display='';
-  for(var i=0;i<PATHS.length;i++){try{await puter.fs.mkdir(PATHS[i].path);}catch(e){}}
-  await loadProfile();renderProfile();
-  document.getElementById('profileCard').style.display='';
-  browse('grudge-studio');
-}
-function openGrudgeId(){
-  var ret=encodeURIComponent(location.href);
-  location.href='https://id.grudge-studio.com/api/auth/page?app=puter-cloud&redirect='+ret;
-}
-async function loadProfile(){
-  try{
-    var j=await puter.kv.get(KK.profile);
-    P=j?JSON.parse(j):null;
-    if(!P) P={id:U.uuid,username:U.username,puterUuid:U.uuid,createdAt:new Date().toISOString(),aiQueries:0};
-    P.lastLogin=new Date().toISOString();
-    P.puterUuid=U.uuid;
-    var gid=localStorage.getItem('grudge_id');
-    if(gid) P.grudgeId=gid;
-    await puter.kv.set(KK.profile,JSON.stringify(P));
-  }catch(e){P={username:U.username};}
-}
-function renderProfile(){
-  if(!P)return;
-  var g=document.getElementById('pg');
-  var f=[['Puter',P.username],['Grudge ID',P.grudgeId||localStorage.getItem('grudge_id')||'—'],['UUID',(P.puterUuid||'').slice(0,12)+'…'],['AI Queries',P.aiQueries||0]];
-  g.innerHTML=f.map(function(x){return '<div class="pf"><div class="l">'+x[0]+'</div><div class="v">'+x[1]+'</div></div>';}).join('');
-}
-async function browse(path){
-  if(!R)return;D=path;
-  document.getElementById('bc').textContent='/'+path;
-  var box=document.getElementById('fs');box.innerHTML='Loading...';
-  try{
-    var items=await puter.fs.readdir(path);
-    if(!items.length){box.innerHTML='<p style="color:var(--s)">Empty — upload saves or assets here.</p>';return;}
-    items.sort(function(a,b){if(a.is_dir&&!b.is_dir)return-1;if(!a.is_dir&&b.is_dir)return 1;return a.name.localeCompare(b.name);});
-    box.innerHTML='';
-    items.forEach(function(it){
-      var d=document.createElement('div');d.className='fi';
-      d.textContent=(it.is_dir?'?? ':'?? ')+it.name;
-      if(it.is_dir) d.onclick=function(){browse(it.path);};
-      box.appendChild(d);
-    });
-  }catch(e){box.innerHTML='Error: '+e.message;}
-}
-function refreshFs(){if(R)browse(D);}
-async function newFolder(){
-  if(!R)return;var n=prompt('Folder name:');if(!n)return;
-  try{await puter.fs.mkdir(D+'/'+n.replace(/[^a-zA-Z0-9_-]/g,'-').toLowerCase());browse(D);}catch(e){alert(e.message);}
-}
-async function uploadFiles(e){
-  var f=e.target.files;if(!f.length||!R)return;
-  for(var i=0;i<f.length;i++){try{await puter.fs.write(D+'/'+f[i].name,f[i],{dedupeName:true});}catch(x){}}
-  e.target.value='';browse(D);
-}
-async function syncSaveSnapshot(){
-  if(!R){alert('Sign in to Puter first');return;}
-  var token=localStorage.getItem('grudge_auth_token');
-  var payload={exportedAt:new Date().toISOString(),puterUser:U.username,grudgeId:localStorage.getItem('grudge_id'),sso:true};
-  if(token){
-    try{
-      var acct=await fetch('https://api.grudge-studio.com/api/account/me',{headers:{Authorization:'Bearer '+token}}).then(function(r){return r.ok?r.json():null;});
-      var chars=await fetch('https://api.grudge-studio.com/api/characters',{headers:{Authorization:'Bearer '+token}}).then(function(r){return r.ok?r.json():null;});
-      payload.account=acct&&acct.account||acct;
-      payload.characters=(chars&&chars.characters)||chars||[];
-    }catch(e){payload.fetchError=e.message;}
-  }
-  var name='save-'+Date.now()+'.json';
-  await puter.fs.write('grudge-studio/player-data/'+name,JSON.stringify(payload,null,2));
-  addMsg('Save snapshot written to player-data/'+name,'warn');
-  browse('grudge-studio/player-data');
-}
-function addMsg(t,y){var c=document.getElementById('ch');var d=document.createElement('div');d.className='msg m'+(y||'a');d.innerHTML=(y==='u'?'<b>You:</b> ':'<b>AI:</b> ')+t;c.appendChild(d);c.scrollTop=c.scrollHeight;}
-async function sendAi(){
-  var inp=document.getElementById('mi');var m=inp.value.trim();if(!m)return;
-  addMsg(m,'u');inp.value='';
-  var task=document.getElementById('aiTask').value;
-  try{
-    var r=await fetch((location.origin||'https://nexus.grudge-studio.com')+'/api/ai/rag/chat',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:m,task:task,includeMismatch:task==='mismatch',mode:task==='mismatch'?'query':'chat'})
-    });
-    var data=await r.json();
-    if(!r.ok) throw new Error(data.error||r.status);
-    addMsg(data.textResponse||data.response||JSON.stringify(data).slice(0,2000),'a');
-    if(P){P.aiQueries=(P.aiQueries||0)+1;await puter.kv.set(KK.profile,JSON.stringify(P));renderProfile();}
-  }catch(e){
-    try{
-      var fb=await puter.ai.chat('Grudge Studio fleet assistant. User asks: '+m);
-      addMsg(fb,'a');
-    }catch(e2){addMsg('AI error: '+e.message+' (Puter fallback: '+e2.message+')','a');}
-  }
-}
+})();
 </script>
 </body>
 </html>
