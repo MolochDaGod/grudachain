@@ -12,8 +12,13 @@ const CANONICAL = {
 
   auth: 'https://id.grudge-studio.com',
   authLogin: 'https://id.grudge-studio.com/api/auth/page',
+  /** Cloudflare edge (may be offline) */
   gameApi: 'https://api.grudge-studio.com',
+  /** Postgres SSOT — ONE TRUTH for characters, islands, inventory */
+  gameData: 'https://grudge-api-production-0d46.up.railway.app',
   account: 'https://account.grudge-studio.com',
+  charactersHub: 'https://character.grudge-studio.com',
+  client: 'https://client.grudge-studio.com',
   objectStore: 'https://objectstore.grudge-studio.com',
   assets: 'https://assets.grudge-studio.com',
 

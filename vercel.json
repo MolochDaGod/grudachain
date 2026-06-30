@@ -4,15 +4,15 @@
   "outputDirectory": "public",
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/",
       "has": [{ "type": "host", "value": "grudachain-rho.vercel.app" }],
-      "destination": "https://nexus.grudge-studio.com/:path*",
+      "destination": "https://nexus.grudge-studio.com/",
       "permanent": true
     },
     {
-      "source": "/:path*",
+      "source": "/",
       "has": [{ "type": "host", "value": "grudachain.vercel.app" }],
-      "destination": "https://nexus.grudge-studio.com/:path*",
+      "destination": "https://nexus.grudge-studio.com/",
       "permanent": true
     }
   ],

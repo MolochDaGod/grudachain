@@ -8,10 +8,11 @@ module.exports = function handler(req, res) {
   res.json({
     success: true,
     links: {
-      main: CANONICAL.warlords,
-      warlords: CANONICAL.warlords,
+      main: CANONICAL.grudgewarlords,
+      warlords: CANONICAL.grudgewarlords,
       auth: CANONICAL.auth,
       gameApi: CANONICAL.gameApi,
+      gameData: CANONICAL.gameData,
       dashboard: CANONICAL.dash,
       nexus: NEXUS_CANONICAL,
       nexusCanonical: NEXUS_CANONICAL,
@@ -19,7 +20,7 @@ module.exports = function handler(req, res) {
       game: CANONICAL.game,
       wcs: CANONICAL.wcs,
       islandHub: islandHub(),
-      characters: `${CANONICAL.warlords}/character`,
+      characters: CANONICAL.charactersHub,
       gdevelop: CANONICAL.gdevelop,
       grudgedot: CANONICAL.grudgedot,
       devTool: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest',

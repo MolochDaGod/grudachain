@@ -135,7 +135,7 @@
 (function () {
   'use strict';
 
-  var API = 'https://api.grudge-studio.com';
+  var API = (typeof location !== 'undefined' && location.origin) ? location.origin : 'https://nexus.grudge-studio.com';
   var AUTH = 'https://id.grudge-studio.com';
   var NEXUS = (location.origin && location.origin.indexOf('grudge') >= 0) ? location.origin : 'https://nexus.grudge-studio.com';
 

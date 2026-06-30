@@ -44,8 +44,8 @@ module.exports = function handler(req, res) {
       login: CANONICAL.authLogin,
       verify: `${CANONICAL.auth}/api/auth/verify`,
       puterSso: `${CANONICAL.auth}/api/auth/puter-sso`,
-      sessionExchange: `${CANONICAL.gameApi}/api/auth/session/exchange`,
-      gameDataPuter: 'https://grudge-builder-production.up.railway.app/api/auth/puter'
+      sessionExchange: `${CANONICAL.auth}/api/auth/session/exchange`,
+      gameDataPuter: `${CANONICAL.gameData}/api/auth/puter`
     },
     libraries: {
       gameLibrary: {
@@ -68,6 +68,12 @@ module.exports = function handler(req, res) {
     },
     api: {
       game: CANONICAL.gameApi,
+      gameData: CANONICAL.gameData,
+      /** Same-origin proxies on Nexus (avoid CORS + dead edge API) */
+      characters: `${nexus}/api/characters`,
+      account: `${nexus}/api/account/me`,
+      accountProfile: `${nexus}/api/account`,
+      health: `${CANONICAL.gameData}/api/health`,
       assets: CANONICAL.assets,
       objectStore: CANONICAL.objectStore,
       objectStoreCatalog: `${CANONICAL.objectStore}/api/v1/catalog`,
@@ -90,12 +96,12 @@ module.exports = function handler(req, res) {
       adminApp: 'https://grudge-cloud.puter.site'
     },
     playerHub: {
-      characters: `${CANONICAL.warlords}/character`,
+      characters: `${CANONICAL.charactersHub}`,
       island: islandHub(),
-      homeIsland: `${CANONICAL.warlords}/island`,
-      warlords: CANONICAL.warlords,
+      homeIsland: `${CANONICAL.client}/island`,
+      warlords: CANONICAL.grudgewarlords,
       wcs: `${CANONICAL.wcs}/dashboard`,
-      saves: CANONICAL.gameApi,
+      saves: CANONICAL.gameData,
       account: CANONICAL.auth,
       wallet: `${CANONICAL.wcs}/wallet`
     },
@@ -118,9 +124,9 @@ module.exports = function handler(req, res) {
     },
     quickLinks: [
       { id: 'sign-in', label: 'Grudge ID', icon: 'shield', url: CANONICAL.auth, category: 'auth' },
-      { id: 'characters', label: 'My Characters', icon: 'user', url: `${CANONICAL.warlords}/character`, category: 'player' },
+      { id: 'characters', label: 'My Characters', icon: 'user', url: CANONICAL.charactersHub, category: 'player' },
       { id: 'island', label: 'Home Island', icon: 'island', url: islandHub(), category: 'player' },
-      { id: 'warlords', label: 'Play Warlords', icon: 'sword', url: CANONICAL.warlords, category: 'game' },
+      { id: 'warlords', label: 'Play Warlords', icon: 'sword', url: CANONICAL.grudgewarlords, category: 'game' },
       { id: 'tactics', label: 'Grudge Tactics', icon: 'sword', url: CANONICAL.game, category: 'game' },
       { id: 'grudgedot', label: 'grudgeDot', icon: 'gamepad', url: CANONICAL.grudgedot, category: 'tool' },
       { id: 'nexus', label: 'Nexus Hub', icon: 'link', url: NEXUS_CANONICAL, category: 'tool' },

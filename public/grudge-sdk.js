@@ -28,7 +28,13 @@
 (function(global) {
   'use strict';
 
-  const API_BASE   = 'https://api.grudge-studio.com';
+  const GAME_DATA  = 'https://grudge-api-production-0d46.up.railway.app';
+  const API_BASE   = (typeof location !== 'undefined' &&
+    (/grudachain-rho\.vercel\.app$/.test(location.hostname) ||
+     /nexus\.grudge-studio\.com$/.test(location.hostname) ||
+     /grudachain\.grudge-studio\.com$/.test(location.hostname)))
+    ? location.origin
+    : GAME_DATA;
   const AI_BASE    = 'https://ai.grudge-studio.com';
   const ASSETS_CDN = 'https://assets.grudge-studio.com';
   const WS_URL     = 'wss://api.grudge-studio.com/ws';
@@ -223,6 +229,7 @@
     post(path, body){ return _post(API_BASE, path, body); },
     characters()    { return _get(API_BASE, '/api/characters'); },
     createChar(d)   { return _post(API_BASE, '/api/characters', d); },
+    account()       { return _get(API_BASE, API_BASE === GAME_DATA ? '/api/account' : '/api/account/me'); },
     islands()       { return _get(API_BASE, '/api/islands'); },
     profile()       { return _get(API_BASE, '/api/profile'); },
     metadata()      { return _get(API_BASE, '/api/metadata'); },

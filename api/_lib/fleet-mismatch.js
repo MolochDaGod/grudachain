@@ -57,6 +57,7 @@ async function runFleetMismatchAudit(origin = CANONICAL.nexus) {
       diffKey('platform', CANONICAL.platform, c.tools?.platform),
       diffKey('auth', CANONICAL.auth, c.auth?.gateway),
       diffKey('gameApi', CANONICAL.gameApi, c.api?.game),
+      diffKey('gameData', CANONICAL.gameData, c.api?.gameData),
       diffKey('puterCloud', CANONICAL.puterCloud, c.cloud?.puter),
       diffKey('grudgedot', CANONICAL.grudgedot, c.tools?.grudgedot),
       diffKey('wcs', `${CANONICAL.wcs}/dashboard`, c.playerHub?.wcs),

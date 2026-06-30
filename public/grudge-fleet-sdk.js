@@ -86,7 +86,12 @@
         puterSso: 'https://id.grudge-studio.com/api/auth/puter-sso',
         sessionExchange: 'https://api.grudge-studio.com/api/auth/session/exchange'
       },
-      api: { game: 'https://api.grudge-studio.com' },
+      api: {
+        game: 'https://api.grudge-studio.com',
+        gameData: 'https://grudge-api-production-0d46.up.railway.app',
+        characters: NEXUS_ORIGIN + '/api/characters',
+        account: NEXUS_ORIGIN + '/api/account/me'
+      },
       sso: SSO_SCRIPT,
       widget: CONNECT_SCRIPT,
       libraries: {
@@ -127,7 +132,7 @@
         puterSso: auth.puterSso || ((auth.gateway || 'https://id.grudge-studio.com') + '/api/auth/puter-sso'),
         sessionExchange: auth.sessionExchange || 'https://api.grudge-studio.com/api/auth/session/exchange'
       },
-      api: m.api || { game: 'https://api.grudge-studio.com' },
+      api: m.api || fallbackManifest().api,
       cloud: m.cloud || {},
       playerHub: m.playerHub || {},
       tools: m.tools || {},

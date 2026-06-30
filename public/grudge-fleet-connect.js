@@ -42,9 +42,9 @@
   var CONFIG_URL = NEXUS_ORIGIN + '/api/fleet/connect';
   var DEFAULT_CONFIG = {
     playerHub: {
-      characters: 'https://client.grudge-studio.com/character',
+      characters: 'https://character.grudge-studio.com',
       island: 'https://wcs.grudge-studio.com/island-hub',
-      warlords: 'https://client.grudge-studio.com',
+      warlords: 'https://grudgewarlords.com',
       account: 'https://id.grudge-studio.com'
     },
     tools: {
@@ -107,11 +107,32 @@
       });
   }
 
+  /** Same-origin Nexus proxy first; manifest api.* fallback; Railway SSOT last resort */
+  function resolveApiUrl(kind) {
+    var host = location.hostname || '';
+    var onNexus =
+      host === 'nexus.grudge-studio.com' ||
+      host === 'grudachain.grudge-studio.com' ||
+      host === 'platform.grudge-studio.com' ||
+      host === 'grudachain-rho.vercel.app' ||
+      host === 'grudachain.vercel.app';
+    if (onNexus) {
+      if (kind === 'account') return location.origin + '/api/account/me';
+      if (kind === 'characters') return location.origin + '/api/characters';
+    }
+    if (config && config.api) {
+      if (kind === 'account' && config.api.account) return config.api.account;
+      if (kind === 'characters' && config.api.characters) return config.api.characters;
+    }
+    if (kind === 'account') return 'https://grudge-api-production-0d46.up.railway.app/api/account';
+    return 'https://grudge-api-production-0d46.up.railway.app/api/characters';
+  }
+
   function fetchPlayerData() {
     var token = getToken();
     if (!token) return Promise.resolve(null);
 
-    return fetch('https://api.grudge-studio.com/api/account/me', {
+    return fetch(resolveApiUrl('account'), {
       headers: { Authorization: 'Bearer ' + token },
       signal: AbortSignal.timeout(6000)
     })
@@ -125,7 +146,7 @@
       .catch(function () { return null; })
       .then(function (acct) {
         if (!acct) return null;
-        return fetch('https://api.grudge-studio.com/api/characters', {
+        return fetch(resolveApiUrl('characters'), {
           headers: { Authorization: 'Bearer ' + token },
           signal: AbortSignal.timeout(6000)
         })

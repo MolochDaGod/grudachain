@@ -4,7 +4,7 @@ const { CANONICAL, NEXUS_CANONICAL } = require('../_lib/canonical-urls');
 const SERVICES = [
   { slug: 'nexus-hub', name: 'Nexus Hub', url: `${NEXUS_CANONICAL}/api/health` },
   { slug: 'auth-gateway', name: 'Grudge Auth (SSO)', url: `${CANONICAL.auth}/health` },
-  { slug: 'game-api', name: 'Grudge Game API', url: `${CANONICAL.gameApi}/health` },
+  { slug: 'game-api', name: 'Grudge Game API (Railway SSOT)', url: `${CANONICAL.gameData}/api/health` },
   { slug: 'wcs', name: 'Grudge Warlords', url: CANONICAL.grudgewarlords },
   { slug: 'unity-dedicated', name: 'Unity Dedicated Server', url: `${CANONICAL.grudgewarlords}/api/servers/unity/status` },
   { slug: 'gdevelop', name: 'GDevelop Assistant', url: `${CANONICAL.grudgedot}/api/health` },

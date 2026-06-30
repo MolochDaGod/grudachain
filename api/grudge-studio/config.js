@@ -10,6 +10,7 @@ module.exports = function handler(req, res) {
     ecosystem: {
       authGateway: CANONICAL.auth,
       gameApi: CANONICAL.gameApi,
+      gameData: CANONICAL.gameData,
       dashboard: CANONICAL.dash,
       account: CANONICAL.account,
       wcs: CANONICAL.wcs,
@@ -21,16 +22,17 @@ module.exports = function handler(req, res) {
       grudgedot: CANONICAL.grudgedot,
       objectStore: CANONICAL.objectStore,
       assets: CANONICAL.assets,
-      grudgewarlords: CANONICAL.warlords,
+      grudgewarlords: CANONICAL.grudgewarlords,
+      charactersHub: CANONICAL.charactersHub,
       legion: CANONICAL.legion,
       grudaAgent: CANONICAL.grudaAgent,
       devTool: 'https://github.com/MolochDaGod/grudge-dev-tool/releases/latest',
       fleetConnect: `${NEXUS_ORIGIN}/grudge-fleet-connect.js`
     },
     playerHub: {
-      characters: `${CANONICAL.warlords}/character`,
+      characters: CANONICAL.charactersHub,
       island: islandHub(),
-      saves: CANONICAL.gameApi,
+      saves: CANONICAL.gameData,
       wallet: `${CANONICAL.wcs}/wallet`
     },
     sdk: {
