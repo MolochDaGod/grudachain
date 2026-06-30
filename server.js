@@ -625,7 +625,8 @@ app.get('/api/services/self', (req, res) => {
         matchmakingQueue:   '/api/games/matchmaking/queue',
         accountsMe:         '/api/accounts/me',
         accountsRegister:   '/api/accounts/register',
-        accountsLinkPuter:  '/api/accounts/link/puter'
+        accountsLinkPuter:  '/api/accounts/link/puter',
+        wsConfig:           '/api/ws/config'
       }
     },
     config: {
@@ -641,7 +642,62 @@ app.get('/api/services/self', (req, res) => {
 });
 
 
-// â”àâ”àâ”à Vibe AI Routes (ported from Vercel serverless functions) â”àâ”àâ”à
+// ── WebSocket Configuration Endpoint ──────────────────────────────────────────
+// gruda-legion exposes its own Socket.IO server on this domain.
+// A dedicated, horizontally-scalable WebSocket service is available in
+// ws-server.js — intended to run at wss://ws.grudge-studio.com/ as a
+// separate Railway service.  Clients can fetch this endpoint to discover
+// the correct WebSocket URLs and supported room/event schemas.
+app.get('/api/ws/config', (req, res) => {
+  const host  = req.headers.host || `localhost:${PORT}`;
+  const proto = req.headers['x-forwarded-proto'] || (host.includes('railway') || host.includes('grudge-studio') ? 'https' : 'http');
+  const wsProto = proto === 'https' ? 'wss' : 'ws';
+
+  res.json({
+    success: true,
+    websocket: {
+      // Dedicated WebSocket service (ws-server.js)
+      dedicated: {
+        url:         process.env.WS_SERVER_URL || 'wss://ws.grudge-studio.com',
+        description: 'Dedicated real-time WebSocket hub (ws-server.js)',
+        status:      process.env.WS_SERVER_URL ? 'configured' : 'default',
+      },
+      // gruda-legion's own embedded Socket.IO endpoint
+      embedded: {
+        url:         `${wsProto}://${host}`,
+        description: 'gruda-legion embedded Socket.IO endpoint',
+        namespaces:  ['/', '/game', '/admin'],
+      },
+    },
+    rooms: {
+      prefixes: ['game:', 'crew:', 'pvp:', 'user:'],
+      static:   ['global', 'notifications'],
+    },
+    events: {
+      clientToServer: [
+        'authenticate', 'join-room', 'leave-room',
+        'message', 'presence', 'game-event', 'service-notification',
+      ],
+      serverToClient: [
+        'connected', 'authenticated', 'auth-error',
+        'room-joined', 'room-left',
+        'message', 'history',
+        'presence-update',
+        'game-event', 'service-notification',
+        'error',
+      ],
+    },
+    auth: {
+      method:      'JWT Bearer token',
+      handshake:   'socket.handshake.auth.token',
+      postConnect: 'emit("authenticate", { token })',
+      verifyUrl:   `${proto}://${host}/api/auth/verify`,
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// ── Vibe AI Routes (ported from Vercel serverless functions) ──────────────────
 app.get('/api/vibe/providers', vibeProvidersHandler);
 app.post('/api/vibe/chat', vibeChatHandler);
 app.options('/api/vibe/chat', vibeChatHandler); // CORS preflight
@@ -764,6 +820,7 @@ app.get('/api/admin/stats', verifyGrudgeToken, (req, res) => {
       'POST /api/chat', 'POST /api/generate-code', 'POST /api/analyze-file',
       'GET /api/network/discover',
       'POST /api/services/register', 'GET /api/services/discover', 'GET /api/services/self',
+      'GET /api/ws/config',
       'GET /api/vibe/providers', 'POST /api/vibe/chat',
       'GET /api/sdk/info',
       'GET /api/storage/info', 'GET /api/storage/list',
