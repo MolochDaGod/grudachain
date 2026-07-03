@@ -5,7 +5,7 @@
     <meta name="google" content="notranslate" />
     <script src="https://client.grudge-studio.com/grudge-game-bootstrap.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GRUDA Legion — Grudge Studio Nexus</title>
+  <title>GRUDA Legion ï¿½ Grudge Studio Nexus</title>
 
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -17,9 +17,7 @@
   <script src="/grudge-sso.js"></script>
   <script src="/grudge-auth.js"></script>
   <script src="/grudge-fleet-connect.js"></script>
-  <!-- Phantom Connect SDK (wallet auth) -->
-  <script src="https://unpkg.com/@phantom/browser-sdk@latest/dist/index.js" defer></script>
-  <meta name="description" content="Grudge Studio Nexus — central hub for all apps, games, AI systems, ObjectStore, WCS, GDevelop Assistant, and ecosystem links." />
+  <meta name="description" content="Grudge Studio Nexus ï¿½ central hub for all apps, games, AI systems, ObjectStore, WCS, GDevelop Assistant, and ecosystem links." />
 
   <!-- WCS Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -571,13 +569,13 @@
         </div>
         <div>
           <h1>Grudge Studio Nexus</h1>
-          <p>Apps • Games • AI • ObjectStore • WCS • Tools</p>
+          <p>Apps ï¿½ Games ï¿½ AI ï¿½ ObjectStore ï¿½ WCS ï¿½ Tools</p>
         </div>
       </div>
 
       <div class="actions">
         <div id="authArea">
-          <button class="auth-btn" onclick="openAuthModal()"><i class="fas fa-right-to-bracket"></i> Sign In</button>
+          <button class="auth-btn" onclick="redirectToGrudgeLogin()"><i class="fas fa-right-to-bracket"></i> Sign In</button>
         </div>
         <a class="chip" href="https://apps.grudge-studio.com" target="_blank" rel="noreferrer"><i class="fas fa-shield-halved"></i> Platform</a>
         <a class="chip" href="https://wcs.grudge-studio.com" target="_blank" rel="noreferrer"><i class="fas fa-hammer"></i> WCS</a>
@@ -590,81 +588,6 @@
     </div>
   </div>
 
-  <!-- Auth Modal -->
-  <div class="auth-overlay" id="authOverlay" onclick="if(event.target===this)closeAuthModal()">
-    <div class="auth-modal">
-      <div class="auth-modal-header">
-        <h2><i class="fas fa-shield-halved"></i> Grudge ID</h2>
-        <button class="auth-close" onclick="closeAuthModal()"><i class="fas fa-xmark"></i></button>
-      </div>
-      <div id="authError" class="auth-error"></div>
-      <div id="authSuccess" class="auth-success"></div>
-
-      <!-- Social / OAuth Buttons -->
-      <div class="social-grid">
-        <button class="social-btn discord" onclick="doDiscord()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-          Discord
-        </button>
-        <button class="social-btn google" onclick="doGoogle()">
-          <svg width="13" height="13" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Google
-        </button>
-        <button class="social-btn github" onclick="doGitHub()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.162 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-          GitHub
-        </button>
-        <button class="social-btn phantom" onclick="doWallet()">
-          <i class="fas fa-wallet"></i> Phantom
-        </button>
-        <button class="social-btn puter" onclick="doPuter()">
-          <i class="fas fa-cloud"></i> Puter
-        </button>
-        <button class="social-btn phone" onclick="togglePhonePanel()">
-          <i class="fas fa-mobile-screen"></i> Phone
-        </button>
-      </div>
-
-      <!-- Phone Panel (hidden by default) -->
-      <div class="phone-panel" id="phonePanel" style="display:none">
-        <input class="auth-field" id="phoneNum" placeholder="+1 (555) 000-0000" type="tel" />
-        <button class="btn-gold" style="width:100%;margin-bottom:8px" onclick="sendPhoneCode()">Send Code</button>
-        <div id="phoneCodeSection" style="display:none">
-          <input class="auth-field" id="phoneCode" placeholder="Enter 6-digit code" maxlength="6" />
-          <button class="btn-gold" style="width:100%" onclick="verifyPhoneCode()">Verify &amp; Sign In</button>
-        </div>
-      </div>
-
-      <div class="auth-divider"><span>or</span></div>
-
-      <!-- Sign In / Register Toggle -->
-      <div class="form-toggle">
-        <button class="form-toggle-btn active" id="btnSignIn" onclick="setFormMode('signin')">Sign In</button>
-        <button class="form-toggle-btn" id="btnRegister" onclick="setFormMode('register')">Create Account</button>
-      </div>
-
-      <!-- Sign In Form -->
-      <div id="formSignIn">
-        <input class="auth-field" id="loginId" placeholder="Email, username, or Grudge ID" />
-        <input class="auth-field" id="loginPass" type="password" placeholder="Password" />
-        <button class="btn-gold w100" onclick="doLogin()">Sign In</button>
-      </div>
-
-      <!-- Register Form -->
-      <div id="formRegister" style="display:none">
-        <input class="auth-field" id="regUser" placeholder="Username (3–20 chars)" />
-        <input class="auth-field" id="regEmail" placeholder="Email" type="email" />
-        <input class="auth-field" id="regPhone" placeholder="Phone (optional)" type="tel" />
-        <input class="auth-field" id="regPass" type="password" placeholder="Password (4+ chars)" />
-        <button class="btn-gold w100" onclick="doRegister()">Create Account</button>
-      </div>
-
-      <div class="auth-footer">
-        <button class="guest-btn" onclick="doGuest()"><i class="fas fa-user-secret"></i> Continue as Guest</button>
-        <p class="puter-note"><i class="fas fa-cloud"></i> Every account gets a Puter cloud ID for sync &amp; storage</p>
-      </div>
-    </div>
-  </div>
 
   <div class="container">
     <div class="hero">
@@ -677,7 +600,7 @@
           </p>
 
           <div class="search">
-            <input id="q" type="text" placeholder="Search links (name, url, tags, repo…)" autocomplete="off" />
+            <input id="q" type="text" placeholder="Search links (name, url, tags, repoï¿½)" autocomplete="off" />
             <select id="owner">
               <option value="MolochDaGod">GitHub owner: MolochDaGod</option>
             </select>
@@ -692,12 +615,12 @@
           <p>
             These checks run in your browser and may be blocked by CORS on some apps.
           </p>
-          <div class="muted" id="checks">Loading…</div>
+          <div class="muted" id="checks">Loadingï¿½</div>
         </div>
 
         <div class="card" id="fleetConnectCard">
           <h2><i class="fas fa-link"></i> Fleet Connect</h2>
-          <p>Your account, characters, home-island, and saves — linked across every Grudge app.</p>
+          <p>Your account, characters, home-island, and saves ï¿½ linked across every Grudge app.</p>
           <div id="grudge-fleet-connect" data-grudge-fleet-connect></div>
         </div>
       </div>
@@ -707,13 +630,13 @@
 
       <div class="footer">
         <div>
-        <div><strong style="color: var(--brand); font-family: var(--font-heading);">Grudge Studio</strong> — Nexus Hub</div>
+        <div><strong style="color: var(--brand); font-family: var(--font-heading);">Grudge Studio</strong> ï¿½ Nexus Hub</div>
           <div style="margin-top:6px">Tip: use <strong>+ Add link</strong> to store Render/Railway/Vercel URLs in your browser for quick access.</div>
         </div>
         <div>
-        <div><a href="https://apps.grudge-studio.com" target="_blank" rel="noreferrer">Platform</a> • <a href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer">ObjectStore</a> • <a href="https://coder.grudge-studio.com" target="_blank" rel="noreferrer">GDevelop</a> • <a href="/api/status" target="_blank" rel="noreferrer">/api/status</a></div>
-          <div style="margin-top:6px"><a href="https://grudgewarlords.com/privacy" target="_blank" rel="noreferrer">Privacy Policy</a> • <a href="https://grudgewarlords.com/tos" target="_blank" rel="noreferrer">Terms of Service</a></div>
-          <div style="margin-top:6px">© <span id="year"></span> Grudge Studio</div>
+        <div><a href="https://apps.grudge-studio.com" target="_blank" rel="noreferrer">Platform</a> ï¿½ <a href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer">ObjectStore</a> ï¿½ <a href="https://coder.grudge-studio.com" target="_blank" rel="noreferrer">GDevelop</a> ï¿½ <a href="/api/status" target="_blank" rel="noreferrer">/api/status</a></div>
+          <div style="margin-top:6px"><a href="https://grudgewarlords.com/privacy" target="_blank" rel="noreferrer">Privacy Policy</a> ï¿½ <a href="https://grudgewarlords.com/tos" target="_blank" rel="noreferrer">Terms of Service</a></div>
+          <div style="margin-top:6px">ï¿½ <span id="year"></span> Grudge Studio</div>
         </div>
       </div>
     </div>
@@ -1694,7 +1617,7 @@
         if (state.reposLoading) {
           const d = document.createElement('div');
           d.className = 'muted';
-          d.textContent = 'Loading Vercel apps from GitHub…';
+          d.textContent = 'Loading Vercel apps from GitHubï¿½';
           host.appendChild(d);
         } else if (state.reposError) {
           const d = document.createElement('div');
@@ -1713,7 +1636,7 @@
         if (state.reposLoading) {
           const d = document.createElement('div');
           d.className = 'muted';
-          d.textContent = 'Loading GitHub Pages…';
+          d.textContent = 'Loading GitHub Pagesï¿½';
           host.appendChild(d);
         } else if (state.reposError) {
           const d = document.createElement('div');
@@ -1732,7 +1655,7 @@
         if (state.reposLoading) {
           const d = document.createElement('div');
           d.className = 'muted';
-          d.textContent = 'Loading repos…';
+          d.textContent = 'Loading reposï¿½';
           host.appendChild(d);
         } else if (state.reposError) {
           const d = document.createElement('div');
@@ -1757,16 +1680,16 @@
       if (!q) {
         const allCats = ['deployments','playerHub','objectstore','wcs','devtools','games','ai','platform','packages','tools'];
         const total = allCats.reduce((s,c) => s + (CORE[c]?.length || 0), 0);
-        el('statusline').textContent = `${total} links • ` +
-          `deploys ${CORE.deployments.length} • ` +
-          `objectstore ${CORE.objectstore.length} • ` +
-          `wcs ${CORE.wcs.length} • ` +
-          `devtools ${CORE.devtools.length} • ` +
-          `games ${CORE.games.length} • ` +
-          `ai ${CORE.ai.length} • ` +
-          `platform ${CORE.platform.length} • ` +
+        el('statusline').textContent = `${total} links ï¿½ ` +
+          `deploys ${CORE.deployments.length} ï¿½ ` +
+          `objectstore ${CORE.objectstore.length} ï¿½ ` +
+          `wcs ${CORE.wcs.length} ï¿½ ` +
+          `devtools ${CORE.devtools.length} ï¿½ ` +
+          `games ${CORE.games.length} ï¿½ ` +
+          `ai ${CORE.ai.length} ï¿½ ` +
+          `platform ${CORE.platform.length} ï¿½ ` +
           `custom ${state.custom.length}` +
-          (state.repos ? ` • repos ${state.repos.length}` : '');
+          (state.repos ? ` ï¿½ repos ${state.repos.length}` : '');
       }
     }
 
@@ -1833,335 +1756,113 @@
       GrudgeFleetConnect.mount('#grudge-fleet-connect');
     }
 
-    // ------------------- AUTH SYSTEM -------------------
-    const AUTH_BASE = '';
+    // ------------------- AUTH â€” Unified Grudge ID SSO -------------------
+    const GRUDGE_ID_URL = 'https://id.grudge-studio.com';
+    const GRUDGE_AUTH_PAGE = GRUDGE_ID_URL + '/api/auth/page';
+
     function getAuthToken() { return localStorage.getItem('grudge_auth_token'); }
     function setAuthData(data) {
-      localStorage.setItem('grudge_auth_token', data.token);
-      localStorage.setItem('grudge_user_id', data.userId || '');
-      localStorage.setItem('grudge_id', data.grudgeId || '');
-      localStorage.setItem('grudge_username', data.username || '');
+      if (data.token) localStorage.setItem('grudge_auth_token', data.token);
+      if (data.userId) localStorage.setItem('grudge_user_id', String(data.userId));
+      if (data.grudgeId) localStorage.setItem('grudge_id', data.grudgeId);
+      if (data.username) localStorage.setItem('grudge_username', data.username);
       document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
       if (window.GrudgeFleetConnect) GrudgeFleetConnect.refresh();
     }
     function clearAuthData() {
-      ['grudge_auth_token','grudge_user_id','grudge_id','grudge_username'].forEach(k => localStorage.removeItem(k));
+      ['grudge_auth_token','grudge_user_id','grudge_id','grudge_username','grudge_auth_provider'].forEach(function (k) {
+        localStorage.removeItem(k);
+      });
       document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
       if (window.GrudgeFleetConnect) GrudgeFleetConnect.refresh();
     }
 
-    // -- Form mode toggle --
-    function setFormMode(mode) {
-      const isSignIn = mode === 'signin';
-      document.getElementById('formSignIn').style.display = isSignIn ? '' : 'none';
-      document.getElementById('formRegister').style.display = isSignIn ? 'none' : '';
-      document.getElementById('btnSignIn').classList.toggle('active', isSignIn);
-      document.getElementById('btnRegister').classList.toggle('active', !isSignIn);
-      document.getElementById('authError').style.display = 'none';
-      document.getElementById('authSuccess').style.display = 'none';
+    function redirectToGrudgeLogin() {
+      var ret = encodeURIComponent(window.location.href.split('#')[0]);
+      window.location.href = GRUDGE_AUTH_PAGE + '?redirect=' + ret + '&app=nexus';
     }
 
-    // -- Phone panel toggle --
-    function togglePhonePanel() {
-      const p = document.getElementById('phonePanel');
-      p.style.display = p.style.display === 'none' ? '' : 'none';
-    }
-
-    function openAuthModal() {
-      document.getElementById('authOverlay').classList.add('open');
-      document.getElementById('authError').style.display = 'none';
-      document.getElementById('authSuccess').style.display = 'none';
-    }
-    function closeAuthModal() {
-      document.getElementById('authOverlay').classList.remove('open');
-    }
-    function showAuthError(msg) {
-      const el = document.getElementById('authError');
-      el.textContent = msg; el.style.display = 'block';
-      document.getElementById('authSuccess').style.display = 'none';
-    }
-    function showAuthSuccess(msg) {
-      const el = document.getElementById('authSuccess');
-      el.textContent = msg; el.style.display = 'block';
-      document.getElementById('authError').style.display = 'none';
-    }
-
-    // -- Username / Password Login --
-    async function doLogin() {
-      const identifier = document.getElementById('loginId').value.trim();
-      const password = document.getElementById('loginPass').value;
-      if (!identifier || !password) return showAuthError('Enter username/email and password');
-      showAuthSuccess('Signing in…');
-      try {
-        const res = await fetch(AUTH_BASE + '/api/login', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ identifier, password }),
-        });
-        const data = await res.json();
-        if (!data.success) return showAuthError(data.error || 'Login failed');
-        await onAuthSuccess(data, 'Signed in as ' + data.username);
-      } catch (e) { showAuthError('Network error: ' + e.message); }
-    }
-
-    // -- Register --
-    async function doRegister() {
-      const username = document.getElementById('regUser').value.trim();
-      const email    = document.getElementById('regEmail').value.trim();
-      const phone    = document.getElementById('regPhone').value.trim();
-      const password = document.getElementById('regPass').value;
-      if (!username || !password) return showAuthError('Username and password required');
-      showAuthSuccess('Creating account…');
-      try {
-        const res = await fetch(AUTH_BASE + '/api/register', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, email: email || undefined, phone: phone || undefined, password }),
-        });
-        const data = await res.json();
-        if (!data.success) return showAuthError(data.error || 'Registration failed');
-        await onAuthSuccess(data, data.message || 'Welcome to Grudge Studio!');
-      } catch (e) { showAuthError('Network error: ' + e.message); }
-    }
-
-    // -- Discord OAuth --
-    function doDiscord() {
-      showAuthSuccess('Redirecting to Discord…');
-      window.location.href = '/api/discord-login';
-    }
-
-    // -- Google OAuth --
-    function doGoogle() {
-      showAuthSuccess('Redirecting to Google…');
-      window.location.href = '/api/oauth-google';
-    }
-
-    // -- GitHub OAuth --
-    function doGitHub() {
-      showAuthSuccess('Redirecting to GitHub…');
-      window.location.href = '/api/oauth-github';
-    }
-
-    // -- Phantom Connect SDK (lazy-loaded) --
-    var _phantomSdk = null;
-    function getPhantomSdk() {
-      if (_phantomSdk) return _phantomSdk;
-      if (typeof BrowserSDK === 'undefined') return null;
-      _phantomSdk = new BrowserSDK({
-        providers: ['google', 'phantom', 'injected', 'deeplink'],
-        addressTypes: [AddressType.solana, AddressType.ethereum],
-        appId: '656b4ef2-7acc-44fe-bec7-4b288cfdd2e9',
-        authOptions: {
-          authUrl: 'https://connect.phantom.app/login',
-          redirectUrl: window.location.origin + '/',
-        },
+    function captureAuthFromHash() {
+      if (!location.hash || location.hash.length < 2) return false;
+      var hash = new URLSearchParams(location.hash.slice(1));
+      var token = hash.get('token');
+      if (!token) return false;
+      setAuthData({
+        token: token,
+        grudgeId: hash.get('grudgeId') || hash.get('grudge_id') || '',
+        username: hash.get('name') || hash.get('username') || 'Player',
       });
-      return _phantomSdk;
+      if (hash.get('provider')) localStorage.setItem('grudge_auth_provider', hash.get('provider'));
+      history.replaceState({}, '', location.pathname + location.search);
+      return true;
     }
 
-    // -- Phantom / Web3 Wallet --
-    async function doWallet() {
-      try {
-        showAuthSuccess('Connecting Phantom wallet…');
-        // Try Phantom Connect SDK first (supports embedded + extension)
-        var sdk = getPhantomSdk();
-        if (sdk) {
-          var result = await sdk.connect({ provider: 'injected' });
-          var solAddr = result.addresses.find(function(a) { return a.addressType === 'solana'; });
-          var walletAddress = solAddr ? solAddr.address : result.addresses[0].address;
-        } else if (window.solana && window.solana.isPhantom) {
-          // Fallback to raw extension
-          var resp = await window.solana.connect();
-          var walletAddress = resp.publicKey.toString();
-        } else {
-          return showAuthError('Phantom wallet not found — install it at phantom.app');
-        }
-        localStorage.setItem('grudge_wallet_address', walletAddress);
-        var res = await fetch(AUTH_BASE + '/api/connect-wallet', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ walletAddress: walletAddress, walletType: 'solana' }),
-        });
-        var data = await res.json();
-        if (!data.success) return showAuthError(data.error || 'Wallet auth failed');
-        await onAuthSuccess(data, 'Signed in via Phantom wallet');
-      } catch (e) {
-        var msg = e.message || '';
-        if (msg.includes('cancel') || msg.includes('closed')) {
-          showAuthError('Wallet connection cancelled.');
-        } else {
-          showAuthError('Wallet error: ' + msg);
-        }
-      }
+    function captureAuthFromQuery() {
+      var params = new URLSearchParams(window.location.search);
+      var token = params.get('token') || params.get('sso_token') || params.get('auth_token');
+      if (!token) return false;
+      setAuthData({
+        token: token,
+        username: params.get('username') || params.get('auth_user') || params.get('grudge_username') || 'Player',
+        grudgeId: params.get('grudge_id') || params.get('auth_grudge_id') || '',
+        userId: params.get('grudge_user_id') || '',
+      });
+      var clean = new URL(window.location.href);
+      ['token','sso_token','auth_token','auth_user','auth_grudge_id','auth_error','username','grudge_id','grudge_username','provider','sso_required','grudge_user_id'].forEach(function (k) {
+        clean.searchParams.delete(k);
+      });
+      history.replaceState({}, '', clean.pathname + clean.search);
+      return true;
     }
-
-    // -- Puter Auth --
-    async function doPuter() {
-      if (typeof puter === 'undefined') {
-        showAuthSuccess('Loading Puter SDK…');
-        const script = document.createElement('script');
-        script.src = 'https://js.puter.com/v2/';
-        script.onload = () => doPuterAuth();
-        document.head.appendChild(script);
-      } else {
-        doPuterAuth();
-      }
-    }
-    async function doPuterAuth() {
-      try {
-        showAuthSuccess('Connecting to Puter…');
-        const alreadySignedIn = puter.auth.isSignedIn ? puter.auth.isSignedIn() : false;
-        if (!alreadySignedIn) {
-          await puter.auth.signIn();
-        }
-        const user = await puter.auth.getUser();
-        if (!user || !user.uuid) {
-          return showAuthError('Could not retrieve Puter user info. Please try again.');
-        }
-        const res = await fetch(AUTH_BASE + '/api/puter', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ puterUuid: user.uuid, puterUsername: user.username }),
-        });
-        const data = await res.json();
-        if (!data.success) return showAuthError(data.error || 'Puter auth failed');
-        await onAuthSuccess(data, 'Signed in via Puter as ' + data.username);
-      } catch (e) { showAuthError('Puter error: ' + e.message); }
-    }
-
-    // -- Guest --
-    async function doGuest() {
-      showAuthSuccess('Entering as guest…');
-      try {
-        const deviceId = localStorage.getItem('grudge_device_id') || crypto.randomUUID();
-        localStorage.setItem('grudge_device_id', deviceId);
-        const res = await fetch(AUTH_BASE + '/api/guest', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ deviceId }),
-        });
-        const data = await res.json();
-        if (!data.success) return showAuthError(data.error || 'Guest login failed');
-        await onAuthSuccess(data, 'Playing as guest — upgrade anytime!');
-      } catch (e) { showAuthError('Network error: ' + e.message); }
-    }
-
-    // -- Phone / SMS --
-    async function sendPhoneCode() {
-      const phone = document.getElementById('phoneNum').value.trim();
-      if (!phone) return showAuthError('Enter a phone number');
-      showAuthSuccess('Sending code…');
-      try {
-        const res = await fetch(AUTH_BASE + '/api/phone-send', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone }),
-        });
-        const data = await res.json();
-        if (!data.success) return showAuthError(data.error || 'Failed to send code');
-        showAuthSuccess('Code sent! Check your messages.');
-        document.getElementById('phoneCodeSection').style.display = '';
-      } catch (e) { showAuthError('Network error: ' + e.message); }
-    }
-    async function verifyPhoneCode() {
-      const phone = document.getElementById('phoneNum').value.trim();
-      const code  = document.getElementById('phoneCode').value.trim();
-      if (!code) return showAuthError('Enter the verification code');
-      showAuthSuccess('Verifying…');
-      try {
-        const res = await fetch(AUTH_BASE + '/api/phone-verify', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone, code }),
-        });
-        const data = await res.json();
-        if (!data.success) return showAuthError(data.error || 'Invalid code');
-        await onAuthSuccess(data, 'Signed in via phone');
-      } catch (e) { showAuthError('Network error: ' + e.message); }
-    }
-
-    // -- Post-auth handler — runs after ANY successful login --
-    async function onAuthSuccess(data, msg) {
-      setAuthData(data);
-      closeAuthModal();
-      updateAuthUI(data);
-      toast(msg || 'Signed in!');
-      // Link a Puter cloud ID in the background (non-blocking)
-      linkPuterIdentity(data.token).catch(() => {});
-    }
-
-    // -- Puter ID linker — runs silently after every auth --
-    async function linkPuterIdentity(token) {
-      if (!localStorage.getItem('grudge_puter_guest_id')) {
-        const arr = crypto.getRandomValues(new Uint8Array(8));
-        const hex = Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
-        localStorage.setItem('grudge_puter_guest_id', 'PGID-' + hex);
-      }
-      if (typeof puter !== 'undefined') {
-        try {
-          const loggedIn = await puter.auth.isLoggedIn();
-          if (loggedIn) {
-            const puterUser = await puter.auth.getUser();
-            await fetch(AUTH_BASE + '/api/puter-link', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-              body: JSON.stringify({ puterUuid: puterUser.uuid, puterUsername: puterUser.username }),
-            });
-          }
-        } catch (_) { /* non-critical */ }
-      }
-    }
-
-    // -- Handle OAuth redirect callbacks (?auth_token=JWT in URL) --
-    (function handleOAuthCallback() {
-      const params = new URLSearchParams(window.location.search);
-      const token    = params.get('auth_token');
-      const username = params.get('auth_user');
-      const err      = params.get('auth_error');
-      if (err) {
-        window.history.replaceState({}, '', window.location.pathname);
-        setTimeout(() => { openAuthModal(); showAuthError(decodeURIComponent(err)); }, 300);
-        return;
-      }
-      if (token) {
-        const data = { token, username: username || 'User', grudgeId: params.get('auth_grudge_id') || '' };
-        setAuthData(data);
-        window.history.replaceState({}, '', window.location.pathname);
-        updateAuthUI(data);
-        toast('Signed in as ' + (username || 'User'));
-        linkPuterIdentity(token).catch(() => {});
-      }
-    })();
 
     function updateAuthUI(data) {
-      const area = document.getElementById('authArea');
-      if (data && data.username) {
-        area.innerHTML = `
-          <div class="profile-badge" onclick="openProfileMenu()">
-            <i class="fas fa-shield-halved"></i> ${data.username}
-            ${data.gold ? ' <span style="color:var(--brand);font-weight:700;">' + data.gold + 'g</span>' : ''}
-          </div>`;
+      var area = document.getElementById('authArea');
+      var username = (data && data.username) || localStorage.getItem('grudge_username');
+      if (username && getAuthToken()) {
+        area.innerHTML = '<div class="profile-badge" onclick="openProfileMenu()"><i class="fas fa-shield-halved"></i> ' + username +
+          (data && data.gold ? ' <span style="color:var(--brand);font-weight:700;">' + data.gold + 'g</span>' : '') + '</div>';
       } else {
-        area.innerHTML = '<button class="auth-btn" onclick="openAuthModal()"><i class="fas fa-right-to-bracket"></i> Sign In</button>';
+        area.innerHTML = '<button class="auth-btn" onclick="redirectToGrudgeLogin()"><i class="fas fa-right-to-bracket"></i> Sign In</button>';
       }
     }
 
     function openProfileMenu() {
       if (confirm('Sign out of ' + (localStorage.getItem('grudge_username') || 'account') + '?')) {
+        var t = getAuthToken();
+        if (t) fetch(GRUDGE_ID_URL + '/api/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + t } }).catch(function () {});
         clearAuthData();
         updateAuthUI(null);
         toast('Signed out');
       }
     }
 
-    // Auto-verify existing session on load
-    (async function autoVerify() {
-      const token = getAuthToken();
-      if (!token) return;
+    (async function bootAuth() {
+      var params = new URLSearchParams(location.search);
+      var authErr = params.get('auth_error');
+      if (authErr) {
+        toast('Sign-in failed: ' + decodeURIComponent(authErr));
+        history.replaceState({}, '', location.pathname);
+      }
+      if (captureAuthFromHash() || captureAuthFromQuery()) {
+        updateAuthUI({ username: localStorage.getItem('grudge_username') });
+        toast('Signed in as ' + (localStorage.getItem('grudge_username') || 'Player'));
+        return;
+      }
+      var token = getAuthToken();
+      if (!token) { updateAuthUI(null); return; }
       try {
-        const res = await fetch(AUTH_BASE + '/api/verify', {
-          headers: { 'Authorization': 'Bearer ' + token },
-        });
-        const data = await res.json();
-        if (data.success) {
-          updateAuthUI({ username: data.username || data.user?.username, gold: data.user?.gold });
+        var res = await fetch(GRUDGE_ID_URL + '/api/auth/user', { headers: { Authorization: 'Bearer ' + token } });
+        if (res.ok) {
+          var user = await res.json();
+          setAuthData({ token: token, userId: user.id, grudgeId: user.grudgeId, username: user.username || user.displayName });
+          updateAuthUI({ username: user.username || user.displayName, gold: user.gold });
         } else {
           clearAuthData();
+          updateAuthUI(null);
         }
-      } catch (e) { /* offline — keep token */ }
+      } catch (e) {
+        updateAuthUI({ username: localStorage.getItem('grudge_username') });
+      }
     })();
   </script>
 </body>

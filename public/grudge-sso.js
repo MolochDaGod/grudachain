@@ -27,6 +27,7 @@
 
   // Domains that participate in Grudge SSO
   var SSO_DOMAINS = [
+    'nexus.grudge-studio.com',
     'grudachain.grudge-studio.com',
     'grudachain.grudgestudio.com',
     'grudachain-rho.vercel.app',
