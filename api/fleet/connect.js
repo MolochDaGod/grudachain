@@ -45,6 +45,7 @@ module.exports = function handler(req, res) {
       verify: `${CANONICAL.auth}/api/auth/verify`,
       puterSso: `${CANONICAL.auth}/api/auth/puter-sso`,
       sessionExchange: `${CANONICAL.auth}/api/auth/session/exchange`,
+      account: `${CANONICAL.auth}/account`,
       gameDataPuter: `${CANONICAL.gameData}/api/auth/puter`
     },
     libraries: {
