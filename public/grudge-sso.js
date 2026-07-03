@@ -113,64 +113,45 @@
         return res.json();
       })
       .then(function (profile) {
-        return fetch(GAME_API + '/api/auth/puter', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            puterId: puterUser.uuid,
-            puterUuid: puterUser.uuid,
-            puterUsername: profile.displayName || profile.username,
-            email: profile.email || undefined
-          })
-        }).then(function (bridgeRes) { return bridgeRes.ok ? bridgeRes.json() : null; })
-          .then(function (data) {
-            var jwt = data && (data.sessionToken || data.token);
-            if (jwt) {
-              localStorage.setItem(TOKEN_KEY, jwt);
-              if (profile.grudgeId) localStorage.setItem(ID_KEY, profile.grudgeId);
-              if (profile.username || profile.displayName) {
-                localStorage.setItem(USER_KEY, profile.displayName || profile.username);
-              }
-              document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
-            }
-            return { profile: profile, token: jwt, puterUser: puterUser };
-          });
+        var jwt = profile && (profile.token || profile.sessionToken);
+        if (jwt) {
+          localStorage.setItem(TOKEN_KEY, jwt);
+          if (profile.grudgeId) localStorage.setItem(ID_KEY, profile.grudgeId);
+          if (profile.username || profile.displayName) {
+            localStorage.setItem(USER_KEY, profile.displayName || profile.username);
+          }
+          if (profile.id) localStorage.setItem(USERID_KEY, String(profile.id));
+          document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
+        }
+        return { profile: profile, token: jwt, puterUser: puterUser };
       });
   }
 
-  /** Bridge id.grudge-studio.com launch token → Game API Bearer JWT. */
+  /** Bridge id.grudge-studio.com launch token → local session JWT. */
   function bridgeLaunchToken(launchToken) {
-    return fetch(GAME_API + '/api/auth/session/exchange', {
+    return fetch(AUTH_GATEWAY + '/api/auth/session/exchange', {
       method: 'POST',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': window.location.origin
+      },
       body: JSON.stringify({ token: launchToken, audience: window.location.origin })
     })
       .then(function (res) { return res.ok ? res.json() : null; })
       .then(function (profile) {
-        if (!profile || !profile.grudgeId) return false;
-        return fetch(GAME_API + '/api/auth/puter', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            puterId: 'grudge_' + profile.grudgeId,
-            puterUuid: 'grudge_' + profile.grudgeId,
-            displayName: profile.displayName || profile.username
-          })
-        })
-          .then(function (res) { return res.ok ? res.json() : null; })
-          .then(function (data) {
-            if (!data) return false;
-            var jwt = data.sessionToken || data.token;
-            if (!jwt) return false;
-            localStorage.setItem(TOKEN_KEY, jwt);
-            if (profile.grudgeId) localStorage.setItem(ID_KEY, profile.grudgeId);
-            if (profile.username || profile.displayName) {
-              localStorage.setItem(USER_KEY, profile.displayName || profile.username);
-            }
-            document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
-            return true;
-          });
+        if (!profile) return false;
+        var jwt = profile.token || profile.sessionToken;
+        if (!jwt || !profile.grudgeId) return false;
+        localStorage.setItem(TOKEN_KEY, jwt);
+        localStorage.setItem(ID_KEY, profile.grudgeId);
+        if (profile.username || profile.displayName) {
+          localStorage.setItem(USER_KEY, profile.displayName || profile.username);
+        }
+        if (profile.id) localStorage.setItem(USERID_KEY, String(profile.id));
+        document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
+        return true;
       })
       .catch(function () { return false; });
   }

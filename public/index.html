@@ -1799,6 +1799,8 @@
 
     function captureAuthFromQuery() {
       var params = new URLSearchParams(window.location.search);
+      var launchToken = params.get('grudge_token') || params.get('puter_token');
+      if (launchToken) return false;
       var token = params.get('token') || params.get('sso_token') || params.get('auth_token');
       if (!token) return false;
       setAuthData({
@@ -1836,6 +1838,16 @@
       }
     }
 
+    function onAuthSessionReady() {
+      updateAuthUI({ username: localStorage.getItem('grudge_username') });
+      if (getAuthToken()) {
+        toast('Signed in as ' + (localStorage.getItem('grudge_username') || 'Player'));
+      }
+    }
+
+    document.addEventListener('grudge-auth-changed', onAuthSessionReady);
+    window.addEventListener('grudge-auth:success', onAuthSessionReady);
+
     (async function bootAuth() {
       var params = new URLSearchParams(location.search);
       var authErr = params.get('auth_error');
@@ -1844,8 +1856,10 @@
         history.replaceState({}, '', location.pathname);
       }
       if (captureAuthFromHash() || captureAuthFromQuery()) {
-        updateAuthUI({ username: localStorage.getItem('grudge_username') });
-        toast('Signed in as ' + (localStorage.getItem('grudge_username') || 'Player'));
+        onAuthSessionReady();
+        return;
+      }
+      if (params.get('grudge_token') || params.get('puter_token')) {
         return;
       }
       var token = getAuthToken();

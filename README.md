@@ -20,7 +20,8 @@ Free AI Node System powered by GRUDA Legion v3.0 — the central backend hub for
 | `grudgewarlords.com` | Vercel (grudge-studio repo) | Main game portal & WCS |
 | `www.grudgewarlords.com` | Vercel (grudge-studio repo) | Main game portal (www) |
 | `api.grudge-studio.com` | Cloudflare Tunnel → VPS | Grudge Backend (unified game API) |
-| `id.grudge-studio.com` | Cloudflare → Backend | Auth gateway / SSO |
+| `id.grudge-studio.com` | Cloudflare Worker → Railway (The-ENGINE) | Auth gateway / SSO |
+| `nexus.grudge-studio.com` | Vercel (grudachain repo) | Nexus hub (unified Grudge ID login) |
 | `dash.grudge-studio.com` | Vercel | Admin dashboard |
 | `account.grudge-studio.com` | Cloudflare → Backend | Account management |
 | `grudachain.grudgestudio.com` | Vercel (grudachain repo) | Nexus hub / app gallery |
@@ -63,10 +64,18 @@ Free AI Node System powered by GRUDA Legion v3.0 — the central backend hub for
 | Character Builder | [/grudge-character-builder](https://molochdagod.github.io/grudge-character-builder/) |
 | Grudge SDK (NPM) | [npmjs.com/package/grudge-studio](https://www.npmjs.com/package/grudge-studio) |
 
+### Auth Flow (canonical)
+
+1. Apps redirect to `https://id.grudge-studio.com/api/auth/page?redirect=<return-url>&app=<name>`
+2. User signs in (Puter, OAuth, guest, etc.) on the Grudge ID page
+3. Cross-domain return uses `?grudge_token=<jwt>` — apps exchange via `POST id.grudge-studio.com/api/auth/session/exchange`
+4. Popup login posts `grudge-auth:success` with a launch token to the opener
+
+Fleet scripts: `grudge-sso.js`, `grudge-game-bootstrap.js`, `grudge-fleet-sdk.js` (see `/api/fleet/connect` manifest).
+
 ### Known Issues
 
-- `api.grudge-studio.com` is served by grudge-backend (VPS), not Railway. GrudaChain's `/health` is at its Railway URL.
-- `id.grudge-studio.com` → VPS service down (grudge-studio-backend grudge-id container needs restart)
+- `api.grudge-studio.com` SSL/Tunnel may be offline — game data fallback: `grudge-api-production-0d46.up.railway.app`
 - `grudge-character-creator.vercel.app` → 404 (deployment missing)
 - `grudge-factions-site.vercel.app` → 404 (deployment missing)
 - `grudgeplatform.com` → Squarespace (separate from Vercel grudge-platform)

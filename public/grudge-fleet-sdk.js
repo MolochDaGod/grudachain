@@ -84,7 +84,7 @@
         login: 'https://id.grudge-studio.com/api/auth/page',
         verify: 'https://id.grudge-studio.com/api/auth/verify',
         puterSso: 'https://id.grudge-studio.com/api/auth/puter-sso',
-        sessionExchange: 'https://api.grudge-studio.com/api/auth/session/exchange'
+        sessionExchange: 'https://id.grudge-studio.com/api/auth/session/exchange'
       },
       api: {
         game: 'https://api.grudge-studio.com',
@@ -130,7 +130,7 @@
         login: auth.login || 'https://id.grudge-studio.com/api/auth/page',
         verify: auth.verify || 'https://id.grudge-studio.com/api/auth/verify',
         puterSso: auth.puterSso || ((auth.gateway || 'https://id.grudge-studio.com') + '/api/auth/puter-sso'),
-        sessionExchange: auth.sessionExchange || 'https://api.grudge-studio.com/api/auth/session/exchange'
+        sessionExchange: auth.sessionExchange || 'https://id.grudge-studio.com/api/auth/session/exchange'
       },
       api: m.api || fallbackManifest().api,
       cloud: m.cloud || {},
