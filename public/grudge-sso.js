@@ -186,6 +186,11 @@
   }
 
   // ── 2. OUTBOUND: Append token to cross-app links ──
+  function readActiveCharacterId() {
+    var gid = localStorage.getItem('grudge_account_id') || localStorage.getItem(ID_KEY) || 'guest';
+    return localStorage.getItem('gruda_active_character_' + gid) || localStorage.getItem('grudge.activeCharId');
+  }
+
   function getAuthParams() {
     var token    = localStorage.getItem(TOKEN_KEY);
     var username = localStorage.getItem(USER_KEY);
@@ -195,6 +200,8 @@
     p.set('token', token);
     if (username) p.set('username', username);
     if (grudgeId) p.set('grudge_id', grudgeId);
+    var charId = readActiveCharacterId();
+    if (charId) p.set('characterId', charId);
     return p;
   }
 

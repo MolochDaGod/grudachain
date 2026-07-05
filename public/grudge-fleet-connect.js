@@ -37,8 +37,11 @@
   var NEXUS_ORIGIN = resolveNexusOrigin();
 
   var TOKEN_KEY = 'grudge_auth_token';
+  var LEGACY_TOKEN_KEY = 'grudge_token';
   var USER_KEY = 'grudge_username';
   var ID_KEY = 'grudge_id';
+  var ACCOUNT_ID_KEY = 'grudge_account_id';
+  var CHAR_ACTIVE_PREFIX = 'gruda_active_character';
   var CONFIG_URL = NEXUS_ORIGIN + '/api/fleet/connect';
   var DEFAULT_CONFIG = {
     playerHub: {
@@ -67,9 +70,47 @@
   var characters = null;
   var homeIslandId = null;
 
-  function getToken() { return localStorage.getItem(TOKEN_KEY); }
+  function getToken() {
+    return localStorage.getItem(TOKEN_KEY) || localStorage.getItem(LEGACY_TOKEN_KEY);
+  }
   function getUsername() { return localStorage.getItem(USER_KEY); }
   function getGrudgeId() { return localStorage.getItem(ID_KEY); }
+
+  function readActiveId() {
+    var gid = localStorage.getItem(ACCOUNT_ID_KEY) || getGrudgeId() || 'guest';
+    return localStorage.getItem(CHAR_ACTIVE_PREFIX + '_' + gid) || localStorage.getItem('grudge.activeCharId');
+  }
+
+  function saveActiveId(id) {
+    var gid = localStorage.getItem(ACCOUNT_ID_KEY) || getGrudgeId() || 'guest';
+    if (id) {
+      localStorage.setItem(CHAR_ACTIVE_PREFIX + '_' + gid, id);
+      localStorage.setItem('grudge.activeCharId', id);
+    }
+  }
+
+  /** GRDG-HUMWAR-XL1U4I8U → { race: 'Human', class: 'Warrior' } */
+  function decodeGrdgCharId(id) {
+    if (!id || id.indexOf('GRDG-') !== 0) return null;
+    var tag = (id.split('-')[1] || '').toUpperCase();
+    if (!tag) return null;
+    var RACE = { HUM: 'Human', ELF: 'Elf', DWF: 'Dwarf', ORC: 'Orc', BRB: 'Barbarian', UND: 'Undead' };
+    var CLASS = { WAR: 'Warrior', MAG: 'Mage', RNG: 'Ranger', WRG: 'Worg', SHP: 'Shapeshifter' };
+    return {
+      race: RACE[tag.slice(0, 3)] || tag.slice(0, 3),
+      class: CLASS[tag.slice(3)] || tag.slice(3)
+    };
+  }
+
+  function resolveActiveChar(list) {
+    if (!list || !list.length) return null;
+    var stored = readActiveId();
+    if (stored) {
+      var hit = list.find(function (c) { return c.id === stored; });
+      if (hit) return hit;
+    }
+    return list.find(function (c) { return c.activeForEra || c.isActive; }) || list[0];
+  }
 
   function isSignedIn() { return !!getToken(); }
 
@@ -90,6 +131,8 @@
       u.searchParams.set('token', getToken());
       if (getUsername()) u.searchParams.set('username', getUsername());
       if (getGrudgeId()) u.searchParams.set('grudge_id', getGrudgeId());
+      var active = resolveActiveChar(characters);
+      if (active && active.id) u.searchParams.set('characterId', active.id);
       return u.toString();
     } catch (e) {
       return url;
@@ -146,7 +189,7 @@
       .catch(function () { return null; })
       .then(function (acct) {
         if (!acct) return null;
-        return fetch(resolveApiUrl('characters'), {
+        return fetch(resolveApiUrl('characters') + '?era=warlords', {
           headers: { Authorization: 'Bearer ' + token },
           signal: AbortSignal.timeout(6000)
         })
@@ -154,6 +197,11 @@
           .then(function (data) {
             characters = (data && (data.characters || data)) || [];
             if (!Array.isArray(characters)) characters = [];
+            var active = resolveActiveChar(characters);
+            if (active && active.id) saveActiveId(active.id);
+            document.dispatchEvent(new CustomEvent('grudge:character:updated', {
+              detail: { character: active, characters: characters }
+            }));
             return { account: acct, characters: characters };
           })
           .catch(function () { return { account: acct, characters: [] }; });
@@ -182,8 +230,9 @@
       '.gfc-pill-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:24px;background:linear-gradient(135deg,#1a1f2e,#0d1120);border:2px solid rgba(212,175,55,.5);color:#d4af37;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.5);font-size:13px;font-weight:600}',
       '.gfc-pill-panel{position:absolute;bottom:52px;right:0;width:280px;display:none}',
       '.gfc-pill-panel.open{display:block}',
-      '.gfc-char-row{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px;color:#c0b8a8}',
-      '.gfc-char-lvl{background:rgba(212,175,55,.15);color:#d4af37;padding:1px 5px;border-radius:3px;font-size:10px}'
+      '.gfc-char-row{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px;color:#c0b8a8;flex-wrap:wrap}',
+      '.gfc-char-lvl{background:rgba(212,175,55,.15);color:#d4af37;padding:1px 5px;border-radius:3px;font-size:10px}',
+      '.gfc-char-id{font-family:ui-monospace,monospace;font-size:10px;color:#8a8070;word-break:break-all}'
     ].join('');
     document.head.appendChild(style);
   }
@@ -195,10 +244,15 @@
     var signedIn = isSignedIn();
     var username = getUsername() || 'Player';
     var grudgeId = getGrudgeId() || '';
-    var activeChar = characters && characters.find(function (c) { return c.isActive; }) || (characters && characters[0]);
+    var activeChar = resolveActiveChar(characters);
+    var decoded = activeChar && activeChar.id ? decodeGrdgCharId(activeChar.id) : null;
     var islandUrl = homeIslandId
       ? hub.island + (hub.island.indexOf('?') >= 0 ? '&' : '?') + 'island=' + homeIslandId
       : hub.island;
+    var combatUrl = 'https://grudge-studio.com/super-engine';
+    if (activeChar && activeChar.id) {
+      combatUrl += (combatUrl.indexOf('?') >= 0 ? '&' : '?') + 'characterId=' + encodeURIComponent(activeChar.id);
+    }
 
     var html = '<div class="gfc-root gfc-card">';
     html += '<div class="gfc-header"><span class="gfc-title">Grudge Fleet</span>';
@@ -212,14 +266,21 @@
       html += '<div class="gfc-meta">' + (grudgeId ? escapeHtml(grudgeId.slice(0, 16)) + '…' : 'Linked') + '</div></div></div>';
 
       if (activeChar) {
-        html += '<div class="gfc-char-row"><span>' + escapeHtml(activeChar.name || 'Hero') + '</span>';
+        var raceClass = decoded
+          ? decoded.race + ' ' + decoded.class
+          : ((activeChar.raceId || activeChar.race || '') + ' ' + (activeChar.classId || activeChar.class || '')).trim();
+        html += '<div class="gfc-char-row"><span>' + escapeHtml(activeChar.name || raceClass || 'Hero') + '</span>';
         html += '<span class="gfc-char-lvl">Lv ' + (activeChar.level || 1) + '</span></div>';
+        if (activeChar.id) {
+          html += '<div class="gfc-char-id">' + escapeHtml(activeChar.id) + '</div>';
+        }
       }
 
       html += '<div class="gfc-links">';
       html += link('Characters', ssoUrl(hub.characters));
       html += link('Home Island', ssoUrl(islandUrl));
       html += link('Play Warlords', ssoUrl(hub.warlords || hub.characters));
+      html += link('Super Engine', ssoUrl(combatUrl));
       html += link('grudgeDot', ssoUrl(tools.grudgedot));
       html += link('Nexus', ssoUrl(tools.nexus));
       html += link('Studio Forge', tools.devTool && tools.devTool.download ? tools.devTool.download : '#');
@@ -313,7 +374,18 @@
     refresh: refresh,
     isSignedIn: isSignedIn,
     ssoUrl: ssoUrl,
-    getConfig: loadConfig
+    getConfig: loadConfig,
+    getCharacters: function () { return characters || []; },
+    getActiveId: readActiveId,
+    getActiveCharacter: function () { return resolveActiveChar(characters); },
+    decodeGrdgCharId: decodeGrdgCharId,
+    selectCharacter: function (id) {
+      saveActiveId(id);
+      document.dispatchEvent(new CustomEvent('grudge:character:updated', {
+        detail: { character: resolveActiveChar(characters), characters: characters }
+      }));
+      refresh();
+    }
   };
 
   document.addEventListener('grudge-auth-changed', refresh);
