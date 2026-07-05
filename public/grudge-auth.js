@@ -37,7 +37,7 @@ const GrudgeAuth = {
   async getUserData() {
     const t = this.getToken();
     if (!t) return null;
-    const r = await fetch(GRUDGE_AUTH_BASE + '/user', { headers: { Authorization: 'Bearer ' + t } });
+    const r = await fetch(GRUDGE_AUTH_BASE + '/me', { headers: { Authorization: 'Bearer ' + t } });
     if (!r.ok) { this.setToken(null); return null; }
     return r.json();
   },
