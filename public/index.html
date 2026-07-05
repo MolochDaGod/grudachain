@@ -1919,14 +1919,18 @@
           res = await fetch(GRUDGE_ID_URL + '/api/auth/me', { headers: { Authorization: 'Bearer ' + token } });
         }
         if (res.ok) {
-          var user = await res.json();
+          var payload = await res.json();
+          var user = payload.user || payload;
           setAuthData({
             token: token,
             userId: user.id || user.userId,
-            grudgeId: user.grudgeId || user.grudge_id,
-            username: user.username || user.displayName
+            grudgeId: user.grudgeId || user.grudge_id || payload.grudgeId,
+            username: user.username || user.displayName || payload.username || payload.displayName
           });
-          updateAuthUI({ username: user.username || user.displayName, gold: user.gold });
+          updateAuthUI({
+            username: user.username || user.displayName || payload.username || payload.displayName,
+            gold: user.gold || user.gbuxBalance || payload.gbuxBalance
+          });
         } else if (res.status === 401 || res.status === 403) {
           clearAuthData();
           updateAuthUI(null);
