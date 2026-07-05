@@ -7,7 +7,7 @@
  *   Game Data (Postgres): grudge-builder-production.up.railway.app
  *
  * Usage (one script tag replaces hardcoded URLs + duplicate SSO copies):
- *   <script src="https://grudachain.grudge-studio.com/grudge-fleet-sdk.js"></script>
+ *   <script src="https://nexus.grudge-studio.com/grudge-fleet-sdk.js"></script>
  *   <script>
  *     GrudgeFleet.init().then(function () {
  *       // GrudgeFleet.config.auth.login
@@ -20,7 +20,7 @@
   'use strict';
 
   var NEXUS_CANONICAL = 'https://nexus.grudge-studio.com';
-  var NEXUS_FALLBACK = 'https://grudachain.grudge-studio.com';
+  var NEXUS_FALLBACK = 'https://nexus.grudge-studio.com';
 
   function resolveNexusOrigin() {
     var scripts = document.getElementsByTagName('script');

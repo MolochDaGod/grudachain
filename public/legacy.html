@@ -1964,7 +1964,7 @@
                 const hostDir = 'grudge-studio-app';
                 const subdomain = 'grudge-studio';
                 try { await puter.fs.mkdir(hostDir); } catch(e) {}
-                const src = (location.origin || 'https://grudachain.grudge-studio.com') + '/puter-cloud-dashboard.html';
+                const src = (location.origin || 'https://nexus.grudge-studio.com') + '/puter-cloud-dashboard.html';
                 const dashRes = await fetch(src, { cache: 'no-store' });
                 if (!dashRes.ok) throw new Error('Could not fetch dashboard from ' + src);
                 const dashboard = await dashRes.text();

@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
     <meta name="google" content="notranslate" />
+    <script src="/nexus-canonical.js"></script>
     <script src="/grudge-game-bootstrap.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GRUDA Legion � Grudge Studio Nexus</title>
@@ -577,11 +578,12 @@
         <div id="authArea">
           <button class="auth-btn" onclick="redirectToGrudgeLogin()"><i class="fas fa-right-to-bracket"></i> Sign In</button>
         </div>
+        <a class="chip" href="https://character.grudge-studio.com" target="_blank" rel="noreferrer"><i class="fas fa-user-shield"></i> Characters</a>
         <a class="chip" href="https://apps.grudge-studio.com" target="_blank" rel="noreferrer"><i class="fas fa-shield-halved"></i> Platform</a>
         <a class="chip" href="https://wcs.grudge-studio.com" target="_blank" rel="noreferrer"><i class="fas fa-hammer"></i> WCS</a>
         <a class="chip" href="https://coder.grudge-studio.com" target="_blank" rel="noreferrer"><i class="fas fa-gamepad"></i> grudgeDot</a>
         <a class="chip" href="https://github.com/MolochDaGod/grudge-dev-tool/releases/latest" target="_blank" rel="noreferrer"><i class="fas fa-hammer"></i> Forge</a>
-        <a class="chip" href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer"><i class="fas fa-box-open"></i> ObjectStore</a>
+        <a class="chip" href="https://objectstore.grudge-studio.com" target="_blank" rel="noreferrer"><i class="fas fa-box-open"></i> ObjectStore</a>
         <a class="chip" href="https://github.com/MolochDaGod" target="_blank" rel="noreferrer"><i class="fab fa-github"></i> GitHub</a>
         <a class="chip" href="https://discord.gg/FtGtmxmwkh" target="_blank" rel="noreferrer"><i class="fab fa-discord"></i> Discord</a>
       </div>
@@ -634,8 +636,8 @@
           <div style="margin-top:6px">Tip: use <strong>+ Add link</strong> to store Render/Railway/Vercel URLs in your browser for quick access.</div>
         </div>
         <div>
-        <div><a href="https://apps.grudge-studio.com" target="_blank" rel="noreferrer">Platform</a> � <a href="https://molochdagod.github.io/ObjectStore" target="_blank" rel="noreferrer">ObjectStore</a> � <a href="https://coder.grudge-studio.com" target="_blank" rel="noreferrer">GDevelop</a> � <a href="/api/status" target="_blank" rel="noreferrer">/api/status</a></div>
-          <div style="margin-top:6px"><a href="https://grudgewarlords.com/privacy" target="_blank" rel="noreferrer">Privacy Policy</a> � <a href="https://grudgewarlords.com/tos" target="_blank" rel="noreferrer">Terms of Service</a></div>
+        <div><a href="https://apps.grudge-studio.com" target="_blank" rel="noreferrer">Platform</a> � <a href="https://objectstore.grudge-studio.com" target="_blank" rel="noreferrer">ObjectStore</a> � <a href="https://coder.grudge-studio.com" target="_blank" rel="noreferrer">grudgeDot</a> � <a href="/api/status" target="_blank" rel="noreferrer">/api/status</a></div>
+          <div style="margin-top:6px"><a href="/privacy.html">Privacy Policy</a> � <a href="/tos.html">Terms of Service</a></div>
           <div style="margin-top:6px">� <span id="year"></span> Grudge Studio</div>
         </div>
       </div>
@@ -646,9 +648,9 @@
     const CORE = {
       deployments: [
         {
-          name: 'GrudaChain Nexus (this hub)',
+          name: 'Grudge Studio Nexus (this hub)',
           platform: 'Vercel',
-          url: 'https://grudachain.grudge-studio.com',
+          url: 'https://nexus.grudge-studio.com',
           tags: ['nexus', 'hub', 'grudge-studio']
         },
         {
@@ -682,15 +684,15 @@
           tags: ['wcs', 'systems', 'crafting']
         },
         {
-          name: 'GDevelop Assistant',
+          name: 'grudgeDot (Game Library)',
           platform: 'Vercel',
           url: 'https://coder.grudge-studio.com',
-          tags: ['assistant', 'gdevelop', 'studio']
+          tags: ['grudgedot', 'gdevelop', 'launcher']
         },
         {
           name: 'ObjectStore (Game Data API)',
-          platform: 'GitHub Pages',
-          url: 'https://molochdagod.github.io/ObjectStore',
+          platform: 'Cloudflare',
+          url: 'https://objectstore.grudge-studio.com',
           tags: ['api', 'data', 'weapons', 'sprites']
         },
         {
@@ -701,15 +703,27 @@
         },
         {
           name: 'Puter Cloud Dashboard',
-          platform: 'Puter',
-          url: 'https://grudge-studio.puter.site',
-          tags: ['puter', 'ai', 'cloud', 'storage']
+          platform: 'Nexus',
+          url: '/puter-cloud-dashboard.html',
+          tags: ['puter', 'ai', 'cloud', 'storage', 'fleet']
         },
         {
-          name: 'GRUDA Legion Node',
+          name: 'Puter Cloud (live site)',
+          platform: 'Puter',
+          url: 'https://grudge-studio.puter.site',
+          tags: ['puter', 'hosted', 'cloud']
+        },
+        {
+          name: 'Game Data API (Railway SSOT)',
           platform: 'Railway',
+          url: 'https://grudge-api-production-0d46.up.railway.app',
+          tags: ['characters', 'islands', 'postgres', 'ssot']
+        },
+        {
+          name: 'GRUDA Legion Edge API',
+          platform: 'Cloudflare',
           url: 'https://api.grudge-studio.com',
-          tags: ['ai-node', 'railway', 'socket.io']
+          tags: ['ai-node', 'edge', 'socket.io']
         },
         {
           name: 'Auth Gateway',
@@ -718,71 +732,83 @@
           tags: ['auth', 'jwt', 'gateway']
         },
         {
-          name: 'GrudaChain App Gallery',
+          name: 'Grudge Platform (App Gallery)',
           platform: 'Vercel',
-          url: 'https://grudachain-app-gallery.vercel.app',
-          tags: ['gallery', 'apps']
+          url: 'https://apps.grudge-studio.com',
+          tags: ['gallery', 'apps', 'launcher']
+        },
+        {
+          name: 'Character Hub',
+          platform: 'Vercel',
+          url: 'https://character.grudge-studio.com',
+          tags: ['characters', 'heroes', 'account']
+        },
+        {
+          name: 'Releases Hub (launcher)',
+          platform: 'Vercel',
+          url: 'https://launcher.grudge-studio.com',
+          tags: ['releases', 'downloads', 'fleet']
         }
       ],
       objectstore: [
         {
-          name: 'ObjectStore API Reference',
-          platform: 'GitHub Pages',
-          url: 'https://molochdagod.github.io/ObjectStore',
-          tags: ['api', '24 endpoints', 'weapons', 'armor', 'skills']
+          name: 'ObjectStore Catalog',
+          platform: 'API',
+          url: 'https://objectstore.grudge-studio.com/api/v1/catalog.json',
+          tags: ['api', 'catalog', '104 endpoints', 'fleet']
         },
         {
-          name: 'Item Database',
-          platform: 'Tool',
-          url: 'https://molochdagod.github.io/ObjectStore/GRUDGE_Item_Database.html',
-          tags: ['items', 'stats', 'tooltips', '500+ items']
+          name: 'Master Items Registry',
+          platform: 'API',
+          url: 'https://objectstore.grudge-studio.com/api/v1/master-items.json',
+          tags: ['items', 'registry', '2700+ items']
         },
         {
-          name: 'Item Browser (AI Images)',
-          platform: 'Tool',
-          url: 'https://molochdagod.github.io/ObjectStore/ItemBrowser.html',
-          tags: ['ai-images', 'tier-filter', 'search']
+          name: 'Items Database (JSON)',
+          platform: 'API',
+          url: 'https://objectstore.grudge-studio.com/api/v1/items-database.json',
+          tags: ['items', 'stats', 'json']
         },
         {
-          name: 'Sprite Database',
-          platform: 'Tool',
-          url: 'https://molochdagod.github.io/ObjectStore/SPRITE_DATABASE.html',
-          tags: ['sprites', '500+ icons', 'weapons', 'armor', 'enemies']
+          name: 'Sprites 2D Catalog',
+          platform: 'API',
+          url: 'https://objectstore.grudge-studio.com/api/v1/sprites2d.json',
+          tags: ['sprites', '3000+ icons', 'json']
         },
         {
           name: 'API Documentation',
           platform: 'Docs',
-          url: 'https://molochdagod.github.io/ObjectStore/docs/',
+          url: 'https://info.grudge-studio.com/docs',
           tags: ['sdk', 'schemas', 'integration']
         },
         {
           name: 'Grudge SDK (JS)',
           platform: 'SDK',
-          url: 'https://molochdagod.github.io/ObjectStore/sdk/grudge-sdk.js',
-          tags: ['sdk', 'javascript', 'download']
+          url: '/grudge-sdk.js',
+          tags: ['sdk', 'javascript', 'nexus']
         },
         {
           name: 'Weapons API',
           platform: 'API',
-          url: 'https://molochdagod.github.io/ObjectStore/api/v1/weapons.json',
+          url: 'https://objectstore.grudge-studio.com/api/v1/weapons.json',
           tags: ['119 weapons', 'json']
         },
         {
           name: 'Equipment API',
           platform: 'API',
-          url: 'https://molochdagod.github.io/ObjectStore/api/v1/equipment.json',
+          url: 'https://objectstore.grudge-studio.com/api/v1/equipment.json',
           tags: ['150 items', 'armor', 'json']
         },
         {
           name: 'Sprites API',
           platform: 'API',
-          url: 'https://molochdagod.github.io/ObjectStore/api/v1/sprites.json',
+          url: 'https://objectstore.grudge-studio.com/api/v1/sprites.json',
           tags: ['500+ sprites', 'json']
         },
         {
           name: 'Skills API',
           platform: 'API',
-          url: 'https://molochdagod.github.io/ObjectStore/api/v1/skills.json',
+          url: 'https://objectstore.grudge-studio.com/api/v1/skills.json',
           tags: ['47 skills', 'json']
         }
       ],
@@ -905,8 +931,8 @@
       playerHub: [
         {
           name: 'My Characters',
-          platform: 'Warlords',
-          url: 'https://client.grudge-studio.com/character',
+          platform: 'Character Hub',
+          url: 'https://character.grudge-studio.com',
           tags: ['characters', 'hero', 'account']
         },
         {
@@ -918,8 +944,14 @@
         {
           name: 'Play Warlords',
           platform: 'Warlords',
-          url: 'https://client.grudge-studio.com',
+          url: 'https://grudgewarlords.com',
           tags: ['mmo', 'play', 'main']
+        },
+        {
+          name: 'Warlords 3D Client',
+          platform: 'Client',
+          url: 'https://client.grudge-studio.com',
+          tags: ['3d', 'client', 'editor']
         },
         {
           name: 'Super Engine (Combat)',
@@ -934,10 +966,10 @@
           tags: ['auth', 'account', 'sso']
         },
         {
-          name: 'Game Saves API',
-          platform: 'API',
-          url: 'https://api.grudge-studio.com',
-          tags: ['saves', 'sync', 'api']
+          name: 'Game Data API',
+          platform: 'Railway',
+          url: 'https://grudge-api-production-0d46.up.railway.app',
+          tags: ['saves', 'characters', 'ssot']
         },
         {
           name: 'WCS Wallet',
@@ -947,15 +979,15 @@
         },
         {
           name: 'Puter Cloud Dashboard',
-          platform: 'Puter',
-          url: 'https://grudge-studio.puter.site',
-          tags: ['puter', 'cloud', 'saves', 'assets']
-        },
-        {
-          name: 'Puter Dashboard (source)',
           platform: 'Nexus',
           url: '/puter-cloud-dashboard.html',
-          tags: ['puter', 'redeploy', 'fleet-connect']
+          tags: ['puter', 'cloud', 'saves', 'assets', 'fleet']
+        },
+        {
+          name: 'Puter Cloud (hosted)',
+          platform: 'Puter',
+          url: 'https://grudge-studio.puter.site',
+          tags: ['puter', 'hosted', 'live']
         },
         {
           name: 'Telegram @grudachainbot',
@@ -976,6 +1008,12 @@
           platform: 'GDevelop',
           url: 'https://coder.grudge-studio.com/',
           tags: ['launcher', 'gdevelop', 'grudgedot']
+        },
+        {
+          name: 'Releases Hub',
+          platform: 'Vercel',
+          url: 'https://launcher.grudge-studio.com',
+          tags: ['releases', 'github', 'downloads']
         },
         {
           name: 'AI Battle Station (Chat)',
@@ -1156,10 +1194,16 @@
       ],
       ai: [
         {
-          name: 'GRUDA Legion AI Node',
-          platform: 'Railway',
+          name: 'Legion AI Hub',
+          platform: 'Cloudflare',
+          url: 'https://ai.grudge-studio.com',
+          tags: ['legion', 'ai', 'orchestrator']
+        },
+        {
+          name: 'GRUDA Edge API',
+          platform: 'Cloudflare',
           url: 'https://api.grudge-studio.com',
-          tags: ['ai-node', 'railway', 'socket.io', 'agents']
+          tags: ['edge', 'socket.io', 'agents']
         },
         {
           name: 'AI Battle Station (Chat)',
@@ -1188,13 +1232,13 @@
         {
           name: 'ObjectStore AI Behavior API',
           platform: 'API',
-          url: 'https://molochdagod.github.io/ObjectStore/api/v1/ai.json',
+          url: 'https://objectstore.grudge-studio.com/api/v1/ai.json',
           tags: ['behavior-trees', 'ai', 'entities']
         },
         {
           name: 'ObjectStore ECS API',
           platform: 'API',
-          url: 'https://molochdagod.github.io/ObjectStore/api/v1/ecs.json',
+          url: 'https://objectstore.grudge-studio.com/api/v1/ecs.json',
           tags: ['ecs', 'components', 'systems']
         }
       ],
@@ -1230,6 +1274,12 @@
           tags: ['health', 'api', 'status']
         },
         {
+          name: 'Ops Dashboard',
+          platform: 'Dash',
+          url: 'https://dash.grudge-studio.com',
+          tags: ['ops', 'admin', 'fleet']
+        },
+        {
           name: 'WCS Dev Admin',
           platform: 'WCS',
           url: 'https://wcs.grudge-studio.com/dev-admin',
@@ -1250,9 +1300,9 @@
           tags: ['sdk', 'repo']
         },
         {
-          name: 'ObjectStore SDK (JS Module)',
+          name: 'Grudge SDK (Nexus)',
           platform: 'SDK',
-          url: 'https://molochdagod.github.io/ObjectStore/sdk/grudge-sdk.js',
+          url: '/grudge-sdk.js',
           tags: ['objectstore', 'sdk', 'javascript']
         },
         {
@@ -1343,8 +1393,12 @@
     function normalizeUrl(url) {
       if (!url) return '';
       if (url.startsWith('/')) return url;
-      if (url.startsWith('http://') || url.startsWith('https://')) return url;
-      return 'https://' + url;
+      var out = url;
+      if (!out.startsWith('http://') && !out.startsWith('https://')) out = 'https://' + out;
+      if (window.NEXUS_CANONICAL && NEXUS_CANONICAL.canonicalize) {
+        out = NEXUS_CANONICAL.canonicalize(out);
+      }
+      return out;
     }
 
     function matchesQuery(item, q) {
@@ -1480,7 +1534,7 @@
         .map(r => ({
           name: r.name,
           platform: 'Vercel',
-          url: r.homepage,
+          url: normalizeUrl(r.homepage),
           repo: r.html_url,
           description: r.description,
           tags: [r.language || 'unknown']
@@ -1726,13 +1780,14 @@
     async function runChecks() {
       const targets = [
         { name: 'This Hub', url: '/api/status' },
-        { name: 'Railway Node', url: 'https://api.grudge-studio.com/health' },
+        { name: 'Nexus Hub', url: '/api/status' },
+        { name: 'Game Data API', url: 'https://grudge-api-production-0d46.up.railway.app/api/health' },
         { name: 'Grudge Platform', url: 'https://apps.grudge-studio.com' },
         { name: 'WCS', url: 'https://wcs.grudge-studio.com' },
-        { name: 'GDevelop', url: 'https://coder.grudge-studio.com' },
+        { name: 'grudgeDot', url: 'https://coder.grudge-studio.com' },
         { name: 'Auth Gateway', url: 'https://id.grudge-studio.com' },
-        { name: 'ObjectStore', url: 'https://molochdagod.github.io/ObjectStore' },
-        { name: 'Puter Cloud', url: 'https://grudge-studio.puter.site' },
+        { name: 'ObjectStore', url: 'https://objectstore.grudge-studio.com/api/v1/catalog.json' },
+        { name: 'Character Hub', url: 'https://character.grudge-studio.com' },
       ];
 
       const out = [];

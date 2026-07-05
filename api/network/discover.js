@@ -5,11 +5,11 @@ module.exports = function handler(req, res) {
     success: true,
     nodes: [
       {
-        id: 'grudachain-main',
-        name: 'GrudaChain Node',
+        id: 'nexus-main',
+        name: 'Grudge Studio Nexus',
         status: 'active',
-        services: ['ai', 'storage', 'compute'],
-        endpoint: req.headers.host ? `https://${req.headers.host}` : 'https://grudachain.grudgestudio.com'
+        services: ['ai', 'storage', 'compute', 'fleet-connect'],
+        endpoint: req.headers.host ? `https://${req.headers.host}` : 'https://nexus.grudge-studio.com'
       }
     ],
     timestamp: new Date().toISOString()

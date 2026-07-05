@@ -4,15 +4,33 @@
   "outputDirectory": "public",
   "redirects": [
     {
-      "source": "/",
+      "source": "/(.*)",
       "has": [{ "type": "host", "value": "grudachain-rho.vercel.app" }],
-      "destination": "https://nexus.grudge-studio.com/",
+      "destination": "https://nexus.grudge-studio.com/$1",
       "permanent": true
     },
     {
-      "source": "/",
+      "source": "/(.*)",
       "has": [{ "type": "host", "value": "grudachain.vercel.app" }],
-      "destination": "https://nexus.grudge-studio.com/",
+      "destination": "https://nexus.grudge-studio.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "grudachain.grudge-studio.com" }],
+      "destination": "https://nexus.grudge-studio.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "platform.grudge-studio.com" }],
+      "destination": "https://nexus.grudge-studio.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "grudachain.grudgestudio.com" }],
+      "destination": "https://nexus.grudge-studio.com/$1",
       "permanent": true
     }
   ],

@@ -5,7 +5,7 @@
  * across grudachain, gdevelop-assistant, grudge-platform, and WCS.
  *
  * Usage:
- *   <script src="https://grudachain.grudge-studio.com/grudge-fleet-connect.js"></script>
+ *   <script src="https://nexus.grudge-studio.com/grudge-fleet-connect.js"></script>
  *   <div id="grudge-fleet-connect"></div>
  *   <script>GrudgeFleetConnect.mount('#grudge-fleet-connect');</script>
  *

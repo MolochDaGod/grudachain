@@ -13,7 +13,7 @@
  *
  * Compatible with all Grudge apps: vanilla HTML, React, Vue, etc.
  * Just add: <script src="/grudge-sso.js"></script>
- * Or for CDN: <script src="https://grudachain.grudgestudio.com/grudge-sso.js"></script>
+ * Or for CDN: <script src="https://nexus.grudge-studio.com/grudge-sso.js"></script>
  */
 
 (function () {

@@ -61,8 +61,8 @@ module.exports = async function handler(req, res) {
           type: 'AI dev tools + game prototypes'
         },
         objectStore: {
-          url: 'https://molochdagod.github.io/ObjectStore',
-          platform: 'GitHub Pages',
+          url: 'https://objectstore.grudge-studio.com',
+          platform: 'Cloudflare',
           type: 'Game data API (weapons, armor, skills, sprites)'
         },
         dashboard: {
@@ -82,7 +82,7 @@ module.exports = async function handler(req, res) {
       },
       storage: {
         provider: 'Grudge Backend (VPS)',
-        objectStore: 'https://molochdagod.github.io/ObjectStore',
+        objectStore: 'https://objectstore.grudge-studio.com',
         dashboard: 'https://dash.grudge-studio.com'
       },
       repo: {
