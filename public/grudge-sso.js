@@ -129,31 +129,49 @@
 
   /** Bridge id.grudge-studio.com launch token → local session JWT. */
   function bridgeLaunchToken(launchToken) {
-    return fetch(AUTH_GATEWAY + '/api/auth/session/exchange', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Origin': window.location.origin
-      },
-      body: JSON.stringify({ token: launchToken, audience: window.location.origin })
-    })
-      .then(function (res) { return res.ok ? res.json() : null; })
-      .then(function (profile) {
-        if (!profile) return false;
-        var jwt = profile.token || profile.sessionToken;
-        if (!jwt || !profile.grudgeId) return false;
-        localStorage.setItem(TOKEN_KEY, jwt);
-        localStorage.setItem(ID_KEY, profile.grudgeId);
-        if (profile.username || profile.displayName) {
-          localStorage.setItem(USER_KEY, profile.displayName || profile.username);
-        }
-        if (profile.id) localStorage.setItem(USERID_KEY, String(profile.id));
-        document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
-        return true;
-      })
-      .catch(function () { return false; });
+    if (window.GrudgeGameBootstrap && window.GrudgeGameBootstrap.authPending) {
+      return window.GrudgeGameBootstrap.whenReady().then(function () {
+        return !!localStorage.getItem(TOKEN_KEY);
+      });
+    }
+    var body = JSON.stringify({ token: launchToken, audience: window.location.origin });
+    var paths = ['/api/auth/grudge-bridge', '/api/auth/session/exchange', AUTH_GATEWAY + '/api/auth/session/exchange'];
+    var chain = Promise.resolve(false);
+    paths.forEach(function (path) {
+      chain = chain.then(function (done) {
+        if (done) return true;
+        return fetch(path, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Origin': window.location.origin
+          },
+          body: body
+        })
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (profile) {
+            if (!profile) return false;
+            var jwt = profile.token || profile.sessionToken;
+            if (!jwt) return false;
+            localStorage.setItem(TOKEN_KEY, jwt);
+            if (profile.grudgeId) {
+              localStorage.setItem(ID_KEY, profile.grudgeId);
+              localStorage.setItem('grudge_account_id', profile.grudgeId);
+            }
+            if (profile.username || profile.displayName) {
+              localStorage.setItem(USER_KEY, profile.displayName || profile.username);
+            }
+            if (profile.id) localStorage.setItem(USERID_KEY, String(profile.id));
+            document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
+            window.dispatchEvent(new CustomEvent('grudge-auth:success'));
+            return true;
+          })
+          .catch(function () { return false; });
+      });
+    });
+    return chain;
   }
 
   // ── 1. INBOUND: Capture token from URL params ──

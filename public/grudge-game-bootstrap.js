@@ -2,10 +2,11 @@
  * grudge-game-bootstrap.js — Fleet production bootstrap for Grudge Studio games
  *
  * Load early in <head> on every game / portal HTML entry point:
- *   <script src="https://client.grudge-studio.com/grudge-game-bootstrap.js"></script>
+ *   <script src="/grudge-game-bootstrap.js"></script>
  *
  * - Disables browser auto-translate (prevents Microsoft Translator 401 console noise)
- * - Handles Grudge ID SSO return (?sso_token= & ?grudge_id=)
+ * - Handles Grudge ID SSO return (?grudge_token= / ?puter_token=)
+ * - Bridges launch tokens via same-origin /api/auth/* proxies (avoids CORS)
  * - Listens for grudge-auth:success postMessage from id.grudge-studio.com popups
  * - Exposes window.GRUDGE_FLEET endpoints + window.GrudgeGameBootstrap session helpers
  */
@@ -26,6 +27,11 @@
   var TOKEN_KEY = 'grudge_auth_token';
   var ID_KEY = 'grudge_id';
   var USER_KEY = 'grudge_username';
+  var USERID_KEY = 'grudge_user_id';
+  var ACCOUNT_KEY = 'grudge_account_id';
+
+  var authPending = false;
+  var readyPromise = null;
 
   var FLEET = {
     auth: 'https://id.grudge-studio.com',
@@ -39,11 +45,18 @@
     puterSdk: 'https://js.puter.com/v2/'
   };
 
+  function dispatchAuthReady(detail) {
+    document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
+    global.dispatchEvent(new CustomEvent('grudge-auth:success', { detail: detail || getSession() }));
+    global.dispatchEvent(new CustomEvent('grudge:auth:ready', { detail: detail || getSession() }));
+  }
+
   function getSession() {
     return {
       token: localStorage.getItem(TOKEN_KEY),
       grudgeId: localStorage.getItem(ID_KEY),
       username: localStorage.getItem(USER_KEY),
+      userId: localStorage.getItem(USERID_KEY),
       signedIn: !!localStorage.getItem(TOKEN_KEY)
     };
   }
@@ -51,24 +64,39 @@
   function saveSession(data) {
     if (!data) return;
     var user = data.user || data.player || data.profile || null;
-    var token = data.token || data.access_token || data.sso_token || (user && user.token);
+    var token = data.token || data.sessionToken || data.access_token || data.sso_token || (user && user.token);
     if (token) localStorage.setItem(TOKEN_KEY, token);
-    var gid = data.grudge_id || data.grudgeId || (user && user.grudgeId);
-    if (gid) localStorage.setItem(ID_KEY, gid);
-    var name = data.username || (user && (user.username || user.displayName));
+    var gid = data.grudge_id || data.grudgeId || (user && (user.grudgeId || user.grudge_id));
+    if (gid) {
+      localStorage.setItem(ID_KEY, gid);
+      localStorage.setItem(ACCOUNT_KEY, gid);
+    }
+    var uid = data.id || data.userId || (user && user.id);
+    if (uid) localStorage.setItem(USERID_KEY, String(uid));
+    var name = data.username || data.displayName || (user && (user.username || user.displayName));
     if (name) localStorage.setItem(USER_KEY, name);
+    try {
+      var maxAge = 7 * 24 * 60 * 60;
+      if (token) {
+        document.cookie = TOKEN_KEY + '=' + encodeURIComponent(token) + '; path=/; max-age=' + maxAge + '; SameSite=Lax';
+      }
+      if (gid) {
+        document.cookie = ID_KEY + '=' + encodeURIComponent(gid) + '; path=/; max-age=' + maxAge + '; SameSite=Lax';
+      }
+    } catch (e) {}
   }
 
   function clearSession() {
-    [TOKEN_KEY, ID_KEY, USER_KEY, 'grudge_user'].forEach(function (k) {
+    [TOKEN_KEY, ID_KEY, USER_KEY, USERID_KEY, ACCOUNT_KEY, 'grudge_user', 'grudge_session_token'].forEach(function (k) {
       localStorage.removeItem(k);
     });
+    document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
   }
 
   function buildLoginUrl(app, returnUrl) {
     return FLEET.auth + '/api/auth/page?app=' +
       encodeURIComponent(app || 'grudge-game') +
-      '&redirect=' + encodeURIComponent(returnUrl || location.href);
+      '&redirect=' + encodeURIComponent(returnUrl || location.href.split('#')[0]);
   }
 
   function openLogin(app) {
@@ -82,25 +110,40 @@
   }
 
   function exchangeLaunchToken(launchToken) {
-    return fetch(FLEET.auth + '/api/auth/session/exchange', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Origin': location.origin
-      },
-      body: JSON.stringify({ token: launchToken, audience: location.origin })
-    })
-      .then(function (res) { return res.ok ? res.json() : null; })
-      .then(function (profile) {
-        if (!profile || !profile.token) return false;
-        saveSession(profile);
-        global.dispatchEvent(new CustomEvent('grudge-auth:success', { detail: getSession() }));
-        document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
-        return true;
-      })
-      .catch(function () { return false; });
+    authPending = true;
+    var body = JSON.stringify({ token: launchToken, audience: location.origin });
+    var paths = [
+      '/api/auth/grudge-bridge',
+      '/api/auth/session/exchange',
+      FLEET.auth + '/api/auth/session/exchange'
+    ];
+    var chain = Promise.resolve(false);
+    paths.forEach(function (path) {
+      chain = chain.then(function (done) {
+        if (done) return true;
+        return fetch(path, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Origin': location.origin
+          },
+          body: body
+        })
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (profile) {
+            if (!profile) return false;
+            var jwt = profile.token || profile.sessionToken;
+            if (!jwt) return false;
+            saveSession(profile);
+            dispatchAuthReady(getSession());
+            return true;
+          })
+          .catch(function () { return false; });
+      });
+    });
+    return chain.finally(function () { authPending = false; });
   }
 
   function handleSsoCallback() {
@@ -111,25 +154,25 @@
         ['grudge_token', 'puter_token', 'auth', 'new'].forEach(function (k) { params.delete(k); });
         var qs = params.toString();
         history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
-        exchangeLaunchToken(launchToken);
-        return 'pending';
+        return exchangeLaunchToken(launchToken).then(function (ok) { return ok ? true : 'failed'; });
       }
       var token = params.get('sso_token') || params.get('token');
-      if (!token) return false;
+      if (!token) return Promise.resolve(false);
       saveSession({
         token: token,
         grudge_id: params.get('grudge_id') || params.get('grudgeId'),
-        username: params.get('username')
+        username: params.get('username') || params.get('grudge_username'),
+        id: params.get('grudge_user_id')
       });
-      ['sso_token', 'token', 'grudge_id', 'grudgeId', 'username'].forEach(function (k) {
+      ['sso_token', 'token', 'grudge_id', 'grudgeId', 'username', 'grudge_username', 'grudge_user_id'].forEach(function (k) {
         params.delete(k);
       });
-      var qs = params.toString();
-      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
-      global.dispatchEvent(new CustomEvent('grudge-auth:success', { detail: getSession() }));
-      return true;
+      var qs2 = params.toString();
+      history.replaceState(null, '', location.pathname + (qs2 ? '?' + qs2 : '') + location.hash);
+      dispatchAuthReady(getSession());
+      return Promise.resolve(true);
     } catch (e) {
-      return false;
+      return Promise.resolve(false);
     }
   }
 
@@ -149,8 +192,7 @@
         }
       } catch (e) {}
       saveSession(data.payload || data);
-      document.dispatchEvent(new CustomEvent('grudge-auth-changed'));
-      global.dispatchEvent(new CustomEvent('grudge-auth:success', { detail: getSession() }));
+      dispatchAuthReady(getSession());
     });
   }
 
@@ -165,12 +207,18 @@
     return fetch(url, opts);
   }
 
-  handleSsoCallback();
+  function whenReady() {
+    return readyPromise || Promise.resolve(getSession().signedIn);
+  }
+
   listenAuthPopup();
+  readyPromise = handleSsoCallback();
 
   global.GRUDGE_FLEET = FLEET;
   global.GrudgeGameBootstrap = {
     fleet: FLEET,
+    get authPending() { return authPending; },
+    whenReady: whenReady,
     getSession: getSession,
     saveSession: saveSession,
     clearSession: clearSession,

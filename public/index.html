@@ -1784,9 +1784,18 @@
     }
 
     function redirectToGrudgeLogin() {
+      if (window.GrudgeAuth && GrudgeAuth.redirectToLogin) {
+        GrudgeAuth.redirectToLogin(window.location.href.split('#')[0]);
+        return;
+      }
+      if (window.GrudgeGameBootstrap && GrudgeGameBootstrap.buildLoginUrl) {
+        window.location.href = GrudgeGameBootstrap.buildLoginUrl('nexus', window.location.href.split('#')[0]);
+        return;
+      }
       var ret = encodeURIComponent(window.location.href.split('#')[0]);
       window.location.href = GRUDGE_AUTH_PAGE + '?redirect=' + ret + '&app=nexus';
     }
+    window.redirectToGrudgeLogin = redirectToGrudgeLogin;
 
     function captureAuthFromHash() {
       if (!location.hash || location.hash.length < 2) return false;
@@ -1825,6 +1834,11 @@
 
     function updateAuthUI(data) {
       var area = document.getElementById('authArea');
+      if (!area) return;
+      if (data && data.pending) {
+        area.innerHTML = '<button class="auth-btn" disabled style="opacity:0.85;cursor:wait"><i class="fas fa-spinner fa-spin"></i> Signing in…</button>';
+        return;
+      }
       var username = (data && data.username) || localStorage.getItem('grudge_username');
       if (username && getAuthToken()) {
         area.innerHTML = '<div class="profile-badge" onclick="openProfileMenu()"><i class="fas fa-shield-halved"></i> ' + username +
@@ -1837,22 +1851,39 @@
     function openProfileMenu() {
       if (confirm('Sign out of ' + (localStorage.getItem('grudge_username') || 'account') + '?')) {
         var t = getAuthToken();
-        if (t) fetch(GRUDGE_ID_URL + '/api/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + t } }).catch(function () {});
+        if (t) fetch('/api/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + t } }).catch(function () {
+          fetch(GRUDGE_ID_URL + '/api/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + t } }).catch(function () {});
+        });
+        if (window.GrudgeGameBootstrap) GrudgeGameBootstrap.clearSession();
         clearAuthData();
         updateAuthUI(null);
         toast('Signed out');
       }
     }
+    window.openProfileMenu = openProfileMenu;
 
-    function onAuthSessionReady() {
+    function onAuthSessionReady(ev) {
       updateAuthUI({ username: localStorage.getItem('grudge_username') });
-      if (getAuthToken()) {
+      if (getAuthToken() && ev && (ev.type === 'grudge-auth:success' || ev.type === 'grudge:auth:ready')) {
         toast('Signed in as ' + (localStorage.getItem('grudge_username') || 'Player'));
       }
     }
 
     document.addEventListener('grudge-auth-changed', onAuthSessionReady);
     window.addEventListener('grudge-auth:success', onAuthSessionReady);
+    window.addEventListener('grudge:auth:ready', onAuthSessionReady);
+
+    function syncFromBootstrap() {
+      if (!window.GrudgeGameBootstrap) return;
+      var sess = GrudgeGameBootstrap.getSession();
+      if (!sess.signedIn) return;
+      setAuthData({
+        token: sess.token,
+        userId: sess.userId,
+        grudgeId: sess.grudgeId,
+        username: sess.username
+      });
+    }
 
     (async function bootAuth() {
       var params = new URLSearchParams(location.search);
@@ -1861,24 +1892,46 @@
         toast('Sign-in failed: ' + decodeURIComponent(authErr));
         history.replaceState({}, '', location.pathname);
       }
+
+      if (window.GrudgeGameBootstrap) {
+        if (GrudgeGameBootstrap.authPending) updateAuthUI({ pending: true });
+        var bootResult = await GrudgeGameBootstrap.whenReady();
+        if (bootResult === 'failed') {
+          toast('Sign-in could not be completed. Try again.');
+        }
+        syncFromBootstrap();
+        if (getAuthToken()) {
+          onAuthSessionReady({ type: 'grudge-auth:success' });
+          return;
+        }
+      }
+
       if (captureAuthFromHash() || captureAuthFromQuery()) {
-        onAuthSessionReady();
+        onAuthSessionReady({ type: 'grudge-auth:success' });
         return;
       }
-      if (params.get('grudge_token') || params.get('puter_token')) {
-        return;
-      }
+
       var token = getAuthToken();
       if (!token) { updateAuthUI(null); return; }
       try {
-        var res = await fetch(GRUDGE_ID_URL + '/api/auth/user', { headers: { Authorization: 'Bearer ' + token } });
+        var res = await fetch('/api/auth/user', { headers: { Authorization: 'Bearer ' + token } });
+        if (!res.ok) {
+          res = await fetch(GRUDGE_ID_URL + '/api/auth/user', { headers: { Authorization: 'Bearer ' + token } });
+        }
         if (res.ok) {
           var user = await res.json();
-          setAuthData({ token: token, userId: user.id, grudgeId: user.grudgeId, username: user.username || user.displayName });
+          setAuthData({
+            token: token,
+            userId: user.id || user.userId,
+            grudgeId: user.grudgeId || user.grudge_id,
+            username: user.username || user.displayName
+          });
           updateAuthUI({ username: user.username || user.displayName, gold: user.gold });
-        } else {
+        } else if (res.status === 401 || res.status === 403) {
           clearAuthData();
           updateAuthUI(null);
+        } else {
+          updateAuthUI({ username: localStorage.getItem('grudge_username') });
         }
       } catch (e) {
         updateAuthUI({ username: localStorage.getItem('grudge_username') });

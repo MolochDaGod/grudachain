@@ -289,7 +289,8 @@
       html += link('My Saves', ssoUrl(tools.puterCloud || 'https://grudge-studio.puter.site'));
       html += '</div>';
     } else {
-      var authUrl = buildAuthLoginUrl(window.location.href, 'fleet-connect');
+      var authApp = (location.hostname === 'nexus.grudge-studio.com' || location.hostname === 'grudachain.grudge-studio.com') ? 'nexus' : 'fleet-connect';
+      var authUrl = buildAuthLoginUrl(window.location.href, authApp);
       html += '<p class="gfc-meta" style="margin:0 0 10px">Sign in to sync characters, islands, and saves across the fleet.</p>';
       html += '<a class="gfc-signin" href="' + authUrl + '">Sign in with Grudge ID</a>';
       html += '<div class="gfc-links" style="margin-top:10px">';
